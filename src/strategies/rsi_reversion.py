@@ -20,10 +20,16 @@ class RSIMeanReversionStrategy(BaseStrategy):
     """
 
     name: ClassVar[str] = "rsi_reversion"
+    category: ClassVar[str] = "mean_reversion"
     description: ClassVar[str] = (
         "Mean-reversion: enter long on oversold RSI, exit at the midline; "
         "optionally short the overbought side."
     )
+    opt_grid: ClassVar[dict[str, list[Any]]] = {
+        "window": [7, 10, 14, 21],
+        "lower": [20.0, 25.0, 30.0, 35.0],
+        "exit_level": [45.0, 50.0, 55.0],
+    }
     default_params: ClassVar[dict[str, Any]] = {
         "window": 14,
         "lower": 30.0,

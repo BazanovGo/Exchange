@@ -74,7 +74,12 @@ class BaseStrategy(ABC):
 
     name: ClassVar[str] = ""
     description: ClassVar[str] = ""
+    category: ClassVar[str] = ""  # trend / mean_reversion / momentum / hybrid
     default_params: ClassVar[dict[str, Any]] = {}
+    # Default optimization grid: param name -> candidate values. Used by
+    # src.optimization when no explicit grid is supplied, so every strategy
+    # is optimizable out of the box.
+    opt_grid: ClassVar[dict[str, list[Any]]] = {}
 
     def __init__(self, **params: Any) -> None:
         unknown = set(params) - set(self.default_params)
@@ -131,6 +136,34 @@ def register_strategy(cls: type[BaseStrategy]) -> type[BaseStrategy]:
 
 def available_strategies() -> list[str]:
     return sorted(_STRATEGIES)
+
+
+def strategy_class(name: str) -> type[BaseStrategy]:
+    """Return the registered strategy class (without instantiating it)."""
+    key = name.lower()
+    if key not in _STRATEGIES:
+        raise KeyError(f"Unknown strategy {name!r}; available: {available_strategies()}")
+    return _STRATEGIES[key]
+
+
+def strategy_catalog() -> pd.DataFrame:
+    """Overview table of all registered strategies."""
+    rows = []
+    for name in available_strategies():
+        cls = _STRATEGIES[name]
+        grid_size = 1
+        for values in cls.opt_grid.values():
+            grid_size *= len(values)
+        rows.append(
+            {
+                "name": name,
+                "category": cls.category,
+                "n_params": len(cls.default_params),
+                "grid_size": grid_size if cls.opt_grid else 0,
+                "description": cls.description,
+            }
+        )
+    return pd.DataFrame(rows).set_index("name")
 
 
 def get_strategy(name: str, **params: Any) -> BaseStrategy:

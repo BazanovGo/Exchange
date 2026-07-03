@@ -18,6 +18,7 @@ class MACrossoverStrategy(BaseStrategy):
     """
 
     name: ClassVar[str] = "ma_crossover"
+    category: ClassVar[str] = "trend"
     description: ClassVar[str] = (
         "Trend-following: fast/slow moving average crossover. "
         "Long on golden cross, flat (or short) on death cross."

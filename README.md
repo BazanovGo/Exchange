@@ -129,12 +129,37 @@ report.save("my_run")       # metrics/trades/curves/params -> results/my_run/
 ```python
 from src.optimization import grid_search
 
-table = grid_search("ma_crossover", data,
+table = grid_search("ema_cross", data,
                     {"fast_window": [10, 20, 50], "slow_window": [50, 100, 200]},
                     sort_by="sharpe_ratio")
 ```
 
 Невалидные комбинации (например, `fast >= slow`) пропускаются автоматически.
+
+### Массовое исследование стратегий
+
+Вселенная из **26 стратегий** четырёх классов (трендовые, контртрендовые,
+импульсные, гибридные), каждая с собственной сеткой оптимизации (`opt_grid`).
+Раннер перебирает все сетки с in-sample/out-of-sample разбиением, строит
+интегральный рейтинг по 11 метрикам (CAGR, Return, Sharpe, Sortino, Calmar,
+Max Drawdown, Profit Factor, Win Rate, Expectancy, Recovery Factor, число
+сделок) и диагностирует переобучение:
+
+```python
+from src.optimization import ResearchConfig, research_universe, summarize_strategies, top_configurations
+from src.strategies import available_strategies
+
+names = [n for n in available_strategies() if n != "ma_crossover"]
+combined = research_universe(names, ohlcv, config=ResearchConfig(split=0.7))
+summary = summarize_strategies(combined)          # рейтинг + флаги переобучения
+top20 = top_configurations(combined, n=20)        # устойчивые конфигурации
+```
+
+Ключевые принципы: композитный скор считается по перцентильным рангам в общем
+пуле (никогда — по одной доходности), малое число сделок штрафуется, robust
+score наказывает расхождение IS/OOS. Флаги переобучения: деградация Sharpe
+IS-победителя, ранговая корреляция Спирмена IS↔OOS по сетке, OOS-перцентиль
+IS-победителя. Полный разбор — в `notebooks/02_strategy_research.ipynb`.
 
 ## Ноутбуки и GitHub
 

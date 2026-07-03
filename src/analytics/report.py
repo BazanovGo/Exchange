@@ -23,40 +23,49 @@ import pandas as pd
 from src.backtesting.engine import BacktestResult
 from src.utils.paths import RESULTS_DIR
 
-# (metric name in vbt stats index, short name) — resolved defensively because
-# stats labels can differ slightly between vectorbt versions.
-_METRIC_MAP = [
-    ("Total Return [%]", "total_return_pct"),
-    ("Benchmark Return [%]", "benchmark_return_pct"),
-    ("Max Drawdown [%]", "max_drawdown_pct"),
-    ("Sharpe Ratio", "sharpe_ratio"),
-    ("Sortino Ratio", "sortino_ratio"),
-    ("Calmar Ratio", "calmar_ratio"),
-    ("Win Rate [%]", "win_rate_pct"),
-    ("Profit Factor", "profit_factor"),
-    ("Total Trades", "total_trades"),
-    ("Expectancy", "expectancy"),
-]
+
+def _f(value) -> float:
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return np.nan
+    return value
+
+
+def portfolio_metrics(pf, *, name: str = "") -> pd.Series:
+    """Compact, uniformly named metric set for a vectorbt Portfolio.
+
+    Computed via direct portfolio/trade methods rather than ``pf.stats()``
+    — an order of magnitude faster, which matters in parameter sweeps.
+    ``max_drawdown_pct`` is a positive magnitude (lower is better);
+    ``cagr_pct`` duplicates ``annualized_return_pct`` under the
+    conventional name.
+    """
+    trades = pf.trades
+    metrics: dict[str, float] = {
+        "total_return_pct": _f(pf.total_return()) * 100,
+        "max_drawdown_pct": abs(_f(pf.max_drawdown())) * 100,
+        "sharpe_ratio": _f(pf.sharpe_ratio()),
+        "sortino_ratio": _f(pf.sortino_ratio()),
+        "calmar_ratio": _f(pf.calmar_ratio()),
+        "annualized_return_pct": _f(pf.annualized_return()) * 100,
+        "annualized_volatility_pct": _f(pf.annualized_volatility()) * 100,
+        "final_value": _f(pf.final_value()),
+        "total_trades": _f(trades.count()),
+        "win_rate_pct": _f(trades.win_rate()) * 100,
+        "profit_factor": _f(trades.profit_factor()),
+        "expectancy": _f(trades.expectancy()),
+    }
+    metrics["cagr_pct"] = metrics["annualized_return_pct"]
+    dd = metrics["max_drawdown_pct"]
+    metrics["recovery_factor"] = metrics["total_return_pct"] / dd if dd > 0 else np.nan
+
+    return pd.Series(metrics, name=name)
 
 
 def key_metrics(result: BacktestResult) -> pd.Series:
     """Compact, uniformly named metric set for a backtest result."""
-    pf = result.portfolio
-    stats = pf.stats()
-
-    metrics: dict[str, float] = {}
-    for stats_key, name in _METRIC_MAP:
-        if stats_key in stats.index:
-            value = stats.loc[stats_key]
-            metrics[name] = float(value) if pd.notna(value) else np.nan
-
-    metrics.setdefault("total_return_pct", float(pf.total_return()) * 100)
-    metrics.setdefault("max_drawdown_pct", float(pf.max_drawdown()) * 100)
-    metrics["annualized_return_pct"] = float(pf.annualized_return()) * 100
-    metrics["annualized_volatility_pct"] = float(pf.annualized_volatility()) * 100
-    metrics["final_value"] = float(pf.final_value())
-
-    return pd.Series(metrics, name=f"{result.strategy_name}:{result.symbol or ''}")
+    return portfolio_metrics(result.portfolio, name=f"{result.strategy_name}:{result.symbol or ''}")
 
 
 @dataclass
