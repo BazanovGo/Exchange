@@ -1,33 +1,12 @@
 # Exchange — Trading Strategy Research Framework
 
-Промышленный шаблон репозитория для исследования торговых стратегий на базе
-[vectorbt](https://vectorbt.dev). Инфраструктура отделена от исследований:
-данные, стратегии, бэктест, аналитика, риск и визуализация — независимые
-слои с едиными интерфейсами и реестрами для расширения.
+Промышленный фреймворк для исследования торговых стратегий на базе
+[vectorbt](https://vectorbt.dev). Пять этапов исследования — от инфраструктуры
+до управления капиталом — с одним сквозным принципом: **любой эффект
+подтверждается out-of-sample**, победители никогда не выбираются по одной
+доходности.
 
-## Структура
-
-```
-├── data/                  # рыночные данные (raw/ и processed/, в git — только sample)
-├── notebooks/             # исследовательские ноутбуки
-│   └── 01_repository_setup.ipynb   # проверка инфраструктуры end-to-end
-├── reports/               # сохраненные отчеты
-├── results/               # артефакты бэктестов (метрики, сделки, кривые)
-├── scripts/               # служебные скрипты (запуск ноутбуков и т.п.)
-├── src/
-│   ├── data/              # единый интерфейс загрузки данных + реестр источников
-│   ├── indicators/        # индикаторы (обертки над vectorbt)
-│   ├── strategies/        # единый интерфейс стратегий + реестр
-│   ├── backtesting/       # запуск бэктеста одной функцией
-│   ├── analytics/         # стандартный отчет: метрики, equity, drawdown, сделки
-│   ├── optimization/      # grid search по параметрам любой стратегии
-│   ├── risk/              # риск-метрики и position sizing
-│   ├── visualization/     # графики (plotly), GitHub-совместимый PNG-рендеринг
-│   └── utils/             # пути проекта, логирование
-└── tests/                 # pytest-тесты инфраструктуры
-```
-
-## Установка
+## Быстрый старт
 
 Требуется Python 3.12.
 
@@ -36,8 +15,57 @@ python3.12 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e . --no-deps
-pytest                      # проверка инфраструктуры
+
+pytest                      # 87 тестов инфраструктуры (сеть не нужна)
 ```
+
+Ноутбуки выполняются по порядку (каждый самодостаточен и пересчитывает всё,
+что ему нужно; артефакты сохраняются в `results/`):
+
+```bash
+python scripts/run_notebook.py notebooks/01_repository_setup.ipynb
+python scripts/run_notebook.py notebooks/02_strategy_research.ipynb
+python scripts/run_notebook.py notebooks/03_position_management.ipynb
+python scripts/run_notebook.py notebooks/04_pattern_discovery.ipynb
+python scripts/run_notebook.py notebooks/05_final_report.ipynb
+```
+
+`scripts/run_notebook.py` выполняет ноутбук и вычищает widget-метаданные,
+чтобы все графики (статичные PNG через plotly + kaleido) корректно
+отображались на GitHub. Без сети ноутбуки автоматически переключаются с
+Yahoo Finance на детерминированный локальный сэмпл `data/raw/SAMPLE.csv` —
+через тот же интерфейс загрузки.
+
+## Структура
+
+```
+├── data/                  # рыночные данные (в git — только SAMPLE.csv)
+├── notebooks/             # пять этапов исследования (см. ниже)
+├── reports/               # сохраненные отчеты
+├── results/               # артефакты прогонов (метрики, таблицы, кривые)
+├── scripts/               # run_notebook.py — запуск ноутбуков для GitHub
+├── src/
+│   ├── data/              # единый интерфейс загрузки + реестр источников
+│   ├── indicators/        # 20+ индикаторов (vectorbt + numba-реализации)
+│   ├── strategies/        # 26 стратегий 4 классов, единый контракт сигналов
+│   ├── backtesting/       # запуск бэктеста одной функцией + симулятор выходов
+│   ├── analytics/         # метрики, отчеты, рыночные признаки без lookahead
+│   ├── optimization/      # grid search, IS/OOS research, walk-forward, фильтры
+│   ├── risk/              # риск-метрики, Kelly, Monte Carlo, position sizing
+│   ├── visualization/     # plotly-графики, GitHub-совместимый PNG-рендеринг
+│   └── utils/             # пути, логирование
+└── tests/                 # pytest (87 тестов)
+```
+
+## Этапы исследования (ноутбуки)
+
+| # | Ноутбук | Содержание |
+|---|---------|------------|
+| 01 | `01_repository_setup.ipynb` | Инфраструктура end-to-end: данные → график → индикатор → бэктест → отчет |
+| 02 | `02_strategy_research.ipynb` | 26 стратегий, ~850 конфигураций, IS/OOS 70/30, интегральный рейтинг по 11 метрикам, ТОП-20, флаги переобучения |
+| 03 | `03_position_management.ipynb` | SL/TP/Trailing/BreakEven/TimeStop/частичная фиксация + комбинации; честные вердикты real/false improvement |
+| 04 | `04_pattern_discovery.ipynb` | Рыночные признаки, режимы, корреляции, feature importance; проверка фильтров бэктестом IS→OOS |
+| 05 | `05_final_report.ipynb` | Kelly (classical/half/quarter + ограничения), Monte Carlo (разорение, распределения), Walk-Forward, сводка переобучения, рекомендации |
 
 ## Ключевые интерфейсы
 
@@ -46,129 +74,63 @@ pytest                      # проверка инфраструктуры
 ```python
 from src.data import load_data
 
-data = load_data("yahoo", "AAPL", start="2020-01-01")        # Yahoo Finance
-data = load_data("csv", "SAMPLE")                             # data/raw/SAMPLE.csv
-data = load_data("parquet", "BTCUSD", start="2023-01-01")     # data/processed/BTCUSD.parquet
-
-data.get("AAPL")   # канонический OHLCV DataFrame (Open/High/Low/Close/Volume)
-data.close         # wide-фрейм Close по всем символам
+data = load_data("yahoo", "AAPL", start="2020-01-01")   # Yahoo Finance
+data = load_data("csv", "SAMPLE")                        # data/raw/SAMPLE.csv
+data = load_data("parquet", "BTCUSD")                    # data/processed/
+close = data.close                                       # wide-фрейм по символам
 ```
 
-Все источники возвращают одинаковую схему: `DatetimeIndex` + колонки
-`Open, High, Low, Close, Volume` (нормализация регистра колонок, дублей и
-сортировки — автоматическая).
+Все источники возвращают канонический OHLCV (`DatetimeIndex` +
+`Open/High/Low/Close/Volume`). Новый источник (MOEX, Polygon, ...) — один
+подкласс `BaseDataLoader` с декоратором `@register_loader`, call-sites не
+меняются.
 
-**Добавление нового источника (MOEX, Polygon, ...):**
+### Стратегии: единый контракт
+
+Каждая стратегия возвращает `StrategySignals`: `entries`, `exits`,
+`short_entries`, `short_exits`, `params`, `description` — плюс несёт
+`category` и сетку оптимизации `opt_grid`:
 
 ```python
-from src.data import BaseDataLoader, register_loader
+from src.strategies import get_strategy, strategy_catalog
 
-@register_loader
-class MoexLoader(BaseDataLoader):
-    source_name = "moex"
-
-    def _load_symbol(self, symbol, *, start=None, end=None, timeframe="1d", **kwargs):
-        ...  # вернуть сырой DataFrame — нормализация и слайсинг уже в базовом классе
+strategy_catalog()                                   # обзор всех 26 стратегий
+strat = get_strategy("ema_rsi", fast_window=20, slow_window=200)
+sig = strat.signals(data)
 ```
 
-После этого `load_data("moex", "SBER")` работает во всем проекте.
+Классы: трендовые (sma/ema/triple-ema cross, supertrend, donchian, adx,
+psar, ichimoku), контртрендовые (rsi, bollinger, cci, williams %r,
+stochastic, vwap- и zscore-reversion), импульсные (roc, momentum, macd,
+atr/keltner breakout, volatility expansion), гибридные (ema+rsi, ema+adx,
+donchian+atr, vwap+volume, macd+trend-filter).
 
-### Стратегии: единый контракт `StrategySignals`
-
-Каждая стратегия возвращает стандартный объект:
-
-| Поле | Описание |
-|---|---|
-| `entries` | входы в лонг (bool) |
-| `exits` | выходы из лонга (bool) |
-| `short_entries` | входы в шорт (bool, all-False у long-only) |
-| `short_exits` | выходы из шорта (bool) |
-| `params` | фактические параметры запуска |
-| `description` | описание логики |
-
-```python
-from src.strategies import get_strategy
-
-strategy = get_strategy("ma_crossover", fast_window=20, slow_window=60)
-signals = strategy.signals(data)
-```
-
-**Новая стратегия** — подкласс `BaseStrategy` с декоратором
-`@register_strategy`: реализуется только `generate_signals(ohlcv)`,
-валидация параметров и заполнение short-легов делаются базовым классом.
-Встроенные примеры: `ma_crossover`, `rsi_reversion`.
-
-### Бэктест: одна функция для любой стратегии
+### Бэктест: одна функция
 
 ```python
 from src.backtesting import run_backtest, BacktestConfig
 
-config = BacktestConfig(init_cash=100_000, fees=0.001, slippage=0.0005)
-result = run_backtest("ma_crossover", data,
-                      params={"fast_window": 20, "slow_window": 60},
-                      config=config)
-
-result.stats()      # полная таблица vectorbt
-result.equity()     # кривая капитала
-result.drawdown()   # просадка
-result.trades()     # список сделок
+result = run_backtest("ema_rsi", data, params={...},
+                      config=BacktestConfig(init_cash=100_000, fees=0.001))
+result.stats(); result.equity(); result.drawdown(); result.trades()
 ```
 
-### Анализ результатов
+### Массовое исследование (этап 02)
 
 ```python
-from src.analytics import PerformanceReport
+from src.optimization import research_universe, summarize_strategies, top_configurations
 
-report = PerformanceReport.from_result(result)
-report.summary()            # единый набор метрик (Sharpe, MaxDD, WinRate, ...)
-report.save("my_run")       # metrics/trades/curves/params -> results/my_run/
+combined = research_universe(names, ohlcv)      # IS/OOS по всем сеткам
+summary = summarize_strategies(combined)        # рейтинг + флаги переобучения
+top20 = top_configurations(combined, n=20)      # устойчивые конфигурации
 ```
 
-### Оптимизация
+Интегральный рейтинг — перцентильные ранги 11 метрик (CAGR, Return, Sharpe,
+Sortino, Calmar, MaxDD, Profit Factor, Win Rate, Expectancy, Recovery
+Factor, число сделок) со штрафом за малое число сделок; robust score
+наказывает расхождение IS/OOS.
 
-```python
-from src.optimization import grid_search
-
-table = grid_search("ema_cross", data,
-                    {"fast_window": [10, 20, 50], "slow_window": [50, 100, 200]},
-                    sort_by="sharpe_ratio")
-```
-
-Невалидные комбинации (например, `fast >= slow`) пропускаются автоматически.
-
-### Массовое исследование стратегий
-
-Вселенная из **26 стратегий** четырёх классов (трендовые, контртрендовые,
-импульсные, гибридные), каждая с собственной сеткой оптимизации (`opt_grid`).
-Раннер перебирает все сетки с in-sample/out-of-sample разбиением, строит
-интегральный рейтинг по 11 метрикам (CAGR, Return, Sharpe, Sortino, Calmar,
-Max Drawdown, Profit Factor, Win Rate, Expectancy, Recovery Factor, число
-сделок) и диагностирует переобучение:
-
-```python
-from src.optimization import ResearchConfig, research_universe, summarize_strategies, top_configurations
-from src.strategies import available_strategies
-
-names = [n for n in available_strategies() if n != "ma_crossover"]
-combined = research_universe(names, ohlcv, config=ResearchConfig(split=0.7))
-summary = summarize_strategies(combined)          # рейтинг + флаги переобучения
-top20 = top_configurations(combined, n=20)        # устойчивые конфигурации
-```
-
-Ключевые принципы: композитный скор считается по перцентильным рангам в общем
-пуле (никогда — по одной доходности), малое число сделок штрафуется, robust
-score наказывает расхождение IS/OOS. Флаги переобучения: деградация Sharpe
-IS-победителя, ранговая корреляция Спирмена IS↔OOS по сетке, OOS-перцентиль
-IS-победителя. Полный разбор — в `notebooks/02_strategy_research.ipynb`.
-
-### Управление позицией
-
-Единый numba-симулятор выходов (`src/backtesting/position_management.py`)
-накладывает на сигналы стратегии любые комбинации механик: Stop Loss,
-Take Profit, Trailing Stop, Break Even, Time Stop, сигнальные выходы и
-частичную фиксацию прибыли. Исполнение через `Portfolio.from_orders` с
-корректными intrabar-ценами стопов (гэп — по open) и кодом причины каждого
-выхода:
+### Управление позицией (этап 03)
 
 ```python
 from src.backtesting import ExitRules, managed_portfolio
@@ -177,55 +139,63 @@ rules = ExitRules(sl_stop=0.08, tp_stop=0.20, partial_tp=0.08, partial_fraction=
 pf, reasons = managed_portfolio(ohlcv, sig.entries, sig.exits, rules)
 ```
 
-Раннер `src/optimization/exit_research.py` оптимизирует каждую механику на
-IS-окне и судит её OOS против baseline стратегии (выход по противоположному
-сигналу), разделяя реальные улучшения и ложные (оверфит выходов).
-Разбор — в `notebooks/03_position_management.ipynb`.
+Единый numba-симулятор: SL/TP/Trailing/BreakEven/TimeStop/сигнальные
+выходы/частичная фиксация и их комбинации; интрабарные цены стопов
+(гэп — по open), код причины каждого выхода. Раннер
+`exit_research`/`summarize_mechanics` выносит вердикты real/false
+improvement по протоколу IS→OOS.
 
-### Поиск закономерностей (EDA)
-
-`src/analytics/features.py` строит рыночные признаки без lookahead
-(волатильность, ATR, ADX, объём, день недели/час, расстояние до средней,
-ширина Bollinger, наклон EMA, efficiency ratio, направление недельного
-тренда, категориальный режим рынка) и датасет «сделка × признаки на входе»:
+### Признаки и фильтры (этап 04)
 
 ```python
 from src.analytics import market_features, trade_feature_dataset
+from src.optimization import filter_research, summarize_filters
 
-features = market_features(ohlcv)
-trades = trade_feature_dataset(best_params, ohlcv, features)  # ret_pct, win + признаки
+features = market_features(ohlcv)               # 12 признаков без lookahead
+trades = trade_feature_dataset(best_params, ohlcv, features)
+fsweep = filter_research(best_params, ohlcv, features)
 ```
 
-`src/optimization/filter_research.py` превращает найденные закономерности в
-фильтры входов и проверяет их тем же IS→OOS протоколом против
-нефильтрованного baseline (вердикты real/false improvement, scoreboard).
-Разбор — в `notebooks/04_pattern_discovery.ipynb`.
+### Капитал: Kelly + Monte Carlo + Walk-Forward (этап 05)
 
-## Ноутбуки и GitHub
+```python
+from src.risk import TradeStats, sizing_menu, kelly_robustness, simulate_trade_sequences
+from src.optimization import walk_forward, walk_forward_summary, WalkForwardConfig
 
-GitHub рендерит ноутбуки статически — интерактивные plotly-графики (включая
-все графики vectorbt) отображаются пустыми ячейками. Поэтому:
-
-1. в начале ноутбука вызывается `setup_github_rendering()`;
-2. любые фигуры выводятся через `show(fig)` из `src.visualization` — они
-   встраиваются статичными PNG (kaleido);
-3. запускать ноутбуки удобно скриптом, который дополнительно вычищает
-   тяжелое widget-состояние vectorbt:
-
-```bash
-python scripts/run_notebook.py notebooks/01_repository_setup.ipynb
+stats = TradeStats.from_returns(trade_returns)  # E, Var, p, avg_win/avg_loss
+sizing_menu(stats, max_fraction=0.25, risk_per_trade=0.02)  # classical/half/quarter + capы
+kelly_robustness(trade_returns, [0.1, 0.25, 0.5, 1.0, 2.0]) # MC: разорение, распределения
+wf = walk_forward("ema_rsi", ohlcv, cfg=WalkForwardConfig())  # пере-оптимизация в окнах
 ```
 
-Ноутбук `01_repository_setup.ipynb` проверяет инфраструктуру end-to-end:
-загрузка данных → график цены → индикатор → бэктест → статистика → графики
-vectorbt. Если Yahoo Finance недоступен (офлайн-среда), он прозрачно
-переключается на `data/raw/SAMPLE.csv` через тот же интерфейс загрузки.
+## Главные результаты (на демонстрационных данных)
 
-## Тесты
+* **ТОП стратегий**: ema_rsi (гибрид), roc_momentum, ichimoku, triple_ema,
+  ema_adx — устойчивые лидеры; supertrend силен на фиксированном сплите,
+  но проваливает walk-forward (поучительный кейс).
+* **Управление позицией**: реально работают Take Profit и частичная
+  фиксация; Time Stop и Break Even — типичные ложные улучшения.
+* **Фильтры**: согласованность старшего и младшего тренда
+  (`htf_up + ema_slope_up`) и запрет на перерастянутые входы
+  (`|dist_ma| < 10%`) — единственные устойчивые; главный резерв —
+  не торговать тихий диапазон (`range_lowvol`).
+* **Капитал**: полный Kelly на десятках сделок не идентифицирован
+  (bootstrap-CI шире оценки); практическое правило —
+  `min(quarter Kelly, 25% капитала, 2% риска на сделку)`.
 
-```bash
-pytest              # 29 тестов: загрузчики, контракт стратегий, бэктест, аналитика, риск
-```
+## Методологические гарантии
 
-Тесты не требуют сети: используется детерминированный синтетический генератор
-OHLCV (`src.data.sample.generate_ohlcv`).
+* Признаки и сигналы считаются только из прошлых баров (тест на lookahead);
+* сигналы для OOS получают warm-up из истории, но метрики окон изолированы;
+* каждая оптимизация (параметры, механики выходов, фильтры) выбирается на
+  IS и судится на OOS против своего baseline;
+* walk-forward пере-оптимизирует параметры в каждом окне;
+* деградационные вердикты и флаги переобучения — часть API, а не ручной
+  анализ.
+
+## Дисклеймер
+
+Репозиторий — исследовательский шаблон. Прогоны в ноутбуках выполнены на
+синтетических данных и демонстрируют методологию, а не торговые
+рекомендации. Прошлые результаты не гарантируют будущих; используйте на
+свой риск.

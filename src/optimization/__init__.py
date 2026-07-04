@@ -25,6 +25,12 @@ from src.optimization.research import (
     summarize_strategies,
     top_configurations,
 )
+from src.optimization.walk_forward import (
+    WalkForwardConfig,
+    walk_forward,
+    walk_forward_summary,
+    window_bounds,
+)
 
 __all__ = [
     "grid_search",
@@ -49,4 +55,8 @@ __all__ = [
     "summarize_filters",
     "filter_scoreboard",
     "regime_performance",
+    "WalkForwardConfig",
+    "walk_forward",
+    "walk_forward_summary",
+    "window_bounds",
 ]
