@@ -8,6 +8,13 @@ from src.optimization.exit_research import (
     summarize_mechanics,
     sweep_exit_rules,
 )
+from src.optimization.filter_research import (
+    default_filters,
+    filter_research,
+    filter_scoreboard,
+    regime_performance,
+    summarize_filters,
+)
 from src.optimization.grid import grid_search, param_grid
 from src.optimization.ranking import DEFAULT_WEIGHTS, composite_score, robust_score
 from src.optimization.research import (
@@ -37,4 +44,9 @@ __all__ = [
     "exit_research",
     "summarize_mechanics",
     "mechanic_scoreboard",
+    "default_filters",
+    "filter_research",
+    "summarize_filters",
+    "filter_scoreboard",
+    "regime_performance",
 ]

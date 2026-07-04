@@ -182,6 +182,25 @@ IS-окне и судит её OOS против baseline стратегии (в�
 сигналу), разделяя реальные улучшения и ложные (оверфит выходов).
 Разбор — в `notebooks/03_position_management.ipynb`.
 
+### Поиск закономерностей (EDA)
+
+`src/analytics/features.py` строит рыночные признаки без lookahead
+(волатильность, ATR, ADX, объём, день недели/час, расстояние до средней,
+ширина Bollinger, наклон EMA, efficiency ratio, направление недельного
+тренда, категориальный режим рынка) и датасет «сделка × признаки на входе»:
+
+```python
+from src.analytics import market_features, trade_feature_dataset
+
+features = market_features(ohlcv)
+trades = trade_feature_dataset(best_params, ohlcv, features)  # ret_pct, win + признаки
+```
+
+`src/optimization/filter_research.py` превращает найденные закономерности в
+фильтры входов и проверяет их тем же IS→OOS протоколом против
+нефильтрованного baseline (вердикты real/false improvement, scoreboard).
+Разбор — в `notebooks/04_pattern_discovery.ipynb`.
+
 ## Ноутбуки и GitHub
 
 GitHub рендерит ноутбуки статически — интерактивные plotly-графики (включая
