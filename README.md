@@ -161,6 +161,27 @@ score наказывает расхождение IS/OOS. Флаги перео�
 IS-победителя, ранговая корреляция Спирмена IS↔OOS по сетке, OOS-перцентиль
 IS-победителя. Полный разбор — в `notebooks/02_strategy_research.ipynb`.
 
+### Управление позицией
+
+Единый numba-симулятор выходов (`src/backtesting/position_management.py`)
+накладывает на сигналы стратегии любые комбинации механик: Stop Loss,
+Take Profit, Trailing Stop, Break Even, Time Stop, сигнальные выходы и
+частичную фиксацию прибыли. Исполнение через `Portfolio.from_orders` с
+корректными intrabar-ценами стопов (гэп — по open) и кодом причины каждого
+выхода:
+
+```python
+from src.backtesting import ExitRules, managed_portfolio
+
+rules = ExitRules(sl_stop=0.08, tp_stop=0.20, partial_tp=0.08, partial_fraction=0.5)
+pf, reasons = managed_portfolio(ohlcv, sig.entries, sig.exits, rules)
+```
+
+Раннер `src/optimization/exit_research.py` оптимизирует каждую механику на
+IS-окне и судит её OOS против baseline стратегии (выход по противоположному
+сигналу), разделяя реальные улучшения и ложные (оверфит выходов).
+Разбор — в `notebooks/03_position_management.ipynb`.
+
 ## Ноутбуки и GitHub
 
 GitHub рендерит ноутбуки статически — интерактивные plotly-графики (включая

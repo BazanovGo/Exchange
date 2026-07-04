@@ -186,12 +186,25 @@ def summarize_strategies(combined: pd.DataFrame, *, config: ResearchConfig | Non
 
         oos_pct_of_is_winner = float((g["oos_composite"] <= best_is["oos_composite"]).mean())
 
+        # Pulling params out of a pandas row upcasts ints to floats; restore
+        # the declared type so the dict can instantiate the strategy directly.
+        defaults = strategy_class(name).default_params
+
         flag_degradation = bool(pd.notna(degradation) and degradation > config.degradation_limit)
         flag_rank = bool(pd.notna(rank_corr) and rank_corr < config.rank_corr_limit)
         flag_flop = bool(oos_pct_of_is_winner < config.oos_percentile_limit)
 
-        params = {c[len("param_"):]: best_robust[c] for c in g.columns
-                  if c.startswith("param_") and pd.notna(best_robust[c])}
+        params = {}
+        for c in g.columns:
+            if not c.startswith("param_") or pd.isna(best_robust[c]):
+                continue
+            key, value = c[len("param_"):], best_robust[c]
+            reference = defaults.get(key)
+            if isinstance(reference, bool):
+                value = bool(value)
+            elif isinstance(reference, int) and isinstance(value, float) and value.is_integer():
+                value = int(value)
+            params[key] = value
         rows.append(
             {
                 "strategy": name,
