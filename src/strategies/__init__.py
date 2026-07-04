@@ -16,6 +16,7 @@ per-strategy code.
 """
 
 # Importing the modules registers the built-in strategies.
+from src.strategies import experimental as _experimental  # noqa: F401
 from src.strategies import hybrid as _hybrid  # noqa: F401
 from src.strategies import mean_reversion as _mean_reversion  # noqa: F401
 from src.strategies import momentum as _momentum  # noqa: F401

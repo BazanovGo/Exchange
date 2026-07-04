@@ -16,6 +16,7 @@ from src.optimization.filter_research import (
     summarize_filters,
 )
 from src.optimization.grid import grid_search, param_grid
+from src.optimization.hypothesis import RESEARCH_DIR, load_catalog, run_full_study
 from src.optimization.ranking import DEFAULT_WEIGHTS, composite_score, robust_score
 from src.optimization.research import (
     ResearchConfig,
@@ -59,4 +60,7 @@ __all__ = [
     "walk_forward",
     "walk_forward_summary",
     "window_bounds",
+    "RESEARCH_DIR",
+    "run_full_study",
+    "load_catalog",
 ]

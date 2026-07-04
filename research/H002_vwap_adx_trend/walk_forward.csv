@@ -1,0 +1,5 @@
+window,train_start,test_start,test_end,params,is_sharpe_ratio,oos_sharpe_ratio,is_total_return_pct,oos_total_return_pct,is_max_drawdown_pct,oos_max_drawdown_pct,is_total_trades,oos_total_trades,is_cagr_pct,oos_cagr_pct
+0,2018-01-01,2021-11-01,2022-10-14,"{'vwap_window': 30, 'adx_window': 14, 'adx_threshold': 25.0}",inf,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+1,2018-12-17,2022-10-17,2023-09-29,"{'vwap_window': 30, 'adx_window': 14, 'adx_threshold': 25.0}",inf,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+2,2019-12-02,2023-10-02,2024-09-13,"{'vwap_window': 30, 'adx_window': 14, 'adx_threshold': 25.0}",inf,-0.12911494111606575,0.0,-0.4295712663449667,0.0,2.6118395060374167,0.0,1.0,0.0,-0.6265539122474961
+3,2020-11-16,2024-09-16,2025-08-29,"{'vwap_window': 50, 'adx_window': 20, 'adx_threshold': 25.0}",inf,inf,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
