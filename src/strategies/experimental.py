@@ -316,3 +316,140 @@ class EngulfingTrendStrategy(BaseStrategy):
         entries = prev_red & engulfs & big_body & uptrend
         exits = c.vbt.crossed_below(sma(c, p["exit_window"]))
         return {"entries": entries, "exits": exits}
+
+
+@register_strategy
+class RegimeSwitcherStrategy(BaseStrategy):
+    """H008: trend engine in trending regimes, mean-reversion in volatile ranges."""
+
+    name: ClassVar[str] = "regime_switcher"
+    category: ClassVar[str] = "hybrid"
+    description: ClassVar[str] = (
+        "Regime-routed composite (stage-04 map): when ADX confirms a trend, trade the EMA "
+        "crossover engine; when ADX is quiet but volatility is elevated, fade z-score dips. "
+        "Positions close when their engine's exit fires or the regime that opened them ends. "
+        "The quiet low-volatility range is never traded."
+    )
+    default_params: ClassVar[dict[str, Any]] = {
+        "adx_threshold": 25.0,
+        "fast_window": 20,
+        "slow_window": 60,
+        "z_window": 20,
+        "z_entry": 1.5,
+    }
+    opt_grid: ClassVar[dict[str, list[Any]]] = {
+        "adx_threshold": [20.0, 25.0, 30.0],
+        "fast_window": [10, 20],
+        "slow_window": [50, 80],
+        "z_window": [15, 20, 30],
+        "z_entry": [1.2, 1.5, 2.0],
+    }
+
+    def validate_params(self) -> None:
+        if self.params["fast_window"] >= self.params["slow_window"]:
+            raise ValueError("fast_window must be < slow_window")
+        if self.params["z_entry"] <= 0:
+            raise ValueError("z_entry must be positive")
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -> dict[str, SignalArray]:
+        from src.analytics.features import label_regime
+        from src.indicators import realized_volatility, zscore
+
+        p = self.params
+        close = ohlcv["Close"]
+        adx_, _, _ = adx(ohlcv["High"], ohlcv["Low"], close, 14)
+        dist_ma = close / sma(close, 200) - 1.0
+        vol = realized_volatility(close, 21)
+        regime = label_regime(adx_, dist_ma, vol, adx_threshold=p["adx_threshold"])
+
+        trending_up = regime == "trend_up"
+        vol_range = regime == "range_highvol"
+
+        fast, slow = ema(close, p["fast_window"]), ema(close, p["slow_window"])
+        trend_entry = fast.vbt.crossed_above(slow) & trending_up
+        trend_exit = fast.vbt.crossed_below(slow)
+
+        z = zscore(close, p["z_window"])
+        mr_entry = z.vbt.crossed_below(-p["z_entry"]) & vol_range
+        mr_exit = z.vbt.crossed_above(0.0)
+
+        # Exit when the engine of the current regime fires, or when the
+        # market drops into a regime we do not trade (quiet range / downtrend).
+        neutral = ~trending_up & ~vol_range
+        exits = (trending_up & trend_exit) | (vol_range & mr_exit) | neutral
+        return {"entries": trend_entry | mr_entry, "exits": exits}
+
+
+@register_strategy
+class MomentumVolumeRankStrategy(BaseStrategy):
+    """H010: H004 reworked — volume percentile rank instead of a multiplier."""
+
+    name: ClassVar[str] = "momentum_volrank"
+    category: ClassVar[str] = "momentum"
+    description: ClassVar[str] = (
+        "Refined H004 (its fragile axis was the volume multiplier): momentum turning positive "
+        "is confirmed by the percentile rank of volume over a long lookback — a scale-free "
+        "condition. Exit when momentum drops back through zero."
+    )
+    default_params: ClassVar[dict[str, Any]] = {
+        "roc_window": 20,
+        "rank_lookback": 120,
+        "rank_floor": 0.6,
+    }
+    opt_grid: ClassVar[dict[str, list[Any]]] = {
+        "roc_window": [10, 20, 40],
+        "rank_lookback": [80, 120, 180],
+        "rank_floor": [0.5, 0.6, 0.7, 0.8],
+    }
+
+    def validate_params(self) -> None:
+        if not 0 < self.params["rank_floor"] < 1:
+            raise ValueError("rank_floor must be in (0, 1)")
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -> dict[str, SignalArray]:
+        p = self.params
+        close, volume = ohlcv["Close"], ohlcv["Volume"]
+        roc_ = roc(close, p["roc_window"])
+        vol_rank = volume.rolling(p["rank_lookback"]).rank(pct=True)
+        return {
+            "entries": roc_.vbt.crossed_above(0.0) & (vol_rank >= p["rank_floor"]),
+            "exits": roc_.vbt.crossed_below(0.0),
+        }
+
+
+@register_strategy
+class CLVDipStrategy(BaseStrategy):
+    """H011: capitulation closes (low CLV) bought inside an uptrend."""
+
+    name: ClassVar[str] = "clv_dip"
+    category: ClassVar[str] = "mean_reversion"
+    description: ClassVar[str] = (
+        "Candle-position reversion: a close pinned to the bottom of its daily range "
+        "(close-location-value below a floor) while the long trend is up marks intraday "
+        "capitulation; buy it and exit when price reclaims the short moving average."
+    )
+    default_params: ClassVar[dict[str, Any]] = {
+        "clv_floor": 0.2,
+        "trend_window": 150,
+        "exit_window": 10,
+    }
+    opt_grid: ClassVar[dict[str, list[Any]]] = {
+        "clv_floor": [0.1, 0.2, 0.3],
+        "trend_window": [100, 150, 200],
+        "exit_window": [5, 10, 20],
+    }
+
+    def validate_params(self) -> None:
+        if not 0 < self.params["clv_floor"] < 1:
+            raise ValueError("clv_floor must be in (0, 1)")
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -> dict[str, SignalArray]:
+        p = self.params
+        h, l, c = ohlcv["High"], ohlcv["Low"], ohlcv["Close"]  # noqa: E741
+        clv = (c - l) / (h - l).replace(0.0, pd.NA)
+        capitulation = (clv <= p["clv_floor"]).fillna(False).astype(bool)
+        uptrend = c > sma(c, p["trend_window"])
+        return {
+            "entries": rising_edge(capitulation & uptrend),
+            "exits": c.vbt.crossed_above(sma(c, p["exit_window"])),
+        }
