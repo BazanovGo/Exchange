@@ -453,3 +453,40 @@ class CLVDipStrategy(BaseStrategy):
             "entries": rising_edge(capitulation & uptrend),
             "exits": c.vbt.crossed_above(sma(c, p["exit_window"])),
         }
+
+
+@register_strategy
+class ZScoreRideStrategy(BaseStrategy):
+    """H019: z-score entry, but ride reversion past the mean to the far band."""
+
+    name: ClassVar[str] = "zscore_ride"
+    category: ClassVar[str] = "mean_reversion"
+    description: ClassVar[str] = (
+        "Exit-driven MR variant: identical z-score dip entry, but instead of exiting at the "
+        "mean, hold until the z-score reaches a positive target on the far side (letting the "
+        "oscillation complete). Tests whether MR alpha sits in the entry or in the exit."
+    )
+    default_params: ClassVar[dict[str, Any]] = {
+        "window": 20,
+        "z_entry": 1.5,
+        "z_target": 0.5,
+    }
+    opt_grid: ClassVar[dict[str, list[Any]]] = {
+        "window": [10, 20, 40, 60],
+        "z_entry": [1.2, 1.5, 2.0],
+        "z_target": [0.0, 0.5, 1.0, 1.5],
+    }
+
+    def validate_params(self) -> None:
+        if self.params["z_entry"] <= 0:
+            raise ValueError("z_entry must be positive")
+
+    def generate_signals(self, ohlcv: pd.DataFrame) -> dict[str, SignalArray]:
+        from src.indicators import zscore
+
+        p = self.params
+        z = zscore(ohlcv["Close"], p["window"])
+        return {
+            "entries": z.vbt.crossed_below(-p["z_entry"]),
+            "exits": z.vbt.crossed_above(p["z_target"]),
+        }
