@@ -1,10 +1,10 @@
 # H001: squeeze_breakout
 
 **Вердикт:** `archived` — too few OOS trades (5 < 8); stage-02 overfit flags = 3; fails walk-forward (efficiency -0.82 < 0.3)
-**Дата:** 2026-07-04 13:34 UTC
+**Дата:** 2026-07-05 05:18 UTC
 
 ## Идея
-Цикл волатильности: сжатие Bollinger (нижний квантиль ширины) накапливает энергию; пробой верхней полосы с уже растущим ATR — начало нового импульса. Комбинация 'ATR Expansion + Bollinger Squeeze'.
+Цикл волатильности: сжатие Bollinger + пробой с растущим ATR (см. первый прогон). ПЕРЕ-АУДИТ: исходный WF-вердикт вычислен с inf-Sharpe багом.
 
 ## Правила
 Volatility-cycle breakout: wait until Bollinger width falls into its lowest quantile over a lookback (the squeeze), then buy a close breaking the upper band while ATR is already expanding; exit on a close back through the middle band.
@@ -46,6 +46,6 @@ Volatility-cycle breakout: wait until Bollinger width falls into its lowest quan
 |                30 |                       80 |                     0.15 |                 14 |             0.275 |              0.229 |          0.503 |
 
 ## Выводы
-—
+Re-audit итерации 4 после фикса WF-отбора.
 
 Артефакты: `sweep.csv` (все конфигурации), `walk_forward.csv`, `equity.png`, `param_heatmap.png`.

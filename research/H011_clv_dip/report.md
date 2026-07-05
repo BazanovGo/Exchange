@@ -1,10 +1,10 @@
 # H011: clv_dip
 
 **Вердикт:** `archived` — fails walk-forward (efficiency -1.78 < 0.3)
-**Дата:** 2026-07-05 04:57 UTC
+**Дата:** 2026-07-05 05:19 UTC
 
 ## Идея
-Позиция закрытия в дневном диапазоне (CLV): закрытие у лоу дня в аптренде = внутридневная капитуляция; частые события (~100+ на историю) в отличие от свечных паттернов H007.
+CLV-капитуляция в аптренде. ПЕРЕ-АУДИТ: исходный WF eff -1.78 вычислен с inf-Sharpe багом.
 
 ## Правила
 Candle-position reversion: a close pinned to the bottom of its daily range (close-location-value below a floor) while the long trend is up marks intraday capitulation; buy it and exit when price reclaims the short moving average.
@@ -45,6 +45,6 @@ Candle-position reversion: a close pinned to the bottom of its daily range (clos
 |               0.2 |                  150 |                  20 |            -0.328 |              0.283 |          0.614 |
 
 ## Выводы
-Класс 'candle position', не паттерн; высокая частота сигналов по уроку итерации 1.
+Re-audit итерации 4 после фикса WF-отбора.
 
 Артефакты: `sweep.csv` (все конфигурации), `walk_forward.csv`, `equity.png`, `param_heatmap.png`.
