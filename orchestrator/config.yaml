@@ -1,0 +1,44 @@
+# External research-loop orchestrator configuration.
+# CLI arguments override these values.
+
+# --- iteration budget & improvement criteria -------------------------------
+max_iterations: 100
+patience: 15              # stop after this many iterations without improvement
+min_improvement: 0.03     # composite-score delta that counts as an improvement
+
+# --- stability stop criterion ----------------------------------------------
+# The loop may stop early when the best strategy is already stable:
+stability:
+  min_oos_sharpe: 0.8         # best OOS Sharpe holds up ...
+  min_wf_efficiency: 0.5      # ... walk-forward does not destroy it ...
+  max_mc_ruin_prob: 0.01      # ... and Monte Carlo shows no excessive risk.
+  required_streak: 5          # how many consecutive iterations must confirm it
+
+# --- repetition guard --------------------------------------------------------
+repetition:
+  jaccard_threshold: 0.6      # idea-token overlap that counts as a repeat
+  streak_stop: 3              # stop when this many repeats arrive in a row
+
+# --- failed-iteration handling ----------------------------------------------
+retries_per_iteration: 2      # re-run with the strict prompt this many times
+iteration_timeout_sec: 3600   # hard cap per Claude Code invocation
+
+# --- paths -------------------------------------------------------------------
+results_dir: research
+prompts_dir: prompts
+knowledge_base: knowledge_base.md
+research_log: research_log.md
+state_file: orchestrator/state.json
+
+# --- Claude Code invocation ---------------------------------------------------
+model: claude-fable-5
+# {prompt} and {model} are substituted; extend with e.g. --max-turns as needed.
+claude_command:
+  - claude
+  - -p
+  - "{prompt}"
+  - --model
+  - "{model}"
+  - --dangerously-skip-permissions
+  - --max-turns
+  - "120"

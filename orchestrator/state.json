@@ -1,0 +1,12 @@
+{
+  "iteration": 0,
+  "best_score": 0.0,
+  "best_iteration": "",
+  "best_summary": {},
+  "no_improvement_streak": 0,
+  "repeat_streak": 0,
+  "stable_streak": 0,
+  "stopped": false,
+  "stop_reason": "",
+  "history": []
+}

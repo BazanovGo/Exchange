@@ -183,6 +183,34 @@ wf = walk_forward("ema_rsi", ohlcv, cfg=WalkForwardConfig())  # пере-опт�
   (bootstrap-CI шире оценки); практическое правило —
   `min(quarter Kelly, 25% капитала, 2% риска на сделку)`.
 
+## Внешний оркестратор автономного исследования
+
+`orchestrator/run_research_loop.py` управляет исследовательским циклом
+снаружи, не полагаясь на одну сессию Claude Code: строит промпт из шаблона
+(`prompts/`) + базы знаний + дайджеста отклонённых идей (защита от
+повторов), запускает headless `claude -p`, валидирует контракт артефактов
+итерации (`research/pending/iteration_NNN/`: hypothesis.md,
+implementation.py, metrics.csv, trades.csv, plots/, notebook.ipynb,
+summary.json, decision.md), оценивает улучшение по composite score и
+маршрутизирует итерацию в `research/accepted/` или `research/rejected/`,
+ведёт `orchestrator/state.json` (переживает перезапуски) и `research_log.md`.
+
+```bash
+python orchestrator/run_research_loop.py \
+    --max-iterations 100 --patience 15 --min-improvement 0.03 \
+    --prompt-file prompts/research_hypothesis.md --results-dir research/
+
+python orchestrator/run_research_loop.py --dry-run --max-iterations 10  # механика без модели
+```
+
+Остановка — по любому из критериев: лимит итераций; `patience` итераций без
+улучшения; лучшая стратегия стабильна (OOS Sharpe / walk-forward / Monte
+Carlo одновременно в норме N итераций); новые гипотезы повторяют уже
+проверенные (Jaccard-схожесть идей). Итерация без метрик считается
+провальной и повторяется со строгим промптом (`prompts/reject_strategy.md`);
+после остановки запрашивается финальный отчёт (`prompts/final_report.md`).
+Настройки — `orchestrator/config.yaml`, CLI-аргументы её переопределяют.
+
 ## Методологические гарантии
 
 * Признаки и сигналы считаются только из прошлых баров (тест на lookahead);
