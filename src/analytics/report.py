@@ -60,6 +60,17 @@ def portfolio_metrics(pf, *, name: str = "") -> pd.Series:
     dd = metrics["max_drawdown_pct"]
     metrics["recovery_factor"] = metrics["total_return_pct"] / dd if dd > 0 else np.nan
 
+    # A portfolio that never traded (or has zero return variance) makes
+    # vectorbt report infinite risk-adjusted ratios; such values must never
+    # win a parameter selection, so report them as NaN.
+    for ratio in ("sharpe_ratio", "sortino_ratio", "calmar_ratio", "recovery_factor"):
+        if not np.isfinite(metrics[ratio]):
+            metrics[ratio] = np.nan
+    if metrics["total_trades"] == 0:
+        for key in ("sharpe_ratio", "sortino_ratio", "calmar_ratio", "win_rate_pct",
+                    "profit_factor", "expectancy", "recovery_factor"):
+            metrics[key] = np.nan
+
     return pd.Series(metrics, name=name)
 
 

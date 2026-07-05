@@ -33,6 +33,7 @@ class WalkForwardConfig:
     test_bars: int = 250
     step_bars: int = 250          # distance between window starts
     select_by: str = "is_sharpe_ratio"
+    min_train_trades: int = 3     # combos with fewer train trades are not candidates
     backtest: BacktestConfig | None = None
 
 
@@ -70,7 +71,16 @@ def walk_forward(
             backtest=cfg.backtest or BacktestConfig(),
         )
         table = evaluate_strategy(strategy_name, window, config=research_cfg, grid=grid)
-        best = table.loc[table[cfg.select_by].fillna(-np.inf).idxmax()]
+        # Zero-trade combos carry meaningless (formerly infinite) ratios and
+        # must not be selectable; require a minimum of activity on train.
+        candidates = table[table["is_total_trades"] >= cfg.min_train_trades]
+        if candidates.empty:
+            candidates = table  # degenerate window: fall back, NaNs won't win
+        criterion = candidates[cfg.select_by].replace([np.inf, -np.inf], np.nan)
+        if criterion.notna().any():
+            best = candidates.loc[criterion.idxmax()]
+        else:
+            best = candidates.iloc[0]
 
         row = {
             "window": w,

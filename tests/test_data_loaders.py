@@ -78,3 +78,30 @@ def test_unknown_source_raises():
 def test_missing_file_raises(tmp_path):
     with pytest.raises(FileNotFoundError):
         load_data("csv", "GHOST", loader_kwargs={"base_dir": tmp_path})
+
+
+def test_structural_generators():
+    import numpy as np
+
+    from src.data.sample import generate_ou_ohlcv, generate_trending_ohlcv
+
+    ou = generate_ou_ohlcv(periods=1500, seed=1)
+    tr = generate_trending_ohlcv(periods=1500, seed=1)
+    for df in (ou, tr):
+        assert list(df.columns) == ["Open", "High", "Low", "Close", "Volume"]
+        assert (df["High"] >= df[["Open", "Close"]].max(axis=1)).all()
+        assert (df["Low"] <= df[["Open", "Close"]].min(axis=1)).all()
+        assert (df["Close"] > 0).all()
+
+    # Structure checks: OU has negative return autocorrelation, the Markov
+    # trend series positive.
+    ou_ret = np.log(ou["Close"]).diff().dropna()
+    tr_ret = np.log(tr["Close"]).diff().dropna()
+    assert ou_ret.autocorr(1) < -0.005
+    assert tr_ret.autocorr(1) > -0.02  # weak but not negative
+
+    # Trend series must spend long stretches in one direction.
+    sma50 = tr["Close"].rolling(50).mean()
+    above = (tr["Close"] > sma50).dropna()
+    runs = (above != above.shift()).cumsum()
+    assert runs.value_counts().max() > 100
