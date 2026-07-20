@@ -1,4 +1,4 @@
-# Exchange — Trading Strategy Research Framework
+# Exchange — фреймворк для исследования торговых стратегий
 
 Промышленный фреймворк для исследования торговых стратегий на базе
 [vectorbt](https://vectorbt.dev). Пять этапов исследования — от инфраструктуры
