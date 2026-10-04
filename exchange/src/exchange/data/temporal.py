@@ -87,6 +87,11 @@ class PointInTimeSeries:
         if self.frame.index.tz is None:
             raise DataError(f"{self.name or 'series'}: observation_time index must be UTC-aware")
         avail = pd.to_datetime(self.frame[AVAILABLE_TIME], utc=True)
+        # pandas 3 parses to microsecond resolution while most bar indexes are
+        # nanosecond, and a merge_asof between the two raises rather than
+        # converting. Pin the column to the observation index's own unit so
+        # every comparison and join downstream sees one resolution.
+        avail = avail.astype(self.frame.index.dtype)
         self.frame = self.frame.assign(**{AVAILABLE_TIME: avail}).sort_index(kind="stable")
         if self.revision_policy not in {"latest", "first"}:
             raise DataError(f"unknown revision policy {self.revision_policy!r}")
@@ -140,6 +145,9 @@ class PointInTimeSeries:
         if self.revision_policy == "first":
             source = source.drop_duplicates(subset=OBSERVATION_TIME, keep="first")
 
+        # Same resolution concern as above, now between the bar index and the
+        # availability column.
+        targets["_key"] = targets["_key"].astype(source[AVAILABLE_TIME].dtype)
         merged = pd.merge_asof(
             targets,
             source,
