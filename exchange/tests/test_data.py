@@ -7,17 +7,17 @@ import pandas as pd
 import pytest
 
 from exchange.core.errors import DataError, DataQualityError
-from exchange.data.contracts import (
-    BUILTIN_ROOTS,
-    ContractRegistry,
-    contract_symbol,
-    parse_contract_symbol,
-)
 from exchange.data.continuous import (
     build_continuous,
     n_days_before_expiration,
     roll_gap_diagnostics,
     volume_roll,
+)
+from exchange.data.contracts import (
+    BUILTIN_ROOTS,
+    ContractRegistry,
+    contract_symbol,
+    parse_contract_symbol,
 )
 from exchange.data.dataset import (
     dataset_from_continuous,
@@ -26,8 +26,8 @@ from exchange.data.dataset import (
     verify_dataset_hash,
 )
 from exchange.data.providers import InMemoryProvider, build_provider
-from exchange.data.schema import OHLCV, assert_canonical, is_canonical, normalise_bars
 from exchange.data.quality import validate_bars
+from exchange.data.schema import OHLCV, assert_canonical, is_canonical, normalise_bars
 from exchange.data.validation import Severity, run_all_checks, worst_severity
 from exchange.synthetic.generators import futures_ladder, random_walk
 

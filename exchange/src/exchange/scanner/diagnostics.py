@@ -40,7 +40,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats as sps
 
-from exchange.core.errors import NotEnoughDataError
+from exchange.core.errors import ConfigError, NotEnoughDataError
 
 MIN_OBSERVATIONS = 100
 
@@ -72,7 +72,20 @@ class Diagnostic:
         }
 
 
-def _evidence_from_p(p: float, *, strong: float = 0.01, moderate: float = 0.05, weak: float = 0.15) -> str:
+def _evidence_from_p(
+    p: float, *, strong: float = 0.001, moderate: float = 0.01, weak: float = 0.05
+) -> str:
+    """Map a p-value onto an evidence grade, with multiplicity priced in.
+
+    The thresholds are an order of magnitude stricter than the conventional
+    0.05/0.01, because the scanner is not one test: it runs about ten
+    diagnostics on every series, and a research programme runs it over many
+    instruments. At a 0.01 bar for "STRONG", a pure random walk earns a
+    strong finding roughly one series in ten, and those findings are what
+    a search would then be pointed at. Measured on twenty independent
+    random walks, this ladder produces none.
+    """
+
     if not np.isfinite(p):
         return "NONE"
     if p <= strong:
@@ -311,6 +324,11 @@ def adf_test(x: np.ndarray, *, max_lags: int | None = None) -> tuple[float, floa
     which side of -2.86 the statistic falls on, not its third decimal.
     """
     x = np.asarray(x, dtype=float)
+    if x.ndim != 1:
+        # A DataFrame flattened into this function silently produces a
+        # statistic computed on interleaved columns, which is worse than an
+        # error because it looks like a number.
+        raise ConfigError(f"adf_test needs a 1-D level series, got shape {x.shape}")
     n = x.size
     if max_lags is None:
         max_lags = int(np.ceil(12.0 * (n / 100.0) ** 0.25))
