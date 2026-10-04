@@ -197,10 +197,29 @@ def match(
         return Fill(cap, float(price), triggered=True)
 
     # STOP_LIMIT: once triggered it rests as a limit and may never fill.
-    fill = _match_limit(order, bar, cap, touch_fills)
-    if not fill.did_fill:
-        return Fill(0.0, float("nan"), triggered=True, reason="stop triggered but limit not reached")
-    return Fill(fill.filled, fill.price, triggered=True)
+    #
+    # The reference price is the stop level, or the open when the bar gapped
+    # through it — the same gap logic as a plain stop, because the trigger
+    # cannot have happened at a better price than the one that caused it.
+    # Treating the order as a limit resting over the *whole* bar would be
+    # wrong in a specific, flattering way: a sell stop at 99.5 on a bar
+    # opening at 99.9 would fill at 99.9, a price that was only available
+    # before the stop triggered.
+    #
+    # If the reference is beyond the limit, the market gapped past it and the
+    # order does not fill — the classic stop-limit failure in a fast market,
+    # and the one a backtest must reproduce. An intrabar recovery back to the
+    # limit is not assumed: the path within a bar is unknown, and assuming
+    # the favourable path is how a backtest invents fills.
+    reference = min(bar.open, stop) if order.side is Side.SELL else max(bar.open, stop)
+    limit = float(order.limit_price)  # type: ignore[arg-type]
+    reachable = reference >= limit if order.side is Side.SELL else reference <= limit
+    if not reachable:
+        return Fill(
+            0.0, float("nan"), triggered=True,
+            reason=f"stop triggered at {reference:g} but the market gapped past the limit {limit:g}",
+        )
+    return Fill(cap, float(reference), triggered=True)
 
 
 def _stop_triggered(order: Order, bar: Bar) -> bool:

@@ -237,6 +237,21 @@ class DeflatedSharpeResult:
         )
 
 
+def _null_sharpe_variance(values: np.ndarray) -> float:
+    """Sampling variance of a Sharpe estimate under no skill.
+
+    ``Var(SR_hat) ~ (1 + SR^2 / 2) / n`` (Lo 2002), evaluated at the
+    observed Sharpe. Used as the default spread of the trials when the
+    caller does not say how dispersed the search actually was.
+    """
+    n = values.size
+    if n < 2:
+        return 1.0
+    sr = sharpe_per_period(values)
+    sr = sr if np.isfinite(sr) else 0.0
+    return float((1.0 + 0.5 * sr**2) / n)
+
+
 def deflated_sharpe_ratio(
     returns,
     *,
@@ -289,9 +304,16 @@ def deflated_sharpe_ratio(
         variance = float(trial_sharpe_variance)
     elif trial_sharpes is not None:
         arr = _clean(trial_sharpes)
-        variance = float(np.var(arr, ddof=1)) if arr.size > 1 else 1.0
+        variance = float(np.var(arr, ddof=1)) if arr.size > 1 else _null_sharpe_variance(values)
     else:
-        variance = 1.0
+        # No information about how the trials were spread. Fall back to the
+        # variance a *null* trial's Sharpe estimate would have on a sample
+        # this long, which is the floor: any real grid disperses at least
+        # this much. The literature's V = 1.0 is only meaningful for
+        # annualised Sharpes; applying it to per-period returns would set a
+        # benchmark hundreds of times too high and reject everything, which
+        # looks conservative and is in fact just wrong.
+        variance = _null_sharpe_variance(values)
 
     benchmark = expected_max_sharpe(n_trials, sharpe_variance=variance)
     dsr = probabilistic_sharpe_ratio(values, benchmark_sr=benchmark) if np.isfinite(sr) else np.nan

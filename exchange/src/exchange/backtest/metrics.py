@@ -100,10 +100,15 @@ def sharpe_ratio(
         return np.nan
     ppy = infer_periods_per_year(returns, periods_per_year)
     excess = values - risk_free / ppy
-    sd = np.std(excess, ddof=1)
-    if sd <= 0:
+    mean = float(np.mean(excess))
+    sd = float(np.std(excess, ddof=1))
+    # A constant return series has no risk estimate. Floating-point noise
+    # leaves its standard deviation at ~1e-19 rather than exactly zero, and
+    # dividing by that reports a Sharpe of 1e16 — a number that looks like a
+    # spectacular result and is in fact an absent denominator.
+    if not np.isfinite(sd) or sd <= 1e-15 or sd <= 1e-10 * abs(mean):
         return np.nan
-    return float(np.mean(excess) / sd * np.sqrt(ppy))
+    return float(mean / sd * np.sqrt(ppy))
 
 
 def sortino_ratio(
