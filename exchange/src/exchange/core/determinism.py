@@ -68,6 +68,19 @@ class DeterminismReport:
     def fully_deterministic(self) -> bool:
         return self.hash_randomisation_disabled
 
+    def summary(self) -> str:
+        """One line for ``exchange doctor``."""
+        phs = self.pythonhashseed if self.pythonhashseed is not None else "unset"
+        state = "fully pinned" if self.fully_deterministic else "PYTHONHASHSEED not pinned"
+        return f"seed={self.seed} PYTHONHASHSEED={phs} ({state})"
+
+    def to_dict(self) -> dict:
+        return {
+            "seed": self.seed,
+            "pythonhashseed": self.pythonhashseed,
+            "hash_randomisation_disabled": self.hash_randomisation_disabled,
+        }
+
 
 def deterministic_mode(seed: int = DEFAULT_SEED) -> DeterminismReport:
     """Pin every seed this process controls; report what it cannot.

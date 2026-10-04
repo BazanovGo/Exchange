@@ -28,6 +28,7 @@ import pandas as pd
 
 from exchange.core.errors import NotEnoughDataError
 from exchange.core.hashing import short
+from exchange.core.text import markdown_table
 from exchange.scanner import diagnostics as dg
 
 _LEVELS = {"NONE": 0, "WEAK": 1, "MODERATE": 2, "STRONG": 3}
@@ -109,7 +110,7 @@ class ScanResult:
 
         if not self.vr_profile.empty:
             lines += ["### Variance ratio profile", "",
-                      self.vr_profile.round(4).to_markdown(index=False), ""]
+                      markdown_table(self.vr_profile, index=False), ""]
 
         lines += [
             "",
@@ -332,3 +333,19 @@ def scan_table(results) -> pd.DataFrame:
     for r in results:
         rows.append({"symbol": r.symbol, "timeframe": r.timeframe, "n_bars": r.n_bars, **r.summary})
     return pd.DataFrame(rows)
+
+
+def scan_dataset(dataset, **kwargs) -> ScanResult:
+    """Scan a :class:`~exchange.data.dataset.Dataset`, carrying its identity.
+
+    Using this rather than :func:`scan` on the raw frame keeps the symbol,
+    timeframe and content hash attached to the result, which is what makes
+    a scan citable in a research report.
+    """
+    return scan(
+        dataset.bars,
+        symbol=dataset.symbol,
+        timeframe=dataset.timeframe.label,
+        data_hash=dataset.data_hash,
+        **kwargs,
+    )

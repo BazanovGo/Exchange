@@ -1,0 +1,58 @@
+# Research programme configuration.
+#
+# Every CLI command accepts --config pointing at a file like this one, and
+# the resolved settings are hashed into each experiment record, so a result
+# can always be traced back to the configuration that produced it.
+#
+# Unknown keys are refused rather than ignored: a setting that is silently
+# dropped is the hardest kind of reproducibility bug to find.
+
+seed: 20260902          # there is no unseeded mode; an unseeded run is not reproducible
+deterministic: true     # fixed seeds, single-threaded BLAS where it matters, no wall-clock inputs
+log_level: INFO
+
+# The scenario that verdicts are based on. 'optimistic' and 'frictionless'
+# are refused here on purpose - they are reported by the stress ladder, but
+# a verdict must never rest on costs no live book obtains.
+execution_scenario: base
+
+data:
+  provider:
+    kind: csv           # csv | parquet | memory | yahoo (equities only) | your own
+    directory: data
+  symbols: []           # e.g. ["NG_continuous"]
+  timeframe: 1d
+  strict: true          # refuse data that fails a quality check outright
+  roll: volume          # calendar | volume | open_interest | n_days_before_expiration
+  adjustment: ratio     # none | backward | ratio - all three are tested by roll_methodology
+  max_warnings: 50
+
+funnel:
+  is_fraction: 0.6      # share of the sample the parameter search may see
+  embargo_bars: 10      # bars discarded between in-sample and out-of-sample
+  holding_horizon: 5    # bars a signal's outcome spans; sets the purge width
+  cpcv_groups: 6
+  cpcv_test_groups: 2
+  wf_train: 500
+  wf_test: 125
+  n_bootstrap: 1000
+  n_monte_carlo: 1000
+  initial_cash: 100000.0
+  alpha: 0.05
+  max_grid: 400         # a larger search is refused rather than deflated away
+
+falsification:
+  enabled: true
+  attacks: []           # empty = run all eleven
+  n_resamples: 1000
+
+# Fundamental features are off until a provider is configured. The package
+# ships no vendor client, by design: implement FeatureProvider against
+# whatever data subscription you have.
+features:
+  provider: {}
+  keys: []
+  strict: true          # refuse a feature column that fails the leakage scan
+
+registry_root: experiments
+reports_root: reports

@@ -18,7 +18,7 @@ from exchange.scanner.diagnostics import (
     variance_ratio_profile,
     volatility_clustering,
 )
-from exchange.scanner.report import ScanResult, scan, scan_table
+from exchange.scanner.report import ScanResult, scan, scan_dataset, scan_table
 
 __all__ = [
     "ALL_DIAGNOSTICS",
@@ -31,6 +31,7 @@ __all__ = [
     "mean_reversion_half_life",
     "partial_autocorrelation",
     "scan",
+    "scan_dataset",
     "scan_table",
     "seasonality",
     "structural_stability",

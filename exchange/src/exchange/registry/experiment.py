@@ -79,6 +79,12 @@ class ExperimentRecord:
     best_params: dict = field(default_factory=dict)
     stages: list = field(default_factory=list)
     robustness: dict | None = None
+    # The whole programme's settings (registry paths, logging, feature
+    # providers). Recorded for context but kept out of ``reproduction_key``:
+    # these cannot change a number, and including them would report a
+    # reproduction run with a different registry path as a different
+    # experiment.
+    programme_config: dict = field(default_factory=dict)
     environment: dict = field(default_factory=dict)
     seed: int | None = None
     created_at: str = ""
