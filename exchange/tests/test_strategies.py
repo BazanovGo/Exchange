@@ -16,6 +16,7 @@ from exchange.strategies.base import (
     catalog,
     grid_size,
     iter_grid,
+    macd,
     register,
     strategy_class,
     valid_combinations,
@@ -106,6 +107,45 @@ class TestParameterGrids:
             cls = strategy_class(name)
             usable = len(valid_combinations(cls))
             assert 1 <= usable <= grid_size(cls.param_space)
+
+
+class TestIndicators:
+    def test_macd_matches_its_definition(self, rw_bars):
+        from exchange.strategies.base import ema
+
+        out = macd(rw_bars["close"], fast=12, slow=26, signal=9)
+        expected = ema(rw_bars["close"], 12) - ema(rw_bars["close"], 26)
+        pd.testing.assert_series_equal(out["macd"], expected, check_names=False)
+        pd.testing.assert_series_equal(
+            out["histogram"], out["macd"] - out["signal"], check_names=False
+        )
+
+    def test_macd_is_causal(self, rw_bars):
+        from exchange.data.temporal import assert_causal
+
+        assert_causal(lambda b: macd(b["close"])["histogram"], rw_bars, name="macd")
+
+    def test_macd_warms_up_before_it_reports(self, rw_bars):
+        """No value before the slow EMA has its full window.
+
+        An indicator that starts reporting on bar 1 is reporting the first
+        price, and a backtest that acts on it trades the warm-up.
+        """
+        out = macd(rw_bars["close"], fast=12, slow=26, signal=9)
+        assert out["macd"].iloc[:25].isna().all()
+        assert out["macd"].iloc[25:].notna().all()
+        assert out["signal"].iloc[:33].isna().all()
+
+    def test_macd_follows_the_trend_sign(self):
+        index = pd.date_range("2026-01-05", periods=200, freq="B", tz="UTC", name="timestamp")
+        rising = pd.Series(np.linspace(100.0, 160.0, 200), index=index)
+        falling = pd.Series(np.linspace(160.0, 100.0, 200), index=index)
+        assert macd(rising)["macd"].iloc[-1] > 0
+        assert macd(falling)["macd"].iloc[-1] < 0
+
+    def test_a_fast_window_at_or_above_the_slow_one_is_refused(self, rw_bars):
+        with pytest.raises(ConfigError, match="shorter"):
+            macd(rw_bars["close"], fast=26, slow=26)
 
 
 class TestStrategyBehaviour:

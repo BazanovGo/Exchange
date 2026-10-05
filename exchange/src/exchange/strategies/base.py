@@ -245,6 +245,45 @@ def ema(series: pd.Series, window: int) -> pd.Series:
     return series.ewm(span=window, adjust=False, min_periods=window).mean()
 
 
+def macd(
+    series: pd.Series,
+    *,
+    fast: int = 12,
+    slow: int = 26,
+    signal: int = 9,
+) -> pd.DataFrame:
+    """MACD: the gap between a fast and a slow EMA, and its own EMA.
+
+    Returns a frame with ``macd``, ``signal`` and ``histogram``
+    (``macd - signal``). Every component is a backward-looking EMA, so the
+    value at bar ``t`` uses bars ``0..t`` only.
+
+    Two things worth stating plainly, because this indicator attracts more
+    confidence than it earns:
+
+    * **It is a smoothed momentum reading, not a signal.** The crossover
+      everyone trades is the sign of ``histogram``, and on a series whose
+      returns are close to unforecastable it changes sign about as often as
+      noise does. The funnel exists to find out which case you are in.
+    * **It must not be computed on an unadjusted spliced futures series.**
+      Both EMAs would respond to the roll gaps — on MOEX natural gas a
+      median +384 basis points at each of 80 rolls — and the indicator would
+      be reading the contract calendar rather than the market. Use an
+      adjusted series, or one whose roll bars are excluded.
+    """
+    if fast >= slow:
+        raise ConfigError(f"fast ({fast}) must be shorter than slow ({slow})")
+    line = (ema(series, fast) - ema(series, slow)).rename("macd")
+    signal_line = ema(line.dropna(), signal).reindex(line.index).rename("signal")
+    return pd.DataFrame(
+        {
+            "macd": line,
+            "signal": signal_line,
+            "histogram": (line - signal_line).rename("histogram"),
+        }
+    )
+
+
 def rolling_zscore(series: pd.Series, window: int) -> pd.Series:
     """Z-score against a *trailing* window.
 
