@@ -113,20 +113,78 @@ class DataQualityReport:
         return f"DataQualityReport({self.symbol}, {self.n_bars} bars, {'OK' if self.ok else 'FAILED'})"
 
 
+def _resolve_session(bars: pd.DataFrame, tf, session):
+    """Infer, accept or decline a session calendar."""
+    if session is None or session == "none":
+        return None
+    if session != "auto":
+        return session
+    from exchange.data.sessions import infer_session
+
+    try:
+        return infer_session(bars.index, tf)
+    except Exception:          # inference must never break validation
+        return None
+
+
+def _bind_session(session):
+    """The default checks, with the session bound into the ones that use it."""
+    from functools import partial
+
+    from exchange.data.validation import (
+        DEFAULT_CHECKS,
+        check_gaps,
+        check_missing_bars,
+        check_session_coverage,
+    )
+
+    bound = {
+        "check_gaps": partial(check_gaps, session=session),
+        "check_missing_bars": partial(check_missing_bars, session=session),
+        "check_session_coverage": partial(check_session_coverage, session=session),
+    }
+    out = []
+    for check in DEFAULT_CHECKS:
+        name = getattr(check, "__name__", "")
+        replacement = bound.get(name)
+        if replacement is not None:
+            replacement.__name__ = name     # run_all_checks reads __name__
+            out.append(replacement)
+        else:
+            out.append(check)
+    return tuple(out)
+
+
 def validate_bars(
     bars: pd.DataFrame,
     *,
     symbol: str = "data",
     timeframe: Timeframe | str | None = None,
     checks=None,
+    session="auto",
 ) -> DataQualityReport:
-    """Validate one canonical bar series and return its quality report."""
+    """Validate one canonical bar series and return its quality report.
+
+    ``session`` controls how spacing is judged on intraday data:
+    ``"auto"`` (the default) infers a piecewise trading session from the
+    timestamps, ``None`` disables it, and a
+    :class:`~exchange.data.sessions.SessionSchedule` uses an authoritative
+    calendar. Without a session every overnight break on an hourly series
+    counts as a seven-bar gap, which buries real holes under thousands of
+    warnings.
+    """
     assert_canonical(bars, name=symbol)
+    tf = None
     if timeframe is None:
         tf = infer_timeframe(bars.index) if len(bars) >= 3 else None
         tf_label = tf.label if tf is not None else "unknown"
     else:
-        tf_label = Timeframe.parse(timeframe).label
+        tf = Timeframe.parse(timeframe)
+        tf_label = tf.label
+
+    resolved = _resolve_session(bars, tf, session)
+    if checks is None and resolved is not None:
+        checks = _bind_session(resolved)
 
     return DataQualityReport(
         symbol=symbol,

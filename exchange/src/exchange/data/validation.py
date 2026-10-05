@@ -117,7 +117,7 @@ def check_timezone(bars: pd.DataFrame) -> Finding:
     return _ok("timezone", "index is UTC-aware")
 
 
-def _spacing_in_bars(bars: pd.DataFrame, tf: Timeframe) -> np.ndarray:
+def _spacing_in_bars(bars: pd.DataFrame, tf: Timeframe, session=None) -> np.ndarray:
     """Bar-to-bar spacing expressed in units of one bar.
 
     For daily and weekly series the spacing is counted in **business days**,
@@ -128,7 +128,16 @@ def _spacing_in_bars(bars: pd.DataFrame, tf: Timeframe) -> np.ndarray:
 
     Holidays still show up (a 2-day business gap over Christmas), which is
     the intended behaviour: they are real absences, just usually benign.
+
+    For intraday data a ``session`` (see :mod:`exchange.data.sessions`) is
+    required for the measure to mean anything: without it every overnight
+    break counts as a seven-bar gap, and the check degenerates into noise.
     """
+    if session is not None:
+        # Intraday with a session calendar: spacing is measured along the
+        # session grid, so an overnight break is one bar rather than seven.
+        spacing, _off = session.spacing(bars.index)
+        return spacing
     if tf.unit in {"d", "w"}:
         days = bars.index.tz_convert("UTC").normalize().to_numpy("datetime64[D]")
         steps = np.busday_count(days[:-1], days[1:]).astype(float)
@@ -138,7 +147,9 @@ def _spacing_in_bars(bars: pd.DataFrame, tf: Timeframe) -> np.ndarray:
     return (np.diff(_nanos(bars.index)) / 1e9) / tf.timedelta.total_seconds()
 
 
-def check_gaps(bars: pd.DataFrame, *, timeframe: Timeframe | None = None, tolerance: float = 1.5) -> Finding:
+def check_gaps(
+    bars: pd.DataFrame, *, timeframe: Timeframe | None = None, tolerance: float = 1.5, session=None
+) -> Finding:
     """Report spacing materially longer than one bar.
 
     Gaps are expected in any real series (holidays, session breaks), so this
@@ -149,22 +160,25 @@ def check_gaps(bars: pd.DataFrame, *, timeframe: Timeframe | None = None, tolera
     if len(bars) < 3:
         return _ok("gaps", "too few bars to assess spacing")
     tf = timeframe or infer_timeframe(bars.index)
-    spacing = _spacing_in_bars(bars, tf)
+    spacing = _spacing_in_bars(bars, tf, session)
+    unit = "session bar" if session is not None else f"{tf.label} bar"
     gaps = spacing > tolerance
     n = int(gaps.sum())
     if n == 0:
-        return _ok("gaps", f"no spacing above {tolerance}x the {tf.label} bar")
+        return _ok("gaps", f"no spacing above {tolerance}x one {unit}")
     largest = float(spacing.max())
     where = bars.index[1:][gaps][:5]
     return _fail(
         "gaps", Severity.WARNING,
-        f"{n} gap(s) longer than {tolerance}x one {tf.label} bar; largest is {largest:.1f} bars",
+        f"{n} gap(s) longer than {tolerance}x one {unit}; largest is {largest:.1f} bars",
         count=n, examples=where,
         details={"largest_gap_bars": largest, "gap_fraction": float(n / len(spacing))},
     )
 
 
-def check_missing_bars(bars: pd.DataFrame, *, timeframe: Timeframe | None = None) -> Finding:
+def check_missing_bars(
+    bars: pd.DataFrame, *, timeframe: Timeframe | None = None, session=None
+) -> Finding:
     """Bars absent from otherwise-dense stretches.
 
     Only short interior holes (2 to 5 bars) are counted: those look like a
@@ -173,7 +187,7 @@ def check_missing_bars(bars: pd.DataFrame, *, timeframe: Timeframe | None = None
     if len(bars) < 10:
         return _ok("missing_bars", "too few bars to assess coverage")
     tf = timeframe or infer_timeframe(bars.index)
-    spacing = _spacing_in_bars(bars, tf)
+    spacing = _spacing_in_bars(bars, tf, session)
     interior = (spacing > 1.0) & (spacing <= 5.0)
     holes = int(interior.sum())
     missing = int(np.round(spacing[interior] - 1.0).sum())
@@ -324,6 +338,35 @@ def check_staleness(bars: pd.DataFrame, *, max_run: int = 20) -> Finding:
     )
 
 
+def check_session_coverage(bars: pd.DataFrame, *, session=None) -> Finding:
+    """Bars timestamped outside the instrument's normal trading session.
+
+    Not automatically an error: exchanges hold exceptional sessions, and
+    this sample contains a few MOEX weekend ones. It *is* something a
+    researcher must know, because an intraday strategy evaluated across
+    them is evaluated in conditions that do not normally exist — and
+    because a large share usually means the session was inferred wrongly,
+    or that the source's timestamps are in a different timezone than
+    assumed.
+    """
+    if session is None:
+        return _ok("session_coverage", "no session calendar (daily or coarser series)")
+    _spacing, off = session.spacing(bars.index)
+    n = int(off.sum())
+    share = float(off.mean()) if len(off) else 0.0
+    detail = session.describe()
+    if n == 0:
+        return _ok("session_coverage", f"every bar is inside the normal session; {detail}")
+    severity = Severity.WARNING if share > 0.10 else Severity.INFO
+    finding = _fail(
+        "session_coverage", severity,
+        f"{n} bar(s) ({share:.2%}) fall outside the normal session; {detail}",
+        count=n, examples=bars.index[off][:5],
+        details={"off_session_fraction": share, "session": session.to_dict()},
+    )
+    return finding
+
+
 DEFAULT_CHECKS: tuple[Callable[[pd.DataFrame], Finding], ...] = (
     check_timezone,
     check_monotonic,
@@ -336,6 +379,7 @@ DEFAULT_CHECKS: tuple[Callable[[pd.DataFrame], Finding], ...] = (
     check_missing_bars,
     check_price_jumps,
     check_staleness,
+    check_session_coverage,
 )
 
 

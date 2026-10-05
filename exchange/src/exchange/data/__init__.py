@@ -34,6 +34,8 @@ from exchange.data.dataset import (
     save_dataset,
     verify_dataset_hash,
 )
+from exchange.data.moex import load_moex_algopack, moex_continuous, moex_dataset
+from exchange.data.prespliced import from_prespliced, splice_artefact
 from exchange.data.providers import (
     BarProvider,
     CsvBarProvider,
@@ -47,6 +49,12 @@ from exchange.data.providers import (
 )
 from exchange.data.quality import DataQualityReport, validate_bars
 from exchange.data.schema import OHLCV, assert_canonical, is_canonical, normalise_bars, to_exchange_time
+from exchange.data.sessions import (
+    SessionCalendar,
+    SessionSchedule,
+    infer_session,
+    session_from_hours,
+)
 from exchange.data.temporal import (
     LeakageFinding,
     PointInTimeSeries,
@@ -81,6 +89,8 @@ __all__ = [
     "RollEvent",
     "RollProvenance",
     "RootSpec",
+    "SessionCalendar",
+    "SessionSchedule",
     "Severity",
     "YahooBarProvider",
     "assert_canonical",
@@ -96,10 +106,15 @@ __all__ = [
     "detect_column_leakage",
     "estimate_last_trade_date",
     "fetch_panel",
+    "from_prespliced",
+    "infer_session",
     "is_canonical",
     "load_bars",
+    "load_moex_algopack",
     "make_dataset",
     "make_point_in_time",
+    "moex_continuous",
+    "moex_dataset",
     "n_days_before_expiration",
     "normalise_bars",
     "open_interest_roll",
@@ -108,7 +123,9 @@ __all__ = [
     "roll_gap_diagnostics",
     "run_all_checks",
     "save_dataset",
+    "session_from_hours",
     "shift_to_decision",
+    "splice_artefact",
     "to_exchange_time",
     "validate_bars",
     "verify_dataset_hash",
