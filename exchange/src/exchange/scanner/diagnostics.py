@@ -191,20 +191,40 @@ def partial_autocorrelation(bars: pd.DataFrame, *, lags: int = 10) -> Diagnostic
             pacf[k] = phi[k, k]
 
     se = 1.0 / np.sqrt(n)
-    significant = [int(k) for k in range(1, lags + 1) if abs(pacf[k]) > 1.96 * se]
-    strongest = int(np.argmax(np.abs(pacf[1:]))) + 1 if lags else 0
+    # This diagnostic tests `lags` hypotheses at once, so its own
+    # multiplicity has to be priced. Judging each lag at 1.96 SE and
+    # reporting "significant" if any fires gives a reading of MODERATE on
+    # roughly 40% of pure random walks at ten lags — measured, not
+    # estimated. The p-value of the largest |PACF| is therefore
+    # Bonferroni-adjusted over the lags examined before it is graded.
+    z = np.abs(pacf[1 : lags + 1]) / se if lags else np.zeros(0)
+    raw_p = 2.0 * sps.norm.sf(z) if lags else np.zeros(0)
+    adjusted_p = np.minimum(raw_p * lags, 1.0) if lags else np.zeros(0)
+    strongest = int(np.argmax(z)) + 1 if lags else 0
+    best_p = float(adjusted_p.min()) if lags else np.nan
+    significant = [
+        int(k) for k in range(1, lags + 1) if adjusted_p[k - 1] <= 0.05
+    ]
 
     return Diagnostic(
         name="partial_autocorrelation",
         value=float(pacf[strongest]) if strongest else np.nan,
-        evidence="MODERATE" if significant else "NONE",
+        p_value=best_p,
+        evidence=_evidence_from_p(best_p),
         interpretation=(
-            f"Significant partial autocorrelation at lag(s) {significant or 'none'}; "
-            f"strongest at lag {strongest} ({pacf[strongest]:+.3f})."
+            f"Strongest partial autocorrelation at lag {strongest} "
+            f"({pacf[strongest]:+.3f}), Bonferroni-adjusted p = {best_p:.3g} over {lags} lag(s); "
+            f"significant lag(s): {significant or 'none'}."
             if strongest else "No partial autocorrelation structure."
         ),
         falsified_by="The same lags failing to be significant on a held-out period.",
-        details={"pacf": pacf[1:].tolist(), "significant_lags": significant, "se": se},
+        details={
+            "pacf": pacf[1:].tolist(),
+            "significant_lags": significant,
+            "se": se,
+            "n_lags_tested": lags,
+            "raw_p_min": float(raw_p.min()) if lags else np.nan,
+        },
     )
 
 
@@ -248,11 +268,22 @@ def variance_ratio(bars: pd.DataFrame, *, q: int = 5, heteroskedastic: bool = Tr
 
     if heteroskedastic:
         # Lo-MacKinlay z*(q): robust to conditional heteroskedasticity.
+        #
+        #   delta(j) = sum_t (r_t - mu)^2 (r_{t-j} - mu)^2 / [sum_t (r_t - mu)^2]^2
+        #   theta    = sum_j [2(q-j)/q]^2 delta(j)
+        #
+        # delta(j) is already O(1/n) — its numerator grows like n and its
+        # denominator like n^2 — so there is no further n to apply. An extra
+        # factor of n here inflates the standard error by sqrt(n), which on
+        # 25,000 bars is a factor of 160: the test then reports "consistent
+        # with a random walk" for everything, including a series built to
+        # mean-revert. A validation test now pins the i.i.d. case against the
+        # homoskedastic formula, where the two must agree.
         theta = 0.0
         d2 = demeaned**2
         denom = float(np.sum(d2)) ** 2
         for j in range(1, q):
-            delta = float(np.sum(d2[j:] * d2[:-j])) * n / denom
+            delta = float(np.sum(d2[j:] * d2[:-j])) / denom
             theta += (2.0 * (q - j) / q) ** 2 * delta
         se = np.sqrt(theta) if theta > 0 else np.nan
     else:

@@ -17,6 +17,7 @@ from exchange.scanner.diagnostics import (
     autocorrelation,
     hurst_exponent,
     mean_reversion_half_life,
+    partial_autocorrelation,
     seasonality,
     structural_stability,
     tail_behaviour,
@@ -75,6 +76,37 @@ class TestDiagnostics:
         assert result.evidence in {"MODERATE", "STRONG"}
         assert 4.0 < result.value < 25.0
 
+    def test_the_robust_variance_ratio_matches_the_textbook_formula(self):
+        """Calibration against an analytic value, which caught a real bug.
+
+        For i.i.d. returns the heteroskedasticity-robust standard error must
+        converge to the homoskedastic one,
+        ``sqrt(2(2q-1)(q-1)/(3qn))``. An extra factor of n in the robust
+        delta inflated it by sqrt(n) — a factor of 160 on 25,000 bars — and
+        the test then called every series a random walk, including series
+        built to mean-revert. Only a comparison against a known value
+        detects that; asserting the direction of the point estimate does
+        not.
+        """
+        series = random_walk(n=10_000, seed=5)
+        for q in (2, 5, 10, 20):
+            robust = variance_ratio(series.bars, q=q, heteroskedastic=True)
+            homoskedastic = variance_ratio(series.bars, q=q, heteroskedastic=False)
+            se_robust = (robust.ci[1] - robust.value) / 1.96
+            se_homo = (homoskedastic.ci[1] - homoskedastic.value) / 1.96
+            assert se_robust == pytest.approx(se_homo, rel=0.05), q
+
+    def test_the_variance_ratio_has_power_on_the_controls(self):
+        """A test that cannot reject anything is not a test."""
+        reverting = variance_ratio(mean_reverting(n=3000, seed=13, half_life=8.0).bars, q=10)
+        trending = variance_ratio(momentum(n=3000, seed=17).bars, q=10)
+        assert reverting.p_value < 0.001 and reverting.value < 1.0
+        assert trending.p_value < 0.001 and trending.value > 1.0
+
+    def test_the_variance_ratio_does_not_reject_a_random_walk(self):
+        walk = variance_ratio(random_walk(n=3000, seed=19).bars, q=10)
+        assert walk.evidence in {"NONE", "WEAK"}
+
     def test_variance_ratio_below_one_for_mean_reversion(self):
         series = mean_reverting(n=2000, seed=13, half_life=8.0)
         assert variance_ratio(series.bars, q=10).value < 1.0
@@ -86,6 +118,25 @@ class TestDiagnostics:
     def test_variance_ratio_near_one_for_a_random_walk(self):
         series = random_walk(n=3000, seed=19)
         assert 0.8 < variance_ratio(series.bars, q=5).value < 1.2
+
+    def test_partial_autocorrelation_prices_its_own_multiplicity(self):
+        """Ten lags are ten hypotheses.
+
+        Judging each at 1.96 standard errors and reporting "significant" if
+        any fires graded 8 of 20 pure random walks as MODERATE. The
+        p-value of the largest coefficient is now Bonferroni-adjusted over
+        the lags examined.
+        """
+        gradings = [
+            partial_autocorrelation(random_walk(n=1500, seed=100 + s).bars).evidence
+            for s in range(20)
+        ]
+        assert sum(g in {"MODERATE", "STRONG"} for g in gradings) <= 2
+
+    def test_partial_autocorrelation_still_finds_real_structure(self):
+        assert partial_autocorrelation(momentum(n=2000, seed=17).bars).evidence in {
+            "MODERATE", "STRONG"
+        }
 
     def test_autocorrelation_detects_momentum(self):
         assert autocorrelation(momentum(n=2000, seed=23).bars).evidence != "NONE"
@@ -143,14 +194,22 @@ class TestFalsePositiveRate:
     would send a search after an artefact.
     """
 
+    # Matched as prefixes: the variance ratio reports one diagnostic per
+    # horizon ("variance_ratio_q10"), and an exact-name list silently
+    # excluded all of them — which is how a powerless variance-ratio test
+    # went unnoticed.
     EXPLOITABLE = (
         "autocorrelation",
         "partial_autocorrelation",
         "variance_ratio",
         "mean_reversion_half_life",
-        "seasonality_month",
+        "seasonality",
         "hurst_exponent",
     )
+
+    @classmethod
+    def _is_exploitable(cls, name: str) -> bool:
+        return any(name.startswith(prefix) for prefix in cls.EXPLOITABLE)
 
     @pytest.mark.slow
     @pytest.mark.control
@@ -159,7 +218,7 @@ class TestFalsePositiveRate:
         for seed in range(20):
             result = scan(random_walk(n=1500, seed=100 + seed).bars, symbol=f"RW{seed}")
             for name, diagnostic in result.diagnostics.items():
-                if name in self.EXPLOITABLE and diagnostic.evidence == "STRONG":
+                if self._is_exploitable(name) and diagnostic.evidence == "STRONG":
                     strong.append((seed, name, diagnostic.p_value))
         assert not strong, f"strong exploitable findings on pure noise: {strong}"
 
