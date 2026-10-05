@@ -159,7 +159,9 @@ def decide_verdict(hypothesis: Hypothesis, metrics: dict, stages) -> Verdict:
     best_year_share = _get(metrics, "best_year_return_share")
 
     gates = [
-        Gate("out-of-sample edge", _ge(oos_sharpe, 0.0),
+        # Strictly greater than zero, matching the stated requirement: a
+        # zero out-of-sample Sharpe is no evidence of an edge.
+        Gate("out-of-sample edge", _gt(oos_sharpe, 0.0),
              f"OOS Sharpe {_fmt(oos_sharpe)} (needs > 0)"),
         Gate("deflated Sharpe", _ge(dsr, 0.90),
              f"DSR {_fmt(dsr)} after {hypothesis.total_trials} trial(s) (needs >= 0.90)"),
