@@ -28,6 +28,8 @@ dependencies = [
 [project.optional-dependencies]
 parquet = ["pyarrow>=14.0"]
 plots = ["matplotlib>=3.8"]
+# Running the notebooks under notebooks/ and re-rendering their figures.
+notebooks = ["matplotlib>=3.8", "jupyterlab>=4.2", "nbformat>=5.10", "nbclient>=0.10", "ipykernel>=6.29"]
 yahoo = ["yfinance>=0.2.36"]
 dev = [
     "pytest>=8.0",
