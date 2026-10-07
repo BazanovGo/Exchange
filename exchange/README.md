@@ -153,6 +153,11 @@ uv run exchange controls               # the framework's own calibration
   must exist before it runs. It is not shipped.
 * [`docs/ROADMAP.md`](docs/ROADMAP.md) — what exists, what is deliberately
   absent, and what comes next.
+* [`docs/RESULTS_SEVEN_FAMILIES.md`](docs/RESULTS_SEVEN_FAMILIES.md) — the
+  first run on real data: seven strategy families on MOEX natural gas and
+  Brent, 125 configurations, every one rejected. Written in Russian, generated
+  from the pickles by
+  [`research/seven_families/`](research/seven_families/README.md).
 
 ## A caution
 

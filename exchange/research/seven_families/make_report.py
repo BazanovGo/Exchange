@@ -30,6 +30,64 @@ def label(key):
     fam, mkt = key.split("|")
     return f"{NAMES[fam]} · {mkt}"
 
+
+def N(x, digits=0):
+    """Целое как строка: markdown_table печатает строку через iterrows, а та
+    приводит всю строку к float64 и ломает форматирование счётчиков."""
+    if x is None or (isinstance(x, float) and not np.isfinite(x)):
+        return ""
+    return f"{x:,.{digits}f}"
+
+
+def pct(x, digits=1):
+    if x is None or not np.isfinite(float(x)):
+        return ""
+    return f"{float(x) * 100:.{digits}f}%"
+
+
+def esc(text):
+    """Вертикальная черта внутри ячейки разрывает Markdown-таблицу."""
+    return str(text).replace("|", " · ")
+
+
+GATES = {
+    "out-of-sample edge": "преимущество вне выборки",
+    "deflated Sharpe": "дефлированный Шарп",
+    "selection is informative": "отбор информативен (PBO)",
+    "purged cross-validation": "purged кросс-валидация",
+    "walk-forward": "walk-forward",
+    "bootstrap interval excludes zero": "бутстрэп-интервал не включает нуль",
+    "survives conservative costs": "выживает при консервативных издержках",
+    "enough out-of-sample trades": "достаточно сделок вне выборки",
+    "parameter plateau": "плато параметров",
+    "works across regimes": "работает в разных режимах",
+}
+CRIT = {
+    "oos_sharpe": "Шарп вне выборки отрицателен при базовых издержках",
+    "pbo": "PBO выше 0.5: отбор чаще выбирает конфигурацию, которая вне выборки хуже медианной",
+    "deflated_sharpe_ratio": "дефлированный Шарп ниже 0.90: после поправки на размер перебора "
+                             "вероятность положительного истинного Шарпа недостаточна",
+    "n_oos_trades": "меньше 30 сделок вне выборки: мастерство не отличить от удачи",
+    "stressed_sharpe": "обвал при стрессовых издержках: торговалось предположение об издержках, "
+                       "а не рынок",
+}
+
+
+def crit_ru(text):
+    """Критерий фреймворка по-русски: `выражение` + наблюдённое значение."""
+    head = text.split("—")[0].strip()
+    tail = text.split("—")[1].split("(")[0].strip() if "—" in text else ""
+    metric = head.strip("`").split()[0]
+    return f"{head} ({CRIT.get(metric, '')}); наблюдено {tail.replace('observed ', '')}"
+
+
+def share_or_na(x):
+    """cost_share теряет смысл, когда валовая прибыль близка к нулю."""
+    v = float(x)
+    if not np.isfinite(v) or abs(v) > 20:
+        return "н/д"
+    return f"{v:.3f}"
+
 L = []
 def w(line=""): L.append(line)
 
@@ -60,6 +118,28 @@ w("Отбор параметров — **только** на in-sample (60% ба
 w()
 
 # ------------------------------------------------- 2. полная статистика
+RULES = {
+    "1_tsmom": "знак доходности за `lookback` баров; long при положительном тренде, short при отрицательном",
+    "2_dual_ma": "знак разности SMA(`fast`) − SMA(`slow`); long при fast > slow",
+    "3_breakout": "пробой `entry`-дневного экстремума входит, обратный `exit_`-дневный выводит в нуль; каналы по барам строго до текущего",
+    "4_cross_sectional": "центрированный ранг доходности за `lookback`; long лучший, short худший (на двух активах — спред NG/BR)",
+    "5_carry": "знак сглаженного годового roll yield с порогом `threshold`; long бэквордация, short контанго",
+    "6_portfolio_ma": "тот же dual MA, применённый к каждой ноге портфеля, по половине риска на ногу",
+    "7_mom_reversal": "0.5·знак(моментум `momentum`) − 0.5·знак(доходность за `reversal`)",
+}
+w("### Правила и сетки параметров")
+w()
+from run_all import GRIDS
+rules = []
+for fam in sorted(RULES):
+    grid = GRIDS[fam]
+    space = {k: sorted({g[k] for g in grid}) for k in grid[0]}
+    rules.append({"семейство": NAMES[fam], "правило": RULES[fam],
+                  "сетка": "; ".join(f"{k} ∈ {v}" for k, v in space.items()),
+                  "конфигураций": len(grid)})
+w(markdown_table(pd.DataFrame(rules).set_index("семейство"), digits=0))
+w()
+
 w("## 2. Полная статистика по каждому исходу (out-of-sample)")
 w()
 perf = []
@@ -71,15 +151,31 @@ for key, r in T.iterrows():
         "деградация": r["sharpe_ratio"] - r["is_sharpe"],
         "Sortino": r["sortino_ratio"], "CAGR": r["cagr"], "волат.": r["annualised_volatility"],
         "maxDD": r["max_drawdown"], "Calmar": r["calmar"],
-        "итог. дох.": e["total_return"],
-        "сделок": int(r["n_trades"]), "win rate": r["win_rate"],
-        "profit factor": r["profit_factor"], "издержки/грязная": r["cost_share"],
+        "итог. дох.": pct(e["total_return"]),
+        "сделок": N(r["n_trades"]), "win rate": pct(r["win_rate"]),
+        "profit factor": r["profit_factor"],
+        "издержки, % капитала": pct(r["total_costs"] / 1_000_000.0),
+        "издержки / валовая": share_or_na(r["cost_share"]),
     })
 w(markdown_table(pd.DataFrame(perf).set_index("ячейка"), digits=3))
 w()
-w("`деградация` = OOS Sharpe − IS Sharpe. `издержки/грязная` — доля транзакционных "
-  "издержек в валовом результате; значение выше 1 означает, что издержки съели всю "
-  "валовую прибыль и больше.")
+w("`деградация` = OOS Sharpe − IS Sharpe. `издержки, % капитала` — суммарные "
+  "транзакционные издержки OOS-периода, отнесённые к капиталу в 1 000 000. "
+  "`издержки / валовая` — их доля в валовом результате; там, где валовая прибыль "
+  "близка к нулю, отношение теряет смысл и показано как `н/д`. `win rate` и "
+  "`profit factor` не определены для панельных семейств (4 и 6): их P&L — сумма двух "
+  "ног, и понятие отдельной сделки к нему не применяется.")
+w()
+no_is = T[T["is_sharpe"] < 0]
+if len(no_is):
+    w("**Важное замечание о " + ", ".join(label(k) for k in no_is.index) + ".** "
+      "У " + ("этой ячейки" if len(no_is) == 1 else "этих ячеек") + " лучшая по "
+      "in-sample конфигурация имела **отрицательный** Шарп "
+      f"({', '.join(f'{v:+.2f}' for v in no_is['is_sharpe'])}): вся сетка была убыточной "
+      "в выборке, и отбор лишь выбрал наименее плохую. Положительный OOS-результат такой "
+      "ячейки не подтверждает гипотезу — подтверждать было нечего. Его следует читать "
+      "как «эффект не был найден в выборке и появился вне её», что при PBO "
+      f"{no_is['pbo'].max():.2f} означает шум, а не открытие.")
 w()
 
 w("### Лестница издержек и задержки")
@@ -91,7 +187,7 @@ for key, r in T.iterrows():
         "0.5x оптимист.": r["sharpe_optimistic"], "1x база": r["sharpe_ratio"],
         "2x консерв.": r["sharpe_conservative"], "3x стресс": r["sharpe_stressed"],
         "+1 бар задержки": r["sharpe_latency1"],
-        "издержки, ₽-экв.": r["total_costs"],
+        "издержки, % капитала": pct(r["total_costs"] / 1_000_000.0),
     })
 w(markdown_table(pd.DataFrame(cost).set_index("ячейка"), digits=3))
 w()
@@ -115,6 +211,10 @@ for key, r in T.iterrows():
         "доля лучшего года": e["best_year_share"],
     })
 w(markdown_table(pd.DataFrame(val).set_index("ячейка"), digits=3))
+w()
+w("`доля лучшего года` — вклад самого удачного календарного года в сумму годовых "
+  "доходностей; значение выше 1 возникает, когда другие годы отрицательны, и пусто, "
+  "когда сумма неположительна — тогда понятие доли теряет смысл.")
 w()
 w("`DSR программа` — дефлированный Шарп, заряженный **всеми " f"{TOTAL}" "** конфигурациями "
   "программы, а не только сеткой своего семейства. `E[max SR] нуль` — ожидаемый максимум "
@@ -177,7 +277,7 @@ w()
 sn = []
 for gname, s in Fn["snoop"].items():
     sn.append({"группа": gname, "моделей": s["rc"]["n_models"], "наблюдений": s["rc"]["n_observations"],
-               "лучшая": s["rc"]["best_model"], "RC статистика": s["rc"]["statistic"],
+               "лучшая": esc(s["rc"]["best_model"]), "RC статистика": s["rc"]["statistic"],
                "RC p": s["rc"]["p_value"], "SPA статистика": s["spa"]["statistic"],
                "SPA p": s["spa"]["p_value"], "блок": s["rc"]["block_length"]})
 w(markdown_table(pd.DataFrame(sn).set_index("группа"), digits=4))
@@ -193,14 +293,15 @@ st = []
 for _, r in streaks.iterrows():
     lab = r["label"]
     st.append({"ячейка": label(lab) if "|" in lab else lab,
-               "месяцев OOS": int(r["n_months"]), "убыточных": int(r["neg_months"]),
-               "доля убыт.": r["share_neg"], "серий": int(r["n_runs"]),
-               "сред. серия": r["mean_streak"], "макс серия": int(r["max_streak"]),
-               "нуль: сред. макс": r["null_mean_max"], "нуль: q95": r["null_q95_max"],
-               "p(макс ≥ набл.)": r["p_boot_ge_obs"],
-               "P(≥3 подряд)": r["p_markov_ge_3"], "P(≥4)": r["p_markov_ge_4"],
-               "P(≥6)": r["p_markov_ge_6"],
-               "худший мес.": r["worst_month"], "лучший мес.": r["best_month"]})
+               "месяцев OOS": N(r["n_months"]), "убыточных": N(r["neg_months"]),
+               "доля убыт.": pct(r["share_neg"], 0), "серий": N(r["n_runs"]),
+               "сред. серия": f"{r['mean_streak']:.1f}", "макс серия": N(r["max_streak"]),
+               "нуль: сред. макс": f"{r['null_mean_max']:.1f}",
+               "нуль: q95": N(r["null_q95_max"]),
+               "p(макс ≥ набл.)": f"{r['p_boot_ge_obs']:.2f}",
+               "P(≥3 подряд)": pct(r["p_markov_ge_3"], 0), "P(≥4)": pct(r["p_markov_ge_4"], 0),
+               "P(≥6)": pct(r["p_markov_ge_6"], 0),
+               "худший мес.": pct(r["worst_month"]), "лучший мес.": pct(r["best_month"])})
 w(markdown_table(pd.DataFrame(st).set_index("ячейка"), digits=3))
 w()
 w("`нуль` — блочный бутстрэп того же ряда с обнулённым средним (сохраняет "
@@ -221,8 +322,8 @@ for key, v in verdicts.items():
     unknown = [g["gate"] for g in v["gates"] if g["passed"] is None]
     vr.append({"ячейка": label(key), "вердикт": v["label"],
                "шлюзов пройдено": f"{len(v['gates']) - len(failed) - len(unknown)}/{len(v['gates'])}",
-               "фальсифицировано критериев": len(v["falsified_by"]),
-               "провалено": ", ".join(failed) or "—"})
+               "критериев фальсификации сработало": N(len(v["falsified_by"])),
+               "провалено": ", ".join(GATES.get(g, g) for g in failed) or "—"})
 w(markdown_table(pd.DataFrame(vr).set_index("ячейка"), digits=2))
 w()
 w("Шлюзы конъюнктивны: ни один показатель не может «перевесить» провал другого. "
@@ -237,7 +338,7 @@ for key, v in verdicts.items():
     w(f"**{label(key)}** — {v['label']}")
     w()
     for f in v["falsified_by"]:
-        w(f"- {f}")
+        w(f"- {crit_ru(f)}")
     w()
 
 # ------------------------------------------------- 8. финальный подсчёт
@@ -287,11 +388,14 @@ w(f"- Лучший результат по дефлированному Шарп
   f"результат объясняется размером перебора.")
 w(f"- Порог шлюза — DSR ≥ 0.90; до него не дошла ни одна ячейка "
   f"(максимум {best_dsr:.3f}).")
+below = int((T["is_sharpe"] <= T["expected_max_sr_null"]).sum())
 w(f"- Ожидаемый максимум годового Шарпа при нулевой истинной доходности и таком "
   f"размере поиска: от {T['expected_max_sr_null'].min():.2f} до "
-  f"{T['expected_max_sr_null'].max():.2f} в зависимости от длины ряда ячейки. "
-  f"Наблюдённые IS-Шарпы ({T['is_sharpe'].min():.2f}…{T['is_sharpe'].max():.2f}) "
-  f"лежат внутри этого диапазона.")
+  f"{T['expected_max_sr_null'].max():.2f} — величина зависит от длины ряда ячейки. "
+  f"У **{below} из {len(T)}** ячеек наблюдённый in-sample Шарп не превышает этот порог: "
+  f"их лучший результат по сетке в точности таков, какой даёт перебор на шуме. "
+  f"У остальных {len(T) - below} превышение есть, но оно не доживает до OOS: "
+  f"максимальный OOS-Шарп среди них {T.loc[T['is_sharpe'] > T['expected_max_sr_null'], 'sharpe_ratio'].max():+.2f}.")
 w()
 w("**Негативные исходы подряд.**")
 w()
@@ -350,8 +454,12 @@ w(f"2. **На NG тех же эффектов нет.** {ng_neg} из {len(ng)} 
   f"отрицательный OOS Sharpe, PBO доходит до {ng['pbo'].max():.2f}, walk-forward "
   f"отрицателен в {int((ng['wf_efficiency'] < 0).sum())} из {len(ng)}. Газ на этом "
   f"периоде — не «тот же тренд, но слабее», а другой режим: сезонность, роллы с "
-  f"медианным гэпом +384 б.п. и издержки, составляющие "
-  f"{ng['cost_share'].min():.0%}…{ng['cost_share'].max():.0%} валового результата.")
+  f"медианным гэпом +384 б.п. и издержки, которые в "
+  f"{int((ng['cost_share'].abs() > 20).sum())} ячейках из {len(ng)} съедают "
+  f"всю валовую прибыль целиком (поэтому отношение «издержки / валовая» в таблице "
+  f"раздела 2 там не определено): в абсолюте это "
+  f"{ng['total_costs'].min()/1e6:.1%}…{ng['total_costs'].max()/1e6:.1%} капитала "
+  f"за {int(ng['n_months_oos'].max())} месяцев.")
 w("3. **Запас прочности отсутствует везде.** Даже лучший результат "
    f"({label(best_key)}, DSR = {best_dsr:.2f}) не достаёт до порога 0.90, а 95%-й "
    "бутстрэп-интервал на Шарп включает нуль во всех двенадцати ячейках. Семь лет "
