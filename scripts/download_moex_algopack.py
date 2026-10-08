@@ -1,9 +1,10 @@
 """Download continuous futures candles from MOEX AlgoPack (apim.moex.com).
 
 Builds the series stored in ``data/raw/moex_algopack``: contracts are glued
-by nearest expiry (a candle belongs to a contract up to and including its
-last trading day, the next contract starts the following day), prices are
-not adjusted. 1m and 60m candles come from the API, 5m are aggregated from 1m.
+by nearest expiry (a contract is held through its last trading day, the next
+one starts the following day, or right after the last candle if the contract
+stopped trading earlier), prices are not adjusted. 1m and 60m candles come
+from the API, 5m are aggregated from 1m.
 
     MOEX_ALGOPACK_TOKEN=... python scripts/download_moex_algopack.py \
         --assets GOLD SILV --ca-bundle russian_trusted_root_ca.pem
@@ -134,6 +135,17 @@ def fetch(client: Client, secid: str, interval: int, lo: date, hi: date) -> list
             for r in rows if lo_s <= r["begin"][:10] <= hi_s]
 
 
+def fetch_all(client: Client, jobs: list[tuple], workers: int, label: str = "") -> dict[tuple, list]:
+    results = {}
+    with ThreadPoolExecutor(workers) as pool:
+        futures = {pool.submit(fetch, client, *job): job for job in jobs}
+        for i, fut in enumerate(as_completed(futures), 1):
+            results[futures[fut]] = fut.result()
+            if label and (i % 50 == 0 or i == len(jobs)):
+                print(f"  {label}: {i}/{len(jobs)} chunks", flush=True)
+    return results
+
+
 def aggregate_5m(rows: list[list]) -> list[list]:
     out: list[list] = []
     for secid, begin, _, o, h, l, c, v, val in rows:
@@ -173,16 +185,28 @@ def download_asset(client: Client, asset: str, start: date, till: date,
     spans = windows(contracts(client, asset, workers), start, till)
     jobs = [(secid, interval, lo, hi)
             for secid, a, b in spans for lo, hi in month_chunks(a, b) for interval in (1, 60)]
-    results: dict[tuple, list] = {}
-    with ThreadPoolExecutor(workers) as pool:
-        futures = {pool.submit(fetch, client, *job): job for job in jobs}
-        for i, fut in enumerate(as_completed(futures), 1):
-            results[futures[fut]] = fut.result()
-            if i % 50 == 0 or i == len(jobs):
-                print(f"  {asset}: {i}/{len(jobs)} chunks", flush=True)
-    series = {1: [], 60: []}
+    results = fetch_all(client, jobs, workers, asset)
+    candles: dict[tuple, list] = defaultdict(list)
     for job in jobs:
-        series[job[1]] += results[job]
+        candles[job[:2]] += results[job]
+
+    # A contract may stop trading before its last trading day: the next one
+    # then takes over the day after the last candle, not after the expiry.
+    last = None
+    for secid, lo, _ in spans:
+        if last and last + timedelta(days=1) < lo:
+            gap = [(secid, interval, a, b) for a, b in month_chunks(last + timedelta(days=1),
+                                                                    lo - timedelta(days=1))
+                   for interval in (1, 60)]
+            extra = fetch_all(client, gap, workers)
+            for interval in (1, 60):
+                candles[secid, interval] = [r for job in gap if job[1] == interval
+                                            for r in extra[job]] + candles[secid, interval]
+        if candles[secid, 1]:
+            last = date.fromisoformat(candles[secid, 1][-1][1][:10])
+
+    series = {interval: [r for secid, _, _ in spans for r in candles[secid, interval]]
+              for interval in (1, 60)}
     for rows in series.values():
         rows.sort(key=lambda r: r[1])
     written = {}
