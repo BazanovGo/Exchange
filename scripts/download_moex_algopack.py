@@ -246,7 +246,7 @@ def main() -> int:
         print(f"{asset}: {sum(v for k, v in written.items() if '/1m/' in k)} 1m candles", flush=True)
     manifest["till"] = args.till
     manifest["files"] = dict(sorted(manifest["files"].items()))
-    manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+    manifest_path.write_text(json.dumps(manifest, indent=2))
     return 0
 
 
