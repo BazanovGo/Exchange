@@ -93,7 +93,9 @@ def contracts(client: Client, asset: str, workers: int) -> list[dict]:
             if desc.get("SHORTNAME", "").upper() == name.upper() and name.upper() not in known:
                 known.add(name.upper())
                 rows.append({"secid": desc["SECID"], "name": name,
-                             "start_date": desc["FRSTTRADE"], "expiration_date": desc["LSTTRADE"]})
+                             "start_date": desc["FRSTTRADE"],
+                             # contracts of 2006-2007 carry only the delivery date
+                             "expiration_date": desc.get("LSTTRADE") or desc["LSTDELDATE"]})
     return sorted(rows, key=lambda r: r["expiration_date"])
 
 
