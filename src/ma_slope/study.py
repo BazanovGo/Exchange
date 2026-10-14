@@ -262,11 +262,47 @@ def cross_market(grids: dict[str, GridResult]) -> dict:
         idx = A.best(ga.score)
         for b, gb in grids.items():
             transfer.loc[a, b] = gb.t_oos[idx]
+    # Honest cross-market selection: in-sample only, the weakest instrument's plateau t.
+    worst_is = np.min(np.stack([np.where(g.valid, g.score, np.nan) for g in grids.values()]), axis=0)
+    is_rows = []
+    for flat in np.argsort(np.nan_to_num(worst_is, nan=-np.inf).ravel())[::-1][:30]:
+        idx = np.unravel_index(flat, first.shape)
+        r = A.labels(first.meta, idx)
+        r["min_is_plateau_t"] = float(worst_is[idx])
+        for t, g in grids.items():
+            r[f"{t}_is_t"], r[f"{t}_oos_t"] = float(g.t_is[idx]), float(g.t_oos[idx])
+        oos = np.array([r[f"{t}_oos_t"] for t in tick])
+        r["oos_positive_instruments"] = int(np.sum(oos > 0))
+        r["oos_mean_t"] = float(np.nanmean(oos))
+        is_rows.append(r)
+    is_all_pos = np.all(np.stack([(g.t_is > 0) & g.valid for g in grids.values()]), axis=0) & common
+    given = {t: float(np.mean(g.t_oos[is_all_pos] > 0)) if is_all_pos.any() else np.nan
+             for t, g in grids.items()}
     agree = {"configs_common": int(common.sum()), "positive_rate": dict(zip(tick, map(float, p), strict=True)),
+             "is_positive_everywhere": int(is_all_pos.sum()),
+             "oos_positive_rate_given_is_positive_everywhere": given,
              "all_positive_oos": int((counts == len(tick)).sum()),
              "all_positive_oos_expected": float(null[-1] * counts.size),
              "all_positive_is_and_oos": int((n_both == len(tick)).sum())}
-    return {"hist": hist, "robust": pd.DataFrame(rows), "transfer": transfer, "agree": agree}
+    return {"hist": hist, "robust": pd.DataFrame(rows), "is_selected": pd.DataFrame(is_rows), "transfer": transfer,
+            "agree": agree}
+
+
+def rerun_cross_market(write=print) -> None:
+    """Recompute only the cross-market part of the stage-1 analysis pickle."""
+    import pickle
+
+    path = RAW / "analysis_stage1.pkl"
+    part = pickle.load(open(path, "rb"))
+    grids = {}
+    for t in INFERENCE:
+        write(f"load stage1 {t}")
+        g = GridResult(t, "stage1")
+        g.stats = g.years = None
+        grids[t] = g
+    part["cross_market"] = cross_market(grids)
+    with open(path, "wb") as f:
+        pickle.dump(part, f)
 
 
 def slope_tables() -> pd.DataFrame:
@@ -366,6 +402,9 @@ def finalize(write=print) -> dict:
     pd.DataFrame(p1["pbo"] + p3["pbo"]).to_csv(TABLES / "pbo.csv", index=False)
     cm["hist"].to_csv(TABLES / "cross_market_counts.csv", index=False)
     cm["robust"].to_csv(TABLES / "cross_market_robust_configs.csv", index=False)
+    cm["is_selected"].to_csv(TABLES / "cross_market_is_selected.csv", index=False)
+    if len(wf):
+        wf_summary(wf).to_csv(TABLES / "walk_forward_summary.csv", index=False)
     cm["transfer"].to_csv(TABLES / "cross_market_transfer.csv")
     if p3["monthly"]:
         pd.concat(p3["monthly"]).to_csv(TABLES / "finalist_monthly_pnl.csv", index=False)
@@ -383,6 +422,29 @@ def finalize(write=print) -> dict:
             "cross_market": cm["agree"], "split_times": {t: str(v) for t, v in p3["split_times"].items()}}
     (TABLES / "summary.json").write_text(json.dumps(info, indent=2, default=float))
     return info
+
+
+def wf_summary(wf: pd.DataFrame) -> pd.DataFrame:
+    """Pooled out-of-sample result of the walk-forward test years.
+
+    The test-year sum of squares is recovered from its t, mean and count, so
+    the pooled t covers every walk-forward trade.
+    """
+    w = wf.copy()
+    n, s, t = w["test_trades"], w["test_pnl"], w["test_t"]
+    mean = s / n
+    with np.errstate(invalid="ignore", divide="ignore"):
+        var = (mean * np.sqrt(n) / t) ** 2
+    w["test_sum_sq"] = np.where(np.isfinite(var), (n - 1) * var + n * mean ** 2, np.nan)
+    rows = []
+    for (ticker, stage, scope), g in w.groupby(["ticker", "stage", "scope"]):
+        ok = g["test_sum_sq"].notna()
+        tt = A.t_stat(g.loc[ok, "test_trades"].sum(), g.loc[ok, "test_pnl"].sum(), g.loc[ok, "test_sum_sq"].sum())
+        rows.append({"ticker": ticker, "stage": stage, "scope": scope, "test_years": len(g),
+                     "positive_years": int((g["test_pnl"] > 0).sum()), "test_pnl": float(g["test_pnl"].sum()),
+                     "test_trades": float(g["test_trades"].sum()), "pooled_t": float(tt),
+                     "pooled_p": A.p_value(float(tt), float(g["test_trades"].sum()))})
+    return pd.DataFrame(rows)
 
 
 def run(write=print) -> dict:
