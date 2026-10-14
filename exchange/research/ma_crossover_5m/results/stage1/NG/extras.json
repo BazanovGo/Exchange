@@ -1,0 +1,139 @@
+{
+ "tick_usd": 0.1,
+ "costs": {
+  "0.0": {
+   "share_pos_is": 0.8532494976310308,
+   "share_pos_oos": 0.9178180249064395,
+   "share_pos_both": 0.8227432571944767,
+   "median_is": 562.5,
+   "median_oos": 293.70001220703125,
+   "best_is_config": 1233232,
+   "best_is_net": 1969.699951171875,
+   "best_is_oos_net": 822.7000122070312,
+   "top1pct_mean_oos_net": 464.6202697753906,
+   "top1pct_share_pos_oos": 0.9990205962840271,
+   "by_exit": {
+    "A_fast_cross": {
+     "config": 1014089,
+     "is_net": 1452.4000244140625,
+     "oos_net": 181.8000030517578,
+     "share_pos_is": 0.7706668371955828,
+     "share_pos_oos": 0.8931140884538097
+    },
+    "B_slow_flip": {
+     "config": 1233232,
+     "is_net": 1969.699951171875,
+     "oos_net": 822.7000122070312,
+     "share_pos_is": 0.9358321580664786,
+     "share_pos_oos": 0.9425219613590694
+    }
+   }
+  },
+  "0.5": {
+   "share_pos_is": 0.7387738970927125,
+   "share_pos_oos": 0.7110102340394152,
+   "share_pos_both": 0.6353544466567115,
+   "median_is": 374.75,
+   "median_oos": 152.39999389648438,
+   "best_is_config": 1233232,
+   "best_is_net": 1839.699951171875,
+   "best_is_oos_net": 714.6500244140625,
+   "top1pct_mean_oos_net": 402.8187255859375,
+   "top1pct_share_pos_oos": 0.9949301454702578,
+   "by_exit": {
+    "A_fast_cross": {
+     "config": 1014089,
+     "is_net": 1306.9500732421875,
+     "oos_net": 65.5999984741211,
+     "share_pos_is": 0.5606345519237506,
+     "share_pos_oos": 0.5184666685102225
+    },
+    "B_slow_flip": {
+     "config": 1233232,
+     "is_net": 1839.699951171875,
+     "oos_net": 714.6500244140625,
+     "share_pos_is": 0.9169132422616744,
+     "share_pos_oos": 0.9035537995686079
+    }
+   }
+  },
+  "1.0": {
+   "share_pos_is": 0.605329835186107,
+   "share_pos_oos": 0.5397415910808768,
+   "share_pos_both": 0.471308509853806,
+   "median_is": 191.0,
+   "median_oos": 37.89999771118164,
+   "best_is_config": 1901201,
+   "best_is_net": 1738.300048828125,
+   "best_is_oos_net": 332.3999938964844,
+   "top1pct_mean_oos_net": 346.89288330078125,
+   "top1pct_share_pos_oos": 0.9820826731960248,
+   "by_exit": {
+    "A_fast_cross": {
+     "config": 1014089,
+     "is_net": 1161.5,
+     "oos_net": -50.600006103515625,
+     "share_pos_is": 0.31341601681322934,
+     "share_pos_oos": 0.2238387902586509
+    },
+    "B_slow_flip": {
+     "config": 1901201,
+     "is_net": 1738.300048828125,
+     "oos_net": 332.3999938964844,
+     "share_pos_is": 0.8972436535589846,
+     "share_pos_oos": 0.8556443919031027
+    }
+   }
+  },
+  "2.0": {
+   "share_pos_is": 0.45523788783806207,
+   "share_pos_oos": 0.38566410642847926,
+   "share_pos_both": 0.35638008590970266,
+   "median_is": -162.29998779296875,
+   "median_oos": -199.29998779296875,
+   "best_is_config": 1901201,
+   "best_is_net": 1658.300048828125,
+   "best_is_oos_net": 261.20001220703125,
+   "top1pct_mean_oos_net": 247.22793579101562,
+   "top1pct_share_pos_oos": 0.9450381679389313,
+   "by_exit": {
+    "A_fast_cross": {
+     "config": 1014089,
+     "is_net": 870.6000366210938,
+     "oos_net": -283.0,
+     "share_pos_is": 0.05136031377320576,
+     "share_pos_oos": 0.030547720443190825
+    },
+    "B_slow_flip": {
+     "config": 1901201,
+     "is_net": 1658.300048828125,
+     "oos_net": 261.20001220703125,
+     "share_pos_is": 0.8591154619029183,
+     "share_pos_oos": 0.7407804924137676
+    }
+   }
+  }
+ },
+ "walk_forward_vs_average_config": {
+  "pnl": {
+   "wf_total": 143.20000656694174,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": -459.3007959152632,
+   "excess_t": -1.230180522546216
+  },
+  "sharpe": {
+   "wf_total": 711.7999816536903,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": 109.2991791714855,
+   "excess_t": 0.35533648810648616
+  },
+  "plateau": {
+   "wf_total": 688.7000141143799,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": 86.19921163217502,
+   "excess_t": 0.3505032099535338
+  }
+ },
+ "monthly_ac1_median": -0.050225132079703375,
+ "monthly_ac1_p90": 0.11674420571940769
+}

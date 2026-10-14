@@ -1,0 +1,35 @@
+{
+ "ticker": "NG",
+ "A_pct_spearman_settings_is_oos": 0.20900562851782367,
+ "A_pct_neutral_drift_abs_mean": 0.04186346144357435,
+ "A_pct_reference_row": {
+  "median_sharpe_is": 0.10979011654853821,
+  "median_sharpe_oos": 0.4576236605644226,
+  "share_pos_oos": 0.7527434842249657
+ },
+ "B_atr_spearman_settings_is_oos": 0.6576470930467363,
+ "B_atr_neutral_drift_abs_mean": 0.017590611942838008,
+ "B_atr_reference_row": {
+  "median_sharpe_is": 0.13546571135520935,
+  "median_sharpe_oos": 0.4817764461040497,
+  "share_pos_oos": 0.7378257887517147
+ },
+ "best": {
+  "A_pct": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "B_atr": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  }
+ }
+}

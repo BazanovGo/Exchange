@@ -1,0 +1,35 @@
+{
+ "ticker": "BR",
+ "A_pct_spearman_settings_is_oos": 0.80187617260788,
+ "A_pct_neutral_drift_abs_mean": 0.014937501041869666,
+ "A_pct_reference_row": {
+  "median_sharpe_is": -0.12904773652553558,
+  "median_sharpe_oos": 0.05595632269978523,
+  "share_pos_oos": 0.5305212620027435
+ },
+ "B_atr_spearman_settings_is_oos": 0.7293893939935364,
+ "B_atr_neutral_drift_abs_mean": 0.0023835891312082133,
+ "B_atr_reference_row": {
+  "median_sharpe_is": -0.07851511240005493,
+  "median_sharpe_oos": 0.03885876387357712,
+  "share_pos_oos": 0.5180041152263375
+ },
+ "best": {
+  "A_pct": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14,
+   "median_sharpe_is": 0.2720174193382263,
+   "median_sharpe_oos": 0.5325309038162231,
+   "setting": 39
+  },
+  "B_atr": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28,
+   "median_sharpe_is": 0.326903760433197,
+   "median_sharpe_oos": 0.301621675491333,
+   "setting": 194
+  }
+ }
+}

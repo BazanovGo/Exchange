@@ -1,0 +1,21 @@
+{
+ "spearman_sharpe_m_is_NG_vs_BR": 0.579381395700294,
+ "spearman_sharpe_m_oos_NG_vs_BR": 0.14393656304551927,
+ "spearman_plateau_sharpe_is_NG_vs_BR": 0.6125255762923499,
+ "share_pos_is_NG": 0.8898590601552274,
+ "share_pos_is_BR": 0.8267789161735155,
+ "share_pos_is_both": 0.810603441918773,
+ "share_pos_is_both_if_independent": 0.735716709302322,
+ "share_pos_oos_NG": 0.8419496524897222,
+ "share_pos_oos_BR": 0.7188214377892078,
+ "share_pos_oos_both": 0.6357375606068986,
+ "share_pos_oos_both_if_independent": 0.605211459748786,
+ "n_pos_all_four": 1940240,
+ "n_pos_is_both": 2814052,
+ "share_oos_both_given_is_both": 0.6894826392689261,
+ "share_oos_both_unconditional": 0.6357375606068986,
+ "families_spearman_is": 0.6824853307611929,
+ "families_spearman_oos": -0.27817699541837476,
+ "candidates": 25,
+ "candidates_oos_positive_both": 25
+}

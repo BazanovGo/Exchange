@@ -158,6 +158,14 @@ uv run exchange controls               # the framework's own calibration
   Brent, 125 configurations, every one rejected. Written in Russian, generated
   from the pickles by
   [`research/seven_families/`](research/seven_families/README.md).
+* [`docs/RESULTS_MA_CROSSOVER_5M.md`](docs/RESULTS_MA_CROSSOVER_5M.md) — a
+  price/moving-average crossover with a slow-MA slope filter on 5-minute NG
+  and BR: the full 3,471,552-configuration grid per instrument, run twice,
+  with walk-forward, PBO, Reality Check/SPA and a path-level null test. A
+  real intraday regularity at zero cost; no tradable edge once costs and the
+  single-path nature of the evidence are accounted for. In Russian, generated
+  by [`research/ma_crossover_5m/`](research/ma_crossover_5m/README.md); charts
+  in `notebooks/03_ma_crossover_5m.ipynb`.
 
 ## A caution
 
