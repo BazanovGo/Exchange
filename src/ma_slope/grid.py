@@ -51,12 +51,25 @@ BASELINE = (Slope(0, 10, 0.02), Slope(1, 10, 0.25, 14))
 
 # Stage 2: slope settings swept on a log-spaced period lattice. eps = 0 makes
 # both methods identical (sign of the change), so it is listed once, under pct.
-K_GRID = (1, 3, 5, 10, 20, 40)
 EPS_PCT = (0.0, 0.005, 0.01, 0.02, 0.05, 0.1)
 ATR_GRID = (14, 100)
 EPS_ATR = (0.05, 0.1, 0.25, 0.5, 1.0)
-SLOPE_GRID = tuple([Slope(0, k, e) for k in K_GRID for e in EPS_PCT]
-                   + [Slope(1, k, e, a) for k in K_GRID for a in ATR_GRID for e in EPS_ATR])
+
+
+def _slopes(ks):
+    return tuple([Slope(0, k, e) for k in ks for e in EPS_PCT]
+                 + [Slope(1, k, e, a) for k in ks for a in ATR_GRID for e in EPS_ATR])
+
+
+# The first sweep (k up to 40) put most optima on its upper edge, so it was
+# extended to k = 80, 160 (stage 2b); the extension is appended, keeping the
+# indices of the first 96 settings.
+K_GRID_BASE = (1, 3, 5, 10, 20, 40)
+K_GRID_EXT = (80, 160)
+K_GRID = K_GRID_BASE + K_GRID_EXT
+SLOPE_GRID_BASE = _slopes(K_GRID_BASE)
+SLOPE_GRID_EXT = _slopes(K_GRID_EXT)
+SLOPE_GRID = SLOPE_GRID_BASE + SLOPE_GRID_EXT
 FAST_LATTICE = (2, 3, 4, 5, 6, 8, 10, 13, 16, 20, 25, 32, 40, 50, 63, 79, 99)
 SLOW_LATTICE = (5, 7, 10, 14, 20, 28, 40, 56, 80, 113, 160, 226, 250)
 

@@ -20,7 +20,17 @@ import pandas as pd  # noqa: E402
 
 from src.ma_slope.analysis import GROUP, MIN_TRADES_IS, t_stat  # noqa: E402
 from src.ma_slope.data import TICKERS, load_instrument  # noqa: E402
-from src.ma_slope.grid import BASELINE, FAST_LATTICE, SLOPE_GRID, SLOW_LATTICE, build_fast, run_grid, run_selected  # noqa: E402
+from src.ma_slope.grid import (  # noqa: E402
+    BASELINE,
+    FAST_LATTICE,
+    SLOPE_GRID,
+    SLOPE_GRID_BASE,
+    SLOPE_GRID_EXT,
+    SLOW_LATTICE,
+    build_fast,
+    run_grid,
+    run_selected,
+)
 from src.ma_slope.kernel import S_N, S_PNL, S_SQ  # noqa: E402
 from src.utils.paths import RESULTS_DIR  # noqa: E402
 
@@ -41,27 +51,37 @@ def stage1(tickers) -> None:
         print(f"{t}: stage1 done in {time.time() - t0:.0f}s", flush=True)
 
 
-def stage2(tickers) -> None:
-    """All 96 slope settings on the log-spaced period lattice (no year buckets)."""
+def _sweep(stage: str, slopes, tickers) -> None:
     for t in tickers:
-        if done("stage2", t):
+        if done(stage, t):
             continue
         t0 = time.time()
         ins = load_instrument(t)
         fast = build_fast(ins, periods=FAST_LATTICE)
-        run_grid(ins, fast, RAW_DIR / "stage2" / t, slopes=SLOPE_GRID, slow_periods=SLOW_LATTICE,
+        run_grid(ins, fast, RAW_DIR / stage / t, slopes=slopes, slow_periods=SLOW_LATTICE,
                  with_years=False, log=lambda m: print(m, flush=True))
-        print(f"{t}: stage2 done in {time.time() - t0:.0f}s", flush=True)
+        print(f"{t}: {stage} done in {time.time() - t0:.0f}s", flush=True)
+
+
+def stage2(tickers) -> None:
+    """The first 96 slope settings (k <= 40) on the log-spaced period lattice."""
+    _sweep("stage2", SLOPE_GRID_BASE, tickers)
+
+
+def stage2b(tickers) -> None:
+    """The extension k = 80, 160 (32 settings) on the same lattice."""
+    _sweep("stage2b", SLOPE_GRID_EXT, tickers)
 
 
 def slope_table(ticker: str) -> pd.DataFrame:
     """In-sample summary of every slope setting per exit model (stage 2)."""
-    d = RAW_DIR / "stage2" / ticker
-    s = np.load(d / "stats.npy", mmap_mode="r")  # (slow_t, slow_p, slope, fast_t, fast_p, model, group, stat)
+    parts = [np.load(RAW_DIR / st / ticker / "stats.npy", mmap_mode="r") for st in ("stage2", "stage2b")]
     rows = []
     for k, sl in enumerate(SLOPE_GRID):
+        # (slow_t, slow_p, slope, fast_t, fast_p, model, group, stat); stage 2b holds the appended settings
+        s, local = (parts[0], k) if k < len(SLOPE_GRID_BASE) else (parts[1], k - len(SLOPE_GRID_BASE))
         for model in (0, 1):
-            g = {name: np.asarray(s[:, :, k, :, :, model, GROUP[name], :], np.float64) for name in ("is", "oos")}
+            g = {name: np.asarray(s[:, :, local, :, :, model, GROUP[name], :], np.float64) for name in ("is", "oos")}
             t_is = t_stat(g["is"][..., S_N], g["is"][..., S_PNL], g["is"][..., S_SQ])
             t_oos = t_stat(g["oos"][..., S_N], g["oos"][..., S_PNL], g["oos"][..., S_SQ])
             ok = (g["is"][..., S_N] >= MIN_TRADES_IS) & np.isfinite(t_is)
@@ -110,10 +130,10 @@ def done(stage: str, ticker: str) -> bool:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("stage", choices=["stage1", "stage2", "stage3"])
+    p.add_argument("stage", choices=["stage1", "stage2", "stage2b", "stage3"])
     p.add_argument("--tickers", nargs="+", default=list(TICKERS))
     args = p.parse_args()
-    {"stage1": stage1, "stage2": stage2, "stage3": stage3}[args.stage](args.tickers)
+    {"stage1": stage1, "stage2": stage2, "stage2b": stage2b, "stage3": stage3}[args.stage](args.tickers)
     return 0
 
 
