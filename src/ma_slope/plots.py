@@ -77,7 +77,7 @@ def matrix_grid(mats: dict[str, np.ndarray], rows, cols, title, path, ncols=4, f
     norm = _norm(np.concatenate([np.ravel(m) for m in mats.values()]))
     for ax in axes.ravel()[len(names):]:
         ax.set_visible(False)
-    for ax, name in zip(axes.ravel(), names, strict=False):
+    for k, (ax, name) in enumerate(zip(axes.ravel(), names, strict=False)):
         m = mats[name]
         im = ax.imshow(m, cmap=DIVERGING, norm=norm, aspect="auto")
         for (i, j), v in np.ndenumerate(m):
@@ -85,9 +85,10 @@ def matrix_grid(mats: dict[str, np.ndarray], rows, cols, title, path, ncols=4, f
                 ax.text(j, i, fmt.format(v), ha="center", va="center", fontsize=6.5,
                         color=INK if abs(norm(v) - 0.5) < 0.3 else SURFACE)
         ax.set_xticks(range(len(cols)), cols, rotation=90)
-        ax.set_yticks(range(len(rows)), rows)
+        ax.set_yticks(range(len(rows)), rows if k % ncols == 0 else [""] * len(rows))
         ax.set_title(name)
         ax.grid(False)
+    fig.subplots_adjust(wspace=0.08, hspace=0.45)
     fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.6, label=cbar_label)
     fig.suptitle(title, fontsize=10, color=INK2)
     return _save(fig, path)
@@ -104,8 +105,8 @@ def ranges(categories, series: dict[str, tuple], title, ylabel, path):
     ax.axhline(0, color=BASE, lw=1)
     ax.set_xticks(range(len(categories)), categories)
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.legend(loc="upper left", ncols=len(series))
+    ax.set_title(title, pad=24)
+    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncols=len(series))
     return _save(fig, path)
 
 
@@ -205,6 +206,6 @@ def grouped_bars(categories, series: dict[str, list], title, ylabel, path):
     ax.axhline(0, color=BASE, lw=1)
     ax.set_xticks(range(len(categories)), categories)
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.legend(loc="upper left", ncols=len(series))
+    ax.set_title(title, pad=24)
+    ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), ncols=len(series))
     return _save(fig, path)

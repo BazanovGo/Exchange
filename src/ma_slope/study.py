@@ -540,12 +540,76 @@ def figures(split_times, summary, pairs, bests, finals, wf, cm, slopes, equity, 
         P.small_multiples_hexbin(scatter, "All configs: in-sample vs out-of-sample t (stage 3, 200k sample)",
                                  "IS t", "OOS t", FIGS / "is_vs_oos.png")
     # Walk-forward and PBO.
-    w = wf[(wf["scope"] == "all") & (wf["stage"] == "stage3")] if len(wf) else wf
-    if len(w):
-        P.signed_bars({NAMES[t]: (list(gg["test_year"]), list(gg["test_pnl"])) for t, gg in w.groupby("ticker")},
-                      "Walk-forward (3 years train -> next year test): test-year PnL of the selected config",
-                      "USD per contract", FIGS / "walk_forward.png")
+    for stage, note in (("stage1", "slope fixed in advance"),
+                        ("stage3", "slope chosen on IS: test years before the IS/OOS split are not clean")):
+        w = wf[(wf["scope"] == "all") & (wf["stage"] == stage)] if len(wf) else wf
+        if len(w):
+            P.signed_bars({NAMES[t]: (list(gg["test_year"]), list(gg["test_pnl"])) for t, gg in w.groupby("ticker")},
+                          f"Walk-forward, {stage} ({note}): 3 years train -> next year test, PnL of the pick",
+                          "USD per contract", FIGS / f"walk_forward_{stage}.png")
     if pbo_logits:
         P.small_multiples_hist({k: {"logit of OOS rank": v} for k, v in pbo_logits.items()},
                                "CSCV: logit of the OOS rank of the IS-best config (< 0 = below median)",
                                "logit", FIGS / "pbo_logits.png", bins=30)
+
+
+def selection_skill(write=print) -> pd.DataFrame:
+    """Does selection beat a config picked at random from the same grid?
+
+    For every walk-forward test year and for the IS/OOS finalist, the selected
+    config's out-of-sample t is ranked among all configs with at least
+    ``MIN_TRADES_OOS`` trades in that period (percentile 0.5 = no skill), next
+    to the median config of that period.
+    """
+    wf = pd.read_csv(TABLES / "walk_forward.csv")
+    finals = pd.read_csv(TABLES / "finalists.csv")
+    rows = []
+    for stage in ("stage1", "stage3"):
+        for t in INFERENCE:
+            if not (RAW / stage / t / "years.npy").exists():
+                continue
+            write(f"skill {stage} {t}")
+            stats, years, meta = A.load_grid(RAW / stage / t)
+            pos = {name: {v: i for i, v in enumerate(meta[key])} for name, key in
+                   (("slow_type", "slow_types"), ("slow_period", "slow_periods"), ("fast_type", "fast_types"),
+                    ("fast_period", "fast_periods"), ("model", "models"))}
+
+            def index(r, pos=pos):
+                return (pos["slow_type"][r["slow_type"]], pos["slow_period"][int(r["slow_period"])],
+                        METHODS.index(r["method"]), pos["fast_type"][r["fast_type"]],
+                        pos["fast_period"][int(r["fast_period"])], pos["model"][r["model"]])
+
+            split_year = pd.Timestamp(meta["split_time"]).year
+            sub = wf[(wf["stage"] == stage) & (wf["ticker"] == t) & (wf["scope"] == "all")]
+            for _, r in sub.iterrows():
+                y = np.asarray(years[..., int(r["test_year"]) - meta["first_year"], :], np.float64)
+                tt = np.where(y[..., 1] >= MIN_TRADES_OOS, A.year_t(y), np.nan)
+                pick = tt[index(r)]
+                ok = np.isfinite(tt)
+                rows.append({"ticker": t, "stage": stage, "kind": "walk_forward", "period": int(r["test_year"]),
+                             "after_is_oos_split": int(r["test_year"]) > split_year,
+                             "selected_t": float(pick), "median_config_t": float(np.median(tt[ok])),
+                             "share_configs_positive": float(np.mean(tt[ok] > 0)),
+                             "selected_percentile": float(np.mean(tt[ok] < pick)) if np.isfinite(pick) else np.nan})
+            fr = finals[(finals["stage"] == stage) & (finals["ticker"] == t) & (finals["tag"] == "overall")]
+            if len(fr):
+                g = np.asarray(stats[..., A.GROUP["oos"], :], np.float64)
+                tt = np.where(g[..., S_N] >= MIN_TRADES_OOS, A.t_stat(g[..., S_N], g[..., S_PNL], g[..., S_SQ]),
+                              np.nan)
+                pick = tt[index(fr.iloc[0])]
+                ok = np.isfinite(tt)
+                rows.append({"ticker": t, "stage": stage, "kind": "is_oos_finalist", "period": "oos",
+                             "after_is_oos_split": True, "selected_t": float(pick),
+                             "median_config_t": float(np.median(tt[ok])),
+                             "share_configs_positive": float(np.mean(tt[ok] > 0)),
+                             "selected_percentile": float(np.mean(tt[ok] < pick)) if np.isfinite(pick) else np.nan})
+    out = pd.DataFrame(rows)
+    out.to_csv(TABLES / "selection_skill.csv", index=False)
+    w = out[out["kind"] == "walk_forward"]
+    inf = [t for t in INFERENCE if t in set(w["ticker"])]
+    P.grouped_bars([NAMES[t] for t in inf],
+                   {f"{st}: mean percentile - 0.5": w[w["stage"] == st].groupby("ticker")["selected_percentile"].mean()
+                    .reindex(inf).sub(0.5).to_numpy() for st in ("stage1", "stage3")},
+                   "Walk-forward pick vs all configs of the same test year (0 = no better than a random config)",
+                   "percentile - 0.5", FIGS / "selection_skill.png")
+    return out
