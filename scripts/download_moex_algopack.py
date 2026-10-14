@@ -4,7 +4,8 @@ Builds the series stored in ``data/raw/moex_algopack``: contracts are glued
 by nearest expiry (a contract is held through its last trading day, the next
 one starts the following day, or right after the last candle if the contract
 stopped trading earlier), prices are not adjusted. 1m and 60m candles come
-from the API, 5m are aggregated from 1m.
+from the API, 5m are aggregated from 1m. ``<ticker>/rolls.csv`` holds the
+new/old contract price ratio at every roll for back-adjusting the series.
 
     MOEX_ALGOPACK_TOKEN=... python scripts/download_moex_algopack.py \
         --assets GOLD SILV --ca-bundle russian_trusted_root_ca.pem
@@ -33,6 +34,7 @@ API = "https://apim.moex.com/iss"
 PAGE = 500
 MONTH_CODES = "FGHJKMNQUVXZ"
 COLUMNS = ["ticker", "secid", "begin", "end", "open", "high", "low", "close", "volume", "value"]
+ROLL_COLUMNS = ["from_secid", "to_secid", "from_time", "from_price", "to_time", "to_price", "ratio", "method"]
 ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "raw" / "moex_algopack"
 
@@ -72,7 +74,7 @@ def contracts(client: Client, asset: str, workers: int) -> list[dict]:
     """
     data = client.get("/statistics/engines/futures/markets/forts/series.json",
                       asset_code=asset, show_expired=1)["series"]
-    rows = [dict(zip(data["columns"], r)) for r in data["data"]]
+    rows = [dict(zip(data["columns"], r, strict=True)) for r in data["data"]]
     pattern = re.compile(rf"{re.escape(asset)}-\d+\.\d+", re.IGNORECASE)
     rows = [r for r in rows if pattern.fullmatch(r["name"])]
 
@@ -126,7 +128,7 @@ def fetch(client: Client, secid: str, interval: int, lo: date, hi: date) -> list
         block = client.get(path, interval=interval, start=start,
                            **{"from": lo.isoformat(), "till": hi.isoformat()})["candles"]
         cols = block["columns"]
-        page = [dict(zip(cols, r)) for r in block["data"]]
+        page = [dict(zip(cols, r, strict=True)) for r in block["data"]]
         rows += page
         if len(page) < PAGE:
             break
@@ -150,18 +152,18 @@ def fetch_all(client: Client, jobs: list[tuple], workers: int, label: str = "") 
 
 def aggregate_5m(rows: list[list]) -> list[list]:
     out: list[list] = []
-    for secid, begin, _, o, h, l, c, v, val in rows:
+    for secid, begin, _, op, hi, lo, cl, v, val in rows:
         t = datetime.fromisoformat(begin)
         b = t.replace(minute=t.minute - t.minute % 5, second=0)
         key = b.strftime("%Y-%m-%d %H:%M:%S")
         if out and out[-1][1] == key and out[-1][0] == secid:
             bar = out[-1]
-            bar[4], bar[5], bar[6] = max(bar[4], h), min(bar[5], l), c
+            bar[4], bar[5], bar[6] = max(bar[4], hi), min(bar[5], lo), cl
             bar[7] += v
             bar[8] += val
         else:
             end = (b + timedelta(minutes=4, seconds=59)).strftime("%Y-%m-%d %H:%M:%S")
-            out.append([secid, key, end, o, h, l, c, v, val])
+            out.append([secid, key, end, op, hi, lo, cl, v, val])
     return out
 
 
@@ -179,6 +181,58 @@ def write_years(ticker: str, tf: str, rows: list[list], out_dir: Path) -> dict[s
             w.writerows([ticker, *r] for r in yrows)
         written[f"{ticker}/{tf}/{year}.csv"] = len(yrows)
     return written
+
+
+def read_1m(ticker: str, out_dir: Path) -> list[tuple[str, str, str, str]]:
+    """(secid, begin, open, close) of the stored 1m series."""
+    rows = []
+    for path in sorted((out_dir / ticker / "1m").glob("*.csv")):
+        with path.open(newline="") as f:
+            rows += [(r["secid"], r["begin"], r["open"], r["close"]) for r in csv.DictReader(f)]
+    return rows
+
+
+def roll_ratio(client: Client, old: tuple, new: tuple) -> list:
+    """Price ratio of the new contract to the old one at a roll.
+
+    Both contracts trade on the old one's last day, so the new contract's last
+    1m close at or before the old contract's last candle is compared with that
+    candle's close. Without such a candle the gap between the old close and the
+    new contract's first open is used instead.
+    """
+    (old_secid, old_time, _, old_close), (new_secid, new_time, new_open, _) = old, new
+    day = date.fromisoformat(old_time[:10])
+    same_time = [r for r in fetch(client, new_secid, 1, day, day) if r[1] <= old_time]
+    if same_time:
+        to_time, to_price, method = same_time[-1][1], same_time[-1][6], "overlap"
+    else:
+        to_time, to_price, method = new_time, float(new_open), "gap"
+    from_price = float(old_close)
+    return [old_secid, new_secid, old_time, from_price, to_time, to_price, to_price / from_price, method]
+
+
+def update_rolls(client: Client, ticker: str, out_dir: Path, workers: int) -> dict[str, int]:
+    """Write ``<ticker>/rolls.csv``: one row per contract change in the 1m series.
+
+    Ratios already in the file are reused, only new rolls are fetched.
+    """
+    path = out_dir / ticker / "rolls.csv"
+    known: dict[tuple[str, str], list] = {}
+    if path.exists():
+        with path.open(newline="") as f:
+            known = {(r["from_secid"], r["to_secid"]): list(r.values()) for r in csv.DictReader(f)}
+    rows = read_1m(ticker, out_dir)
+    pairs = [(a, b) for a, b in zip(rows, rows[1:], strict=False) if a[0] != b[0]]
+    todo = [(a, b) for a, b in pairs if (a[0], b[0]) not in known]
+    with ThreadPoolExecutor(workers) as pool:
+        for row in pool.map(lambda p: roll_ratio(client, *p), todo):
+            known[row[0], row[1]] = row
+    rolls = [known[a[0], b[0]] for a, b in pairs]
+    with path.open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(ROLL_COLUMNS)
+        w.writerows(rolls)
+    return {f"{ticker}/rolls.csv": len(rolls)}
 
 
 def download_asset(client: Client, asset: str, start: date, till: date,
@@ -226,6 +280,8 @@ def main() -> int:
     p.add_argument("--out-dir", type=Path, default=OUT_DIR)
     p.add_argument("--ca-bundle", default=os.environ.get("MOEX_CA_BUNDLE"))
     p.add_argument("--workers", type=int, default=12)
+    p.add_argument("--rolls-only", action="store_true",
+                   help="only rebuild rolls.csv from the stored 1m candles")
     args = p.parse_args()
 
     token = os.environ.get("MOEX_ALGOPACK_TOKEN")
@@ -240,11 +296,16 @@ def main() -> int:
                 {"mode": "continuous-nearest-expiry", "from": args.start,
                  "timezone": "Europe/Moscow", "files": {}})
     for asset in args.assets:
-        print(f"{asset}: downloading {start}..{till}", flush=True)
-        written = download_asset(client, asset, start, till, args.out_dir, args.workers)
-        manifest["files"].update(written)
-        print(f"{asset}: {sum(v for k, v in written.items() if '/1m/' in k)} 1m candles", flush=True)
-    manifest["till"] = args.till
+        if not args.rolls_only:
+            print(f"{asset}: downloading {start}..{till}", flush=True)
+            written = download_asset(client, asset, start, till, args.out_dir, args.workers)
+            manifest["files"].update(written)
+            print(f"{asset}: {sum(v for k, v in written.items() if '/1m/' in k)} 1m candles", flush=True)
+        rolls = update_rolls(client, asset.lower(), args.out_dir, args.workers)
+        manifest["files"].update(rolls)
+        print(f"{asset}: {sum(rolls.values())} rolls", flush=True)
+    if not args.rolls_only:
+        manifest["till"] = args.till
     manifest["files"] = dict(sorted(manifest["files"].items()))
     manifest_path.write_text(json.dumps(manifest, indent=2))
     return 0
