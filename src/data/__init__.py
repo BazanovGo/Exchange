@@ -6,6 +6,7 @@ Usage::
 
     md = load_data("yahoo", "AAPL", start="2020-01-01")
     md = load_data("csv", "SAMPLE", base_dir="data/raw")
+    md = load_data("moex_algopack", "ng", timeframe="60m")  # ratio back-adjusted futures
     close = md.close  # wide DataFrame, one column per symbol
 
 New sources (MOEX, Polygon, ...) are added by subclassing
@@ -15,6 +16,7 @@ New sources (MOEX, Polygon, ...) are added by subclassing
 
 # Importing the modules registers the built-in loaders.
 from src.data import csv_loader as _csv_loader  # noqa: F401
+from src.data import moex_algopack_loader as _moex_algopack_loader  # noqa: F401
 from src.data import parquet_loader as _parquet_loader  # noqa: F401
 from src.data import yahoo_loader as _yahoo_loader  # noqa: F401
 from src.data.base import OHLCV_COLUMNS, BaseDataLoader, MarketData

@@ -260,7 +260,7 @@ def managed_portfolio(
         fees=config.fees,
         slippage=config.slippage,
         init_cash=config.init_cash,
-        freq=config.freq,
+        freq=config.resolve_freq(close.index),
     )
     return pf, reason
 

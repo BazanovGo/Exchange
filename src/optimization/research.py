@@ -62,7 +62,7 @@ def _sliced_portfolio(close: pd.Series, sig, config: BacktestConfig, start: int,
         exits=sig.exits.iloc[sl],
         short_entries=sig.short_entries.iloc[sl],
         short_exits=sig.short_exits.iloc[sl],
-        **config.to_portfolio_kwargs(),
+        **config.to_portfolio_kwargs(close.index[sl]),
     )
 
 

@@ -101,7 +101,7 @@ def run_backtest(
         exits=sig.exits,
         short_entries=sig.short_entries,
         short_exits=sig.short_exits,
-        **config.to_portfolio_kwargs(),
+        **config.to_portfolio_kwargs(ohlcv.index),
     )
 
     return BacktestResult(

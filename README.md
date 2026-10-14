@@ -16,7 +16,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 pip install -e . --no-deps
 
-pytest                      # 87 тестов инфраструктуры (сеть не нужна)
+pytest                      # 107 тестов инфраструктуры (сеть не нужна)
 ```
 
 Ноутбуки выполняются по порядку (каждый самодостаточен и пересчитывает всё,
@@ -54,7 +54,7 @@ Yahoo Finance на детерминированный локальный сэм�
 │   ├── risk/              # риск-метрики, Kelly, Monte Carlo, position sizing
 │   ├── visualization/     # plotly-графики, GitHub-совместимый PNG-рендеринг
 │   └── utils/             # пути, логирование
-└── tests/                 # pytest (87 тестов)
+└── tests/                 # pytest (107 тестов)
 ```
 
 ## Этапы исследования (ноутбуки)
@@ -77,8 +77,13 @@ from src.data import load_data
 data = load_data("yahoo", "AAPL", start="2020-01-01")   # Yahoo Finance
 data = load_data("csv", "SAMPLE")                        # data/raw/SAMPLE.csv
 data = load_data("parquet", "BTCUSD")                    # data/processed/
+data = load_data("moex_algopack", "ng", timeframe="60m")  # фьючерсы MOEX, склейка по коэффициентам
 close = data.close                                       # wide-фрейм по символам
 ```
+
+Реальные котировки фьючерсов MOEX (NG, BR, WTI, GOLD, SILV, COPPER, PLT, PLD;
+1m/5m/60m) лежат в `data/raw/moex_algopack`; склейка контрактов и
+обновление описаны в [его README](data/raw/moex_algopack/README.md).
 
 Все источники возвращают канонический OHLCV (`DatetimeIndex` +
 `Open/High/Low/Close/Volume`). Новый источник (MOEX, Polygon, ...) — один
@@ -114,6 +119,12 @@ result = run_backtest("ema_rsi", data, params={...},
                       config=BacktestConfig(init_cash=100_000, fees=0.001))
 result.stats(); result.equity(); result.drawdown(); result.trades()
 ```
+
+Годовые метрики (CAGR, Sharpe, Sortino, Calmar, волатильность) считаются по
+числу баров, которое рынок реально торгует за год: по умолчанию
+`freq="auto"` берёт среднюю календарную длительность бара из данных
+(около 252 баров в году для дневок акций, 3 600–5 000 для часовых свечей
+MOEX в зависимости от периода), а не 24/7-часы. Явная частота (`freq="1D"`) по-прежнему работает.
 
 ### Массовое исследование (этап 02)
 

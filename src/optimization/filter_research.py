@@ -66,7 +66,7 @@ def _window_metrics(close, entries, exits, config, split_at, prefix_rows: dict[s
             close=close.iloc[sl],
             entries=entries.iloc[sl],
             exits=exits.iloc[sl],
-            **config.to_portfolio_kwargs(),
+            **config.to_portfolio_kwargs(close.index[sl]),
         )
         for metric, value in portfolio_metrics(pf).items():
             prefix_rows[f"{prefix}{metric}"] = value
