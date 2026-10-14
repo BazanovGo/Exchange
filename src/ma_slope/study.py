@@ -275,105 +275,124 @@ def slope_tables() -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
-def run(write=print) -> dict:
+def analyze_stage(stage: str, write=print) -> dict:
+    """Analyse every instrument of one stage and pickle the compact parts."""
+    import pickle
     import warnings
 
     warnings.filterwarnings("ignore", category=RuntimeWarning)  # empty slices of thin instruments
-    TABLES.mkdir(parents=True, exist_ok=True)
     FIGS.mkdir(parents=True, exist_ok=True)
-    rng = np.random.default_rng(42)
-    res = {"stage1": {}, "stage3": {}}
-    summaries, pairs, bests, wf, pbo = [], [], [], [], []
-    finals, monthly_rows, yearly_rows, trades_out = [], [], [], {}
-    equity, hist_data, pbo_logits, scatter = {}, {}, {}, {}
-    for stage in ("stage1", "stage3"):
-        for t in TICKERS:
-            if not (RAW / stage / t / "meta.json").exists():
-                continue
-            write(f"analyze {stage} {t}")
-            r = analyze_instrument(t, stage, rng)
-            res[stage][t] = r
-            summaries += r["summary"]
-            pairs += [dict(p, stage=stage) for p in r["type_pairs"]]
-            bests += [dict(b, stage=stage) for b in r["group_bests"]]
-            if "walk_forward" in r:
-                wf.append(r["walk_forward"])
-            if "pbo" in r:
-                pbo.append(r["pbo"])
-                pbo_logits[f"{NAMES[t]} {stage}"] = r["pbo_logits"]
-            g = r["grid"]
-            if stage == "stage3":
-                ok = np.flatnonzero((g.valid & np.isfinite(g.t_oos)).ravel())
-                pick = rng.choice(ok, min(SAMPLE, ok.size), replace=False) if ok.size else ok
-                rho = _spearman(g.t_is.ravel(), g.t_oos.ravel(), rng)
-                scatter[NAMES[t]] = (g.t_is.ravel()[pick], g.t_oos.ravel()[pick], f"rho={rho:.2f}")
-            if stage == "stage1":
-                finals += [dict(row, stage=stage) for row in r["pick_rows"].values()]
-            for tag, (row, tr, monthly, yearly, eq) in r.get("finalists", {}).items():
-                finals.append(dict(row, stage=stage))
-                if tag == "overall":
-                    trades_out[t] = tr
-                    equity[NAMES[t]] = [("MTM PnL, USD/contract", eq.index, eq.to_numpy())]
-                    hist_data[NAMES[t]] = {"IS": tr.loc[tr["sample"] == "is", "pnl"].to_numpy(),
-                                           "OOS": tr.loc[tr["sample"] == "oos", "pnl"].to_numpy()}
-                    m = monthly.copy()
-                    m.insert(0, "ticker", t)
-                    monthly_rows.append(m.reset_index())
-                    yearly_rows += [{"ticker": t, "year": int(y), "pnl": float(v)} for y, v in yearly.items()]
-            # Free the big arrays of stage 3 (cross-market only needs stage 1).
-            if stage == "stage3":
+    rng = np.random.default_rng(42 if stage == "stage1" else 43)
+    part = {"summary": [], "pairs": [], "bests": [], "wf": [], "pbo": [], "finals": [], "monthly": [],
+            "yearly": [], "trades": {}, "equity": {}, "hist": {}, "pbo_logits": {}, "scatter": {},
+            "n_trials": {}, "split_times": {}}
+    grids = {}
+    for t in TICKERS:
+        if not (RAW / stage / t / "meta.json").exists():
+            continue
+        write(f"analyze {stage} {t}")
+        r = analyze_instrument(t, stage, rng)
+        g = r["grid"]
+        part["summary"] += r["summary"]
+        part["pairs"] += [dict(p, stage=stage) for p in r["type_pairs"]]
+        part["bests"] += [dict(b, stage=stage) for b in r["group_bests"]]
+        part["n_trials"][t] = r["n_trials"]
+        part["split_times"][t] = r["split_time"]
+        if "walk_forward" in r:
+            part["wf"].append(r["walk_forward"])
+        if "pbo" in r:
+            part["pbo"].append(r["pbo"])
+            part["pbo_logits"][f"{NAMES[t]} {stage}"] = r["pbo_logits"]
+        if stage == "stage3":
+            ok = np.flatnonzero((g.valid & np.isfinite(g.t_oos)).ravel())
+            pick = rng.choice(ok, min(SAMPLE, ok.size), replace=False) if ok.size else ok
+            rho = _spearman(g.t_is.ravel(), g.t_oos.ravel(), rng)
+            part["scatter"][NAMES[t]] = (g.t_is.ravel()[pick], g.t_oos.ravel()[pick], f"rho={rho:.2f}")
+        else:
+            part["finals"] += [dict(row, stage=stage) for row in r["pick_rows"].values()]
+            if t in INFERENCE:
                 g.stats = g.years = None
-    write("cross-market")
-    cm = cross_market({t: res["stage1"][t]["grid"] for t in INFERENCE if t in res["stage1"]})
+                grids[t] = g
+        for tag, (row, tr, monthly, yearly, eq) in r.get("finalists", {}).items():
+            part["finals"].append(dict(row, stage=stage))
+            if tag == "overall":
+                part["trades"][t] = tr
+                part["equity"][NAMES[t]] = [("MTM PnL, USD/contract", eq.index, eq.to_numpy())]
+                part["hist"][NAMES[t]] = {"IS": tr.loc[tr["sample"] == "is", "pnl"].to_numpy(),
+                                          "OOS": tr.loc[tr["sample"] == "oos", "pnl"].to_numpy()}
+                m = monthly.copy()
+                m.insert(0, "ticker", t)
+                part["monthly"].append(m.reset_index())
+                part["yearly"] += [{"ticker": t, "year": int(y), "pnl": float(v)} for y, v in yearly.items()]
+    if grids:
+        write("cross-market")
+        part["cross_market"] = cross_market(grids)
+    with open(RAW / f"analysis_{stage}.pkl", "wb") as f:
+        pickle.dump(part, f)
+    return part
 
-    summary = pd.DataFrame(summaries)
-    pairs = pd.DataFrame(pairs)
-    bests = pd.DataFrame(bests)
-    finals = pd.DataFrame(finals)
+
+def finalize(write=print) -> dict:
+    """Combine the stage analyses: multiple testing, tables, figures, summary.json."""
+    import pickle
+
+    parts = {}
+    for stage in ("stage1", "stage3"):
+        with open(RAW / f"analysis_{stage}.pkl", "rb") as f:
+            parts[stage] = pickle.load(f)
+    p1, p3 = parts["stage1"], parts["stage3"]
+    TABLES.mkdir(parents=True, exist_ok=True)
+    summary = pd.DataFrame(p1["summary"] + p3["summary"])
+    pairs = pd.DataFrame(p1["pairs"] + p3["pairs"])
+    bests = pd.DataFrame(p1["bests"] + p3["bests"])
+    finals = pd.DataFrame(p1["finals"] + p3["finals"])
+    wf = pd.concat(p1["wf"] + p3["wf"]) if p1["wf"] + p3["wf"] else pd.DataFrame()
+    cm = p1["cross_market"]
     # Multiple testing: Holm over the instrument finalists, BH over the group bests.
     for stage in ("stage1", "stage3"):
         sel = (bests["stage"] == stage) & bests["ticker"].isin(INFERENCE)
         bests.loc[sel, "oos_q_bh"] = A.benjamini_hochberg(bests.loc[sel, "oos_p"])
-    if len(finals):
-        fsel = (finals["tag"] == "overall") & finals["ticker"].isin(INFERENCE)
+        fsel = (finals["stage"] == stage) & (finals["tag"] == "overall") & finals["ticker"].isin(INFERENCE)
         finals.loc[fsel, "oos_p_holm"] = A.holm(finals.loc[fsel, "oos_p"])
     stage2_configs = len(MA_TYPES) * len(SLOW_LATTICE) * len(SLOPE_GRID) * len(MA_TYPES) * len(FAST_LATTICE) * 2
-    trials = {t: res["stage1"][t]["n_trials"] + res["stage3"][t]["n_trials"] + stage2_configs
-              for t in res["stage3"]}
+    trials = {t: p1["n_trials"][t] + p3["n_trials"][t] + stage2_configs for t in p3["n_trials"]}
     write("tables")
     summary.to_csv(TABLES / "grid_summary.csv", index=False)
     pairs.to_csv(TABLES / "type_pairs.csv", index=False)
     bests.sort_values(["stage", "ticker", "is_plateau_t"], ascending=[True, True, False]).to_csv(
         TABLES / "ranking_group_bests.csv", index=False)
     finals.to_csv(TABLES / "finalists.csv", index=False)
-    if wf:
-        pd.concat(wf).to_csv(TABLES / "walk_forward.csv", index=False)
-    pd.DataFrame(pbo).to_csv(TABLES / "pbo.csv", index=False)
+    wf.to_csv(TABLES / "walk_forward.csv", index=False)
+    pd.DataFrame(p1["pbo"] + p3["pbo"]).to_csv(TABLES / "pbo.csv", index=False)
     cm["hist"].to_csv(TABLES / "cross_market_counts.csv", index=False)
     cm["robust"].to_csv(TABLES / "cross_market_robust_configs.csv", index=False)
     cm["transfer"].to_csv(TABLES / "cross_market_transfer.csv")
-    if monthly_rows:
-        pd.concat(monthly_rows).to_csv(TABLES / "finalist_monthly_pnl.csv", index=False)
-        pd.DataFrame(yearly_rows).to_csv(TABLES / "finalist_yearly_pnl.csv", index=False)
-    for t, tr in trades_out.items():
-        (TABLES / "finalist_trades").mkdir(exist_ok=True)
+    if p3["monthly"]:
+        pd.concat(p3["monthly"]).to_csv(TABLES / "finalist_monthly_pnl.csv", index=False)
+        pd.DataFrame(p3["yearly"]).to_csv(TABLES / "finalist_yearly_pnl.csv", index=False)
+    (TABLES / "finalist_trades").mkdir(exist_ok=True)
+    for t, tr in p3["trades"].items():
         tr.to_csv(TABLES / "finalist_trades" / f"{t}.csv", index=False)
     slopes = slope_tables()
     slopes.to_csv(TABLES / "slope_sweep.csv", index=False)
-
     write("figures")
-    figures(res, summary, pairs, bests, finals, pd.concat(wf) if wf else pd.DataFrame(), cm, slopes,
-            equity, hist_data, pbo_logits, scatter)
+    figures(p3["split_times"], summary, pairs, bests, finals, wf, cm, slopes, p3["equity"], p3["hist"],
+            {**p1["pbo_logits"], **p3["pbo_logits"]}, p3["scatter"])
     info = {"trials_per_instrument": trials,
             "expected_max_t_null": {t: A.expected_max_t(n) for t, n in trials.items()},
-            "cross_market": cm["agree"],
-            "split_times": {t: str(r["split_time"]) for t, r in res["stage3"].items() if "split_time" in r}}
+            "cross_market": cm["agree"], "split_times": {t: str(v) for t, v in p3["split_times"].items()}}
     (TABLES / "summary.json").write_text(json.dumps(info, indent=2, default=float))
     return info
 
 
-def figures(res, summary, pairs, bests, finals, wf, cm, slopes, equity, hist_data, pbo_logits, scatter):
-    inf = [t for t in INFERENCE if t in res["stage3"]]
+def run(write=print) -> dict:
+    for stage in ("stage1", "stage3"):
+        analyze_stage(stage, write)
+    return finalize(write)
+
+
+def figures(split_times, summary, pairs, bests, finals, wf, cm, slopes, equity, hist_data, pbo_logits, scatter):
+    inf = [t for t in INFERENCE if t in split_times]
     cats = [NAMES[t] for t in inf]
     # 2. 36 type pairs: median OOS t per instrument (stage 3).
     mats = {}
@@ -435,8 +454,7 @@ def figures(res, summary, pairs, bests, finals, wf, cm, slopes, equity, hist_dat
     if equity:
         P.small_multiples_lines(equity, "Selected config per instrument: mark-to-market PnL, one contract "
                                 "(line = IS/OOS split)", "USD", FIGS / "equity_finalists.png",
-                                vlines={NAMES[t]: res["stage3"][t]["split_time"] for t in res["stage3"]
-                                        if "split_time" in res["stage3"][t]})
+                                vlines={NAMES[t]: v for t, v in split_times.items()})
         P.small_multiples_hist(hist_data, "Trade PnL of the selected configs", "USD per trade",
                                FIGS / "trade_distributions.png")
     # 8. Cross-market.
