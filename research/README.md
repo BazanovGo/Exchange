@@ -5,6 +5,8 @@
   параметры, результаты, выводы), `sweep.csv` (все конфигурации IS/OOS),
   `walk_forward.csv`, `equity.png`, `param_heatmap.png`.
 * База знаний (уроки, тупики, направления): [`../knowledge_base.md`](../knowledge_base.md).
+* [`ma_cross_slope_5m/`](ma_cross_slope_5m/README.md) — отдельное масштабное исследование: пересечение цены с
+  быстрой MA + фильтр наклона медленной MA на 5-минутных фьючерсах MOEX (~9 млн конфигураций на инструмент).
 
 Пайплайн одной гипотезы — `src/optimization/hypothesis.py::run_full_study`:
 backtest → оптимизация сетки → плато устойчивости → OOS → walk-forward →
