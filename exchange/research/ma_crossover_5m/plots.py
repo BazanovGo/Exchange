@@ -94,4 +94,6 @@ def step_hist(ax, series: dict, bins, colors=(S1, S2, S3)):
         ax.hist(x, bins=bins, histtype="step", linewidth=1.8, color=c, label=f"{label} (медиана {np.median(x):+.2f})",
                 density=True)
     ax.axvline(0, color=AXIS, linewidth=0.8)
+    lo, hi = ax.get_ylim()
+    ax.set_ylim(lo, hi * 1.3)          # место под легенду, чтобы она не лежала на пиках
     ax.legend(loc="upper left")

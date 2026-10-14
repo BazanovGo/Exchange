@@ -10,6 +10,9 @@ for row, t in enumerate(TICKERS):
         x = months[-len(m):].to_timestamp()
         wf = res[t]["walk_forward"][crit]
         ax.plot(x, np.cumsum(m), color=c_, linewidth=1.6, label=f"{crit}: {wf['total_pnl']:+,.0f}, t={wf['t_stat']:+.2f}")
+    avg = np.load(A / STAGE / t / "avg_config_monthly.npy")[-len(m):]
+    ax.plot(x, np.cumsum(avg), color=P.MUTED, linewidth=1.6,
+            label=f"средняя конфигурация: {avg.sum():+,.0f}")
     ax.axhline(0, color=P.AXIS, linewidth=0.8); ax.legend(loc="upper left")
     ax = axes[row, 1]
     lg = np.load(A / STAGE / t / "pbo_full_logits.npy")

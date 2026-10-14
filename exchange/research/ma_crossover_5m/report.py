@@ -27,23 +27,27 @@ def fmt(v, d=2):
     if v is None or (isinstance(v, float) and not np.isfinite(v)):
         return "—"
     if isinstance(v, (int, np.integer)):
-        return f"{int(v):,}".replace(",", " ")
+        return f"{int(v):,}".replace(",", " ") if abs(int(v)) >= 10_000 else str(int(v))
     if abs(v) >= 1000:
         return f"{v:,.0f}".replace(",", " ")
     return f"{v:.{d}f}"
 
 
 def table(df: pd.DataFrame, digits=2) -> str:
+    """Markdown-таблица. Значения берутся по столбцам, а не через iterrows:
+    iterrows приводит строку к общему типу и превращает целые в 1.000."""
     cols = list(df.columns)
     out = ["| " + " | ".join(map(str, cols)) + " |", "|" + "---|" * len(cols)]
-    for _, r in df.iterrows():
+    data = [df[c].tolist() for c in cols]
+    for i in range(len(df)):
         cells = []
-        for c in cols:
-            v = r[c]
-            if isinstance(v, (float, np.floating)):
-                cells.append(fmt(float(v), digits))
-            elif isinstance(v, (int, np.integer)) and not isinstance(v, bool):
+        for v in (col[i] for col in data):
+            if isinstance(v, bool) or isinstance(v, np.bool_):
+                cells.append("да" if v else "нет")
+            elif isinstance(v, (int, np.integer)):
                 cells.append(fmt(int(v)))
+            elif isinstance(v, (float, np.floating)):
+                cells.append(fmt(float(v), digits))
             else:
                 cells.append(str(v).replace("|", "·"))
         out.append("| " + " | ".join(cells) + " |")
@@ -55,6 +59,11 @@ def load(stage, t, name):
     if p.suffix == ".json":
         return json.loads(p.read_text())
     return pd.read_csv(p)
+
+
+def money(v):
+    """+1 695 — знак и тонкий пробел между тысячами, без запятых."""
+    return f"{v:+,.0f}".replace(",", "\u202f")
 
 
 def cfg_label(r):
@@ -130,7 +139,7 @@ def sec_validation():
     w("|---|---|")
     w("| Шесть средних против прямых формул (6 периодов от 2 до 250, включая TMA против свёртки) | все совпали до 1e−9 |")
     w("| Событийное ядро против независимой побаровой реализации тех же правил (24 случая, оба выхода, маскировка роллов, равенства на тиковой сетке) | все сделки совпали |")
-    w(f"| Ядро против `vectorbt.Portfolio.from_signals` на реальных данных | **{int(v['match'].sum())} из {len(v)}** конфигураций, {int(v['trades_vbt'].sum()):,} сделок, максимальное расхождение {v['max_abs_diff'].max():.1e} |".replace(",", " "))
+    w(f"| Ядро против `vectorbt.Portfolio.from_signals` на реальных данных | **{int(v['match'].sum())} из {len(v)}** конфигураций, {fmt(int(v['trades_vbt'].sum()))} сделок, максимальное расхождение {v['max_abs_diff'].max():.1e} |")
     for stage in ("stage1", "stage3"):
         for t in TICKERS:
             for ext in (".txt", ".raw"):
@@ -188,6 +197,17 @@ def sec_grid(stage, title):
         w()
     w("### По годам: эпизод или закономерность")
     w()
+    rows = []
+    for t in TICKERS:
+        p = WORK / "analysis" / stage / t / "oos_split.json"
+        if p.exists():
+            o = json.loads(p.read_text())
+            rows.append({"инструмент": t, "вне выборки целиком": o["share_pos_all"],
+                         f"без {o['last_year']} года ({o['early_months']} мес.)": o["share_pos_early"],
+                         f"только {o['last_year']} ({o['last_months']} мес.)": o["share_pos_last"]})
+    if rows:
+        w("Доля конфигураций, прибыльных вне выборки:"); w()
+        w(table(pd.DataFrame(rows), 3)); w()
     for t in TICKERS:
         p = WORK / "analysis" / stage / t / "years_grid.csv"
         if p.exists():
@@ -252,6 +272,7 @@ def sec_selection(stage):
         w(table(d, 2))
         w()
     fin_any = all((WORK / "analysis" / stage / t / "finalists.json").exists() for t in TICKERS)
+    yearly_ok = all((WORK / "analysis" / stage / t / "picks_yearly.csv").exists() for t in TICKERS)
     if fin_any:
         w("### Полная статистика отобранных (VectorBT, переоценка открытой позиции)")
         w()
@@ -384,6 +405,8 @@ def sec_costs(stage):
 
 # =====================================================================
 def sec_slope():
+    if not all((WORK / "analysis" / "stage2" / t / "results.json").exists() for t in TICKERS):
+        return
     w("## 5. Оптимизация параметров наклона (этап 2)")
     w()
     w("Полное произведение сетки наклона на базовую сетку — 200 настроек × 3 471 552 ≈ 694 млн "
@@ -434,7 +457,7 @@ def sec_cross(stage):
     w(f"| То же вне выборки | {cm['families_spearman_oos']:+.3f} |")
     w(f"| Доля конфигураций, прибыльных IS на обоих рынках | {cm['share_pos_is_both']:.3f} (при независимости {cm['share_pos_is_both_if_independent']:.3f}) |")
     w(f"| Доля прибыльных OOS на обоих | {cm['share_pos_oos_both']:.3f} (при независимости {cm['share_pos_oos_both_if_independent']:.3f}) |")
-    w(f"| Прибыльны во всех четырёх клетках (IS и OOS × NG и BR) | {cm['n_pos_all_four']:,} конфигураций |".replace(",", " "))
+    w(f"| Прибыльны во всех четырёх клетках (IS и OOS × NG и BR) | {fmt(cm['n_pos_all_four'])} конфигураций |")
     w(f"| Доля OOS>0 на обоих среди IS>0 на обоих | {cm['share_oos_both_given_is_both']:.3f} против безусловной {cm['share_oos_both_unconditional']:.3f} |")
     w()
     c = pd.read_csv(WORK / "analysis" / stage / "crossmarket_candidates.csv")
@@ -661,10 +684,6 @@ def main(stages):
     print("записан", out, len(L), "строк")
 
 
-if __name__ == "__main__":
-    sys.path.insert(0, str(HERE))
-    main(sys.argv[1:] or ["stage1", "stage3"])
-
 
 # =====================================================================
 def sec_summary(stage):
@@ -682,11 +701,16 @@ def sec_summary(stage):
           + (f"Тест траекторий: средняя сделка {s['real_mean_trade_bp']:+.1f} б.п. против нулевых "
              f"{s['null_mean']:+.1f} ± {s['null_std']:.1f} (z = {s['z']:+.1f}, p = {s['p_value']:.3f}). " if s else "")
           + f"PBO = {r[t]['pbo_full']['pbo']:.2f}; walk-forward с переоптимизацией по плато даёт "
-          f"{wf['plateau']['wf_total']:+,.0f} USD против {wf['plateau']['avg_config_total']:+,.0f} у средней конфигурации "
+          f"{money(wf['plateau']['wf_total'])} USD против {money(wf['plateau']['avg_config_total'])} у средней конфигурации "
           f"(t превышения {wf['plateau']['excess_t']:+.2f}). SPA по всей сетке: p = {r[t]['rc_spa_full']['spa_p']:.3f} "
           f"(весь период), {r[t]['rc_spa_is']['spa_p']:.3f} (IS). При 1 тике на сделку прибыльны "
-          f"{c1['share_pos_oos']:.0%} конфигураций вне выборки, при 2 тиках — {c2['share_pos_oos']:.0%}.".replace(",", " "))
+          f"{c1['share_pos_oos']:.0%} конфигураций вне выборки, при 2 тиках — {c2['share_pos_oos']:.0%}.")
         w()
     w(f"**Кросс-рынок.** Ранговая связь одной и той же конфигурации на NG и BR: {cm['spearman_sharpe_m_is_NG_vs_BR']:+.2f} "
       f"в выборке, {cm['spearman_sharpe_m_oos_NG_vs_BR']:+.2f} вне её; по 144 семействам — {cm['families_spearman_oos']:+.2f} вне выборки.")
     w()
+
+
+if __name__ == "__main__":
+    sys.path.insert(0, str(HERE))
+    main(sys.argv[1:] or ["stage1", "stage3"])

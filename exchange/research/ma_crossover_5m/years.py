@@ -47,6 +47,28 @@ def run(stage, ticker):
     print(ticker, "\n", df.round(3).to_string(index=False))
 
 
+
+def oos_split(stage, ticker):
+    """Доля прибыльных вне выборки — целиком, без последнего года и только в нём."""
+    g = load_grid(WORK / stage / ticker)
+    months = pd.PeriodIndex(g.meta["months"], freq="M")
+    oos = np.arange(g.oos_month, len(months))
+    last = oos[months[oos].year == months[-1].year]
+    early = oos[months[oos].year < months[-1].year]
+    tot = {"all": 0, "early": 0, "last": 0}
+    for a in range(0, g.n, 400_000):
+        x = np.asarray(g.monthly[a:a + 400_000], dtype=np.float64)
+        tot["all"] += int((x[:, oos].sum(1) > 0).sum())
+        tot["early"] += int((x[:, early].sum(1) > 0).sum())
+        tot["last"] += int((x[:, last].sum(1) > 0).sum())
+    out = {"oos_months": len(oos), "early_months": len(early), "last_year": int(months[-1].year),
+           "last_months": len(last), **{f"share_pos_{k}": v / g.n for k, v in tot.items()}}
+    (WORK / "analysis" / stage / ticker / "oos_split.json").write_text(json.dumps(out, indent=1))
+    print(ticker, out)
+    return out
+
+
 if __name__ == "__main__":
     for t in sys.argv[2:]:
         run(sys.argv[1], t)
+        oos_split(sys.argv[1], t)

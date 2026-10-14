@@ -8,8 +8,11 @@ for row, t in enumerate(TICKERS):
     ax = axes[row, 0]
     P.frame(ax, f"{NAMES[t]}: OOS-Шарп по методам", xlabel="годовой Шарп", ylabel="плотность")
     P.step_hist(ax, {"A — процентный наклон": c[0].ravel(), "B — наклон в ATR": c[1].ravel()}, bins)
-    mp = pd.read_csv(A / "stage2" / t / "method_pairs.csv")
     ax = axes[row, 1]
+    mp_path = A / "stage2" / t / "method_pairs.csv"
+    if not mp_path.exists():
+        ax.axis("off"); continue
+    mp = pd.read_csv(mp_path)
     P.frame(ax, f"{NAMES[t]}: этап 2, медиана Шарпа по решётке", xlabel="доля нейтрали на IS", ylabel="медиана Шарпа")
     for (lab, col, mk_) in (("A, IS", "A_is", "o"), ("B, IS", "B_is", "s"), ("A, OOS", "A_oos", "o"), ("B, OOS", "B_oos", "s")):
         g = mp.groupby("coverage")[col].median()
