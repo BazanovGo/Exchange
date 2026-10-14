@@ -133,19 +133,26 @@ def _bootstrap_means(
     n_bootstrap: int,
     block_length: float,
     seed: int,
-) -> np.ndarray:
+    with_std: bool = False,
+):
     """``(n_bootstrap, k)`` matrix of resampled column means.
 
     One index draw is shared across all columns per resample, which is what
-    preserves the cross-sectional correlation between models.
+    preserves the cross-sectional correlation between models. With
+    ``with_std`` the per-resample sample standard deviations are returned as
+    well — the denominator of a bootstrap-t replicate.
     """
     n, k = matrix.shape
     rng = make_rng(seed)
     out = np.empty((n_bootstrap, k), dtype=float)
+    sd = np.empty((n_bootstrap, k), dtype=float) if with_std else None
     for b in range(n_bootstrap):
         idx = stationary_bootstrap_indices(n, block_length=block_length, rng=rng)
-        out[b] = matrix[idx].mean(axis=0)
-    return out
+        sample = matrix[idx]
+        out[b] = sample.mean(axis=0)
+        if with_std:
+            sd[b] = sample.std(axis=0, ddof=1)
+    return (out, sd) if with_std else out
 
 
 def reality_check(
@@ -207,12 +214,13 @@ def superior_predictive_ability(
 
     Improvements over the Reality Check, both implemented here:
 
-    1. **Studentisation.** Each model's mean is divided by its own bootstrap
-       standard error, so a model with a small but very stable edge is not
-       buried by a volatile one.
+    1. **Studentisation.** Each model's mean is divided by its own standard
+       deviation (bootstrap-t: each replicate by the deviation of its own
+       resample), so a model with a small but very stable edge is not buried
+       by a volatile one.
     2. **Data-dependent recentring.** Only models whose mean exceeds
        ``-A_k`` participate in the null, where
-       ``A_k = omega_k * sqrt(2 * log(log(n)) / n)``. Models far below the
+       ``A_k = s_k * sqrt(2 * log(log(n)) / n)``. Models far below the
        benchmark are recognised as irrelevant instead of being assumed to sit
        exactly at it. This is what removes the Reality Check's perverse
        incentive to leave bad strategies out of the search.
@@ -227,17 +235,26 @@ def superior_predictive_ability(
         matrix[:, int(np.argmax(means))]
     )
 
-    boot_means = _bootstrap_means(matrix, n_bootstrap=n_bootstrap, block_length=b, seed=seed)
-    # Bootstrap standard error of each model's mean (Hansen's omega_k).
-    omega = np.std(boot_means, axis=0, ddof=1) * np.sqrt(n)
-    omega = np.where(omega > 1e-12, omega, np.nan)
+    boot_means, boot_sd = _bootstrap_means(
+        matrix, n_bootstrap=n_bootstrap, block_length=b, seed=seed, with_std=True
+    )
+    # Studentisation is bootstrap-t: the observed mean is divided by the
+    # sample standard deviation, each replicate by the standard deviation of
+    # its own resample. The first version divided both by the bootstrap
+    # standard error omega_k. On small samples that estimate is biased low,
+    # so the observed t-statistics were inflated while the replicates had unit
+    # variance by construction; the maximum over many models amplified the gap
+    # and the test rejected pure noise in 35% of runs at n = 60 (nominal 5%).
+    sd = matrix.std(axis=0, ddof=1)
+    sd = np.where(sd > 1e-12, sd, np.nan)
+    boot_sd = np.where(boot_sd > 1e-12, boot_sd, np.nan)
 
     with np.errstate(invalid="ignore", divide="ignore"):
-        t_stats = np.sqrt(n) * means / omega
+        t_stats = np.sqrt(n) * means / sd
     statistic = float(np.nanmax(np.maximum(t_stats, 0.0)))
     best = int(np.nanargmax(np.where(np.isfinite(t_stats), t_stats, -np.inf)))
 
-    threshold = omega * np.sqrt(2.0 * np.log(max(np.log(n), 1.0001)) / n)
+    threshold = sd * np.sqrt(2.0 * np.log(max(np.log(n), 1.0001)) / n)
     keep = means >= -threshold                       # consistent recentring
     keep_lower = means >= 0.0                        # lower bound: only good models
     keep_upper = np.ones(k, dtype=bool)              # upper bound: all models
@@ -245,8 +262,8 @@ def superior_predictive_ability(
     def _p(mask: np.ndarray) -> float:
         centred = boot_means - np.where(mask, means, 0.0)[None, :]
         with np.errstate(invalid="ignore", divide="ignore"):
-            boot_t = np.sqrt(n) * centred / omega[None, :]
-        boot_stat = np.nanmax(np.maximum(boot_t, 0.0), axis=1)
+            boot_t = np.sqrt(n) * centred / boot_sd
+        boot_stat = np.nan_to_num(np.nanmax(np.maximum(boot_t, 0.0), axis=1))
         return float((np.sum(boot_stat >= statistic) + 1) / (n_bootstrap + 1))
 
     return SnoopingTestResult(

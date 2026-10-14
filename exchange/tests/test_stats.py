@@ -530,6 +530,19 @@ class TestDataSnooping:
         )
         assert result.p_value < 0.05
 
+    def test_spa_rejection_rate_on_noise_is_nominal(self):
+        """Pure noise, small sample: SPA must reject at about the nominal 5%.
+
+        The first implementation studentised with the bootstrap standard error
+        and rejected noise in 35% of runs at n = 60.
+        """
+        p = [superior_predictive_ability(
+                 np.random.default_rng(10_000 + r).normal(0, 1, (60, 200)),
+                 n_bootstrap=300, seed=r).p_value
+             for r in range(100)]
+        # 200 повторов при разработке дали 2.5%; порог оставляет место шуму
+        assert np.mean(np.array(p) < 0.05) <= 0.10
+
     def test_spa_is_at_least_as_powerful_as_the_reality_check(self):
         """Hansen's recentring removes the dominated strategies' drag."""
         matrix = self._performance(100, 1000, best_edge=0.0025, seed=3)
