@@ -21,8 +21,8 @@ from results import monthly_moments, sharpe_monthly
 WORK = Path(os.environ.get("MA5M_WORK", "work"))
 
 
-def analyze(ticker: str):
-    base = WORK / "stage2" / ticker
+def analyze(ticker: str, stage: str = "stage2"):
+    base = WORK / stage / ticker
     meta = json.loads((base / "meta.json").read_text())
     stats = np.load(base / "stats.npy", mmap_mode="r")
     monthly = np.load(base / "monthly.npy", mmap_mode="r")
@@ -36,7 +36,8 @@ def analyze(ticker: str):
     pnl_is = np.asarray(stats[:, 1, K.PNL]).reshape(shape)
     pnl_oos = np.asarray(stats[:, 2, K.PNL]).reshape(shape)
     trades = np.asarray(stats[:, 0, K.NTR]).reshape(shape)
-    inf = info.reshape(6, 9, 200, 3)
+    n_set = len(meta["settings"])
+    inf = info.reshape(6, 9, n_set, 3)
     rows = []
     for si, (method, k, cov, atr) in enumerate(meta["settings"]):
         a = sh_is[:, :, si]; b = sh_oos[:, :, si]
@@ -54,7 +55,7 @@ def analyze(ticker: str):
             "median_sharpe_oos_exitB": float(np.nanmedian(b[:, :, 1])),
         })
     df = pd.DataFrame(rows)
-    out = WORK / "analysis" / "stage2" / ticker
+    out = WORK / "analysis" / stage / ticker
     out.mkdir(parents=True, exist_ok=True)
     df.to_csv(out / "settings.csv", index=False)
     res = {"ticker": ticker}
@@ -67,9 +68,9 @@ def analyze(ticker: str):
                    "median_sharpe_oos": float(r["median_sharpe_oos"]), "setting": int(r["setting"])}
         res[f"{m}_spearman_settings_is_oos"] = float(sps.spearmanr(d["median_sharpe_is"], d["median_sharpe_oos"]).statistic)
         res[f"{m}_neutral_drift_abs_mean"] = float((d["neutral_oos"] - d["neutral_is"]).abs().mean())
-        res[f"{m}_reference_row"] = d[(d["k"] == 5) & (d["coverage"] == 0.25) &
-                                      ((d["atr_period"] == 14) | (d["atr_period"] == 0))].iloc[0][
-            ["median_sharpe_is", "median_sharpe_oos", "share_pos_oos"]].to_dict()
+        ref = d[(d["k"] == 5) & (d["coverage"] == 0.25) & ((d["atr_period"] == 14) | (d["atr_period"] == 0))]
+        if len(ref):
+            res[f"{m}_reference_row"] = ref.iloc[0][["median_sharpe_is", "median_sharpe_oos", "share_pos_oos"]].to_dict()
     res["best"] = best
     # A против B при одинаковых k и доле нейтрали (B — лучшая по IS ATR для пары)
     pair = []
@@ -88,8 +89,13 @@ def analyze(ticker: str):
 
 
 if __name__ == "__main__":
+    args = sys.argv[1:]
+    if args and args[0].startswith("stage"):
+        for t in args[1:]:
+            analyze(t, args[0])
+        sys.exit(0)
     allbest = {}
-    for t in sys.argv[1:] or ("NG", "BR"):
+    for t in args or ("NG", "BR"):
         allbest[t] = analyze(t)
     (WORK / "stage3").mkdir(parents=True, exist_ok=True)
     (WORK / "stage3" / "slope_params.json").write_text(json.dumps(allbest, indent=1))

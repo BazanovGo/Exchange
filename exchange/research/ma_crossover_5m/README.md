@@ -30,10 +30,13 @@ python extras.py stage1 NG BR   # издержки, эталон WF, годы
 python crossmarket.py stage1
 python stage2.py NG BR          # оптимизация наклона на решётке     (~40 мин)
 python analyze_stage2.py NG BR  # -> $MA5M_WORK/stage3/slope_params.json
+python stage2b.py NG BR && python analyze_stage2.py stage2b NG BR  # продление k за границу
 python stage3.py NG BR          # полная сетка, оптимизированный наклон (~60 мин)
 python analyze.py stage3 NG BR && python extras.py stage3 NG BR && python crossmarket.py stage3
+python years.py stage1 NG BR && python years.py stage3 NG BR   # годы и OOS без последнего года
 python finalists.py stage3 NG BR  # VectorBT: полная статистика, Monte Carlo
 python nulls.py                   # нулевые рынки
+python -c "import signflip; signflip.main(n_paths=200)"   # тест траекторий
 python export.py stage1 stage3    # машиночитаемые результаты в results/
 python report.py stage1 stage3    # отчёт
 python build_notebook.py          # ноутбук

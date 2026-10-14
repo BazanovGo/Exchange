@@ -76,6 +76,11 @@ def analyze(stage: str, ticker: str):
     t0 = time.time()
     g = load_grid(WORK / stage / ticker)
     out = WORK / "analysis" / stage / ticker
+    # MA5M_REUSE=1: PBO и Reality Check/SPA не зависят от плато и отбора — их
+    # можно взять из прошлого прогона, если пересчитывается только отбор.
+    prev = {}
+    if os.environ.get("MA5M_REUSE") == "1" and (out / "results.json").exists():
+        prev = json.loads((out / "results.json").read_text())
     out.mkdir(parents=True, exist_ok=True)
     print(f"== {stage}/{ticker}: {g.n:,} конфигураций", flush=True)
     df = summary_frame(g)
@@ -169,18 +174,25 @@ def analyze(stage: str, ticker: str):
     res["walk_forward"] = wf
 
     # --- PBO ----------------------------------------------------------------
-    nb_is = 16 if g.oos_month >= 96 else 8
-    p_is = R.pbo_cscv(g.monthly, n_blocks=nb_is, n_splits=1000, seed=1, months=slice(0, g.oos_month))
-    p_full = R.pbo_cscv(g.monthly, n_blocks=16 if g.monthly.shape[1] >= 128 else 10,
-                        n_splits=1000, seed=1)
-    res["pbo_is"] = {k: v for k, v in p_is.items() if k in ("pbo", "n_splits", "n_blocks")}
-    res["pbo_full"] = {k: v for k, v in p_full.items() if k in ("pbo", "n_splits", "n_blocks")}
-    np.save(out / "pbo_full_logits.npy", p_full["logits"])
-    np.save(out / "pbo_full_pairs.npy", p_full["is_oos_pairs"])
-    print(f"   PBO IS {p_is['pbo']:.3f} | full {p_full['pbo']:.3f}", flush=True)
+    if "pbo_full" in prev and (out / "pbo_full_logits.npy").exists():
+        res["pbo_is"], res["pbo_full"] = prev["pbo_is"], prev["pbo_full"]
+        print(f"   PBO (из прошлого прогона) IS {res['pbo_is']['pbo']:.3f} | full {res['pbo_full']['pbo']:.3f}", flush=True)
+    else:
+        nb_is = 16 if g.oos_month >= 96 else 8
+        p_is = R.pbo_cscv(g.monthly, n_blocks=nb_is, n_splits=1000, seed=1, months=slice(0, g.oos_month))
+        p_full = R.pbo_cscv(g.monthly, n_blocks=16 if g.monthly.shape[1] >= 128 else 10,
+                            n_splits=1000, seed=1)
+        res["pbo_is"] = {k: v for k, v in p_is.items() if k in ("pbo", "n_splits", "n_blocks")}
+        res["pbo_full"] = {k: v for k, v in p_full.items() if k in ("pbo", "n_splits", "n_blocks")}
+        np.save(out / "pbo_full_logits.npy", p_full["logits"])
+        np.save(out / "pbo_full_pairs.npy", p_full["is_oos_pairs"])
+        print(f"   PBO IS {p_is['pbo']:.3f} | full {p_full['pbo']:.3f}", flush=True)
 
     # --- Reality Check / SPA по всей сетке ------------------------------------
     for tag, sl in (("is", slice(0, g.oos_month)), ("full", slice(0, g.monthly.shape[1]))):
+        if f"rc_spa_{tag}" in prev:
+            res[f"rc_spa_{tag}"] = prev[f"rc_spa_{tag}"]
+            continue
         r = R.reality_check_spa(g.monthly, months=sl, B=1000, seed=2)
         r["rc_best_config"] = g.decode([r["rc_best"]]).iloc[0].to_dict()
         r["spa_best_config"] = g.decode([r["spa_best"]]).iloc[0].to_dict()

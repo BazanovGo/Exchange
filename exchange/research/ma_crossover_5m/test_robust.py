@@ -46,6 +46,18 @@ def test_plateau_and_walk_forward_shapes():
     assert len(steps) == 4 and steps[0]["test_start"] == 24
 
 
+def test_plateau_does_not_invent_neighbours_at_the_edge():
+    """Одна выбросная точка на краю: при честном усреднении её плато ниже,
+    чем у точки в середине ровной области того же уровня."""
+    shape = (1, 1, 30, 1, 1, 30)
+    v = np.full(shape, 0.5)
+    v[0, 0, -1, 0, 0, 15] = 5.0                 # выброс на краю по медленной
+    p = R.plateau(v.ravel(), shape, size=(7, 7)).reshape(shape)
+    # честно: 4 реальных строки × 7 = 28 соседей, 0.5 + 4.5/28 = 0.66;
+    # с mode="nearest" край повторялся бы ещё 3 раза: 0.5 + 4.5·4/49 = 0.87
+    assert p[0, 0, -1, 0, 0, 15] < 0.75
+
+
 def test_dsr_penalises_trials():
     rng = np.random.default_rng(5)
     x = rng.normal(0.3, 1, 120)

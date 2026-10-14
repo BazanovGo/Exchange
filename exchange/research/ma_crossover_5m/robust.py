@@ -23,8 +23,12 @@ def plateau(values: np.ndarray, shape: tuple, size=PLATEAU) -> np.ndarray:
     ok = np.isfinite(v)
     filled = np.where(ok, v, 0.0)
     footprint = (1, 1, size[0], 1, 1, size[1])
-    s = ndimage.uniform_filter(filled, size=footprint, mode="nearest")
-    c = ndimage.uniform_filter(ok.astype(np.float64), size=footprint, mode="nearest")
+    # mode="constant": за краем сетки соседей нет. Первая версия использовала
+    # "nearest", который размножает крайние значения: у точки на границе
+    # окрестность становилась фиктивной, и шум края проходил как «плато» —
+    # так на NG была выбрана конфигурация с медленной = 250, ровно на краю.
+    s = ndimage.uniform_filter(filled, size=footprint, mode="constant", cval=0.0)
+    c = ndimage.uniform_filter(ok.astype(np.float64), size=footprint, mode="constant", cval=0.0)
     with np.errstate(invalid="ignore", divide="ignore"):
         out = np.where(c > 0, s / c, np.nan)
     return out.reshape(-1).astype(np.float32)
