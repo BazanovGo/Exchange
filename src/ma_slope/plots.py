@@ -90,7 +90,8 @@ def matrix_grid(mats: dict[str, np.ndarray], rows, cols, title, path, ncols=4, f
         ax.grid(False)
     fig.subplots_adjust(wspace=0.08, hspace=0.45)
     fig.colorbar(im, ax=axes.ravel().tolist(), shrink=0.6, label=cbar_label)
-    fig.suptitle(title, fontsize=10, color=INK2)
+    # A single row leaves no room under the default suptitle position: lift it above the panel titles.
+    fig.suptitle(title, fontsize=10, color=INK2, y=0.98 if nrows > 1 else 1.04)
     return _save(fig, path)
 
 
@@ -111,7 +112,7 @@ def ranges(categories, series: dict[str, tuple], title, ylabel, path):
 
 
 def small_multiples_lines(curves: dict[str, list[tuple[str, object, object]]], title, ylabel, path,
-                          vlines: dict | None = None, ncols=4):
+                          vlines: dict | None = None, ncols=4, zero_line=True):
     """One panel per key; each panel holds named (x, y) lines in fixed slot order."""
     names = list(curves)
     nrows = int(np.ceil(len(names) / ncols))
@@ -123,7 +124,8 @@ def small_multiples_lines(curves: dict[str, list[tuple[str, object, object]]], t
             ax.plot(x, y, color=SERIES[k], lw=1.3, label=label)
         if vlines and name in vlines:
             ax.axvline(vlines[name], color=INK2, lw=1)
-        ax.axhline(0, color=BASE, lw=0.8)
+        if zero_line:
+            ax.axhline(0, color=BASE, lw=0.8)
         ax.set_title(name)
         ax.tick_params(axis="x", rotation=30)
     axes.ravel()[0].set_ylabel(ylabel)
