@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -230,3 +232,19 @@ def test_presentation_example_window_is_a_representative_weekday_span():
     # Oct 7-9 and Oct 6-8 span the contract change; Oct 5-7 is the latest weekday span in one contract.
     assert (lo, hi) == (pd.Timestamp("2026-10-05"), pd.Timestamp("2026-10-08"))
     assert len(inside) == 4 and set(inside["direction"]) == {1, -1}
+
+
+@pytest.mark.skipif(not (Path(__file__).resolve().parents[1] / "research" / "ma_cross_slope_5m" / "grid"
+                         / "stage3_copper.parquet").exists(), reason="study grid not in the checkout")
+def test_trade_ledger_reproduces_the_finalist_trades():
+    from src.ma_slope.ledger import ledger, summary_table
+    from src.ma_slope.presentation import TABLES
+
+    df, cfg, _ = ledger("copper")  # ledger() itself asserts PnL against the held-contract and raw price moves
+    ref = pd.read_csv(TABLES / "finalist_trades" / "copper.csv")
+    assert cfg.label.startswith("VWMA16 / WMA16")
+    assert len(df) == len(ref) and list(df["trade"]) == list(range(1, len(ref) + 1))
+    np.testing.assert_allclose(df["pnl_usd"], ref["pnl"], atol=1e-3)
+    np.testing.assert_allclose(df["cum_pnl_usd"], np.cumsum(ref["pnl"]), atol=1e-3)
+    s = summary_table(df.assign(config=cfg.label)).iloc[0]
+    assert s["прибыльных"] + s["убыточных"] <= s["сделок"] == len(df)

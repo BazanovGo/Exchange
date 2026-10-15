@@ -610,6 +610,7 @@ python -c "from src.ma_slope import study; study.export_all()"    # компак
 | `ranking_group_bests.csv` | рейтинг: лучшая по плато конфигурация каждой из 144 групп, все метрики, p и q (BH) |
 | `finalists.csv` | лучшие конфигурации инструментов (общая и по категориям) с Sharpe, Sortino, MC, поправкой Холма |
 | `finalist_trades/*.csv`, `finalist_monthly_pnl.csv`, `finalist_yearly_pnl.csv` | сделки и календарь финалистов |
+| `trade_ledger.xlsx`, `trade_ledger.csv` | реестр всех 16 349 сделок финалистов этапа 3 по порядку: время, контракт и цена входа и выхода, роллы внутри сделки, PnL в $ и тиках, накопленный итог; в Excel — сводка, все сделки в порядке закрытия и лист на инструмент (итоги, просадка и серии убытков — формулы). Сборка — `python scripts/build_trade_ledger.py`, просмотр — `notebooks/08_trade_ledger.ipynb` |
 | `slope_sweep.csv` | этап 2: все 128 настроек наклона × выход по инструментам |
 | `walk_forward.csv`, `walk_forward_summary.csv` | выбор и результат каждого тестового года, совокупный t |
 | `selection_skill.csv` | перцентиль выбора среди всех конфигураций периода |

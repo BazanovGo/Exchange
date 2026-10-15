@@ -7,6 +7,7 @@ numpy>=1.26,<2.0
 scipy>=1.11
 numba>=0.59
 pyarrow>=14.0,<23  # 23+ needs NumPy 2
+openpyxl>=3.1  # Excel trade ledger (src/ma_slope/ledger.py)
 scikit-learn>=1.4
 
 # Visualization

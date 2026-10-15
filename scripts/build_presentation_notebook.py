@@ -439,6 +439,7 @@ slide("""
 | Что | Где |
 |---|---|
 | Эта презентация | `notebooks/07_project_presentation.ipynb`, слайды — `07_project_presentation.slides.html` |
+| Все сделки лучших конфигураций по порядку (16 349 сделок) | `notebooks/08_trade_ledger.ipynb`, `research/ma_cross_slope_5m/tables/trade_ledger.xlsx` |
 | Подробный разбор и исследователь любой конфигурации (VectorBT) | `notebooks/06_ma_slope_research.ipynb` |
 | Полный отчёт с методологией и ограничениями | `research/ma_cross_slope_5m/README.md` |
 | Таблицы: рейтинг, финалисты, сделки, walk-forward, PBO… | `research/ma_cross_slope_5m/tables/` |
