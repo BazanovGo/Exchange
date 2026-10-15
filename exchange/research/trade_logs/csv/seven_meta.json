@@ -1,6 +1,7 @@
 [
  {
   "id": "7F_1_TSMOM_BR",
+  "csv": "7F_1_TSMOM_BR.csv",
   "study": "seven",
   "name": "1 Time-Series Momentum · BR",
   "market": "BR",
@@ -12,6 +13,7 @@
  },
  {
   "id": "7F_1_TSMOM_NG",
+  "csv": "7F_1_TSMOM_NG.csv",
   "study": "seven",
   "name": "1 Time-Series Momentum · NG",
   "market": "NG",
@@ -23,6 +25,7 @@
  },
  {
   "id": "7F_2_DualMA_BR",
+  "csv": "7F_2_DualMA_BR.csv",
   "study": "seven",
   "name": "2 Dual Moving Average · BR",
   "market": "BR",
@@ -34,6 +37,7 @@
  },
  {
   "id": "7F_2_DualMA_NG",
+  "csv": "7F_2_DualMA_NG.csv",
   "study": "seven",
   "name": "2 Dual Moving Average · NG",
   "market": "NG",
@@ -45,6 +49,7 @@
  },
  {
   "id": "7F_3_Breakout_BR",
+  "csv": "7F_3_Breakout_BR.csv",
   "study": "seven",
   "name": "3 Channel Breakout · BR",
   "market": "BR",
@@ -56,6 +61,7 @@
  },
  {
   "id": "7F_3_Breakout_NG",
+  "csv": "7F_3_Breakout_NG.csv",
   "study": "seven",
   "name": "3 Channel Breakout · NG",
   "market": "NG",
@@ -67,6 +73,7 @@
  },
  {
   "id": "7F_4_CrossSect_NGBR",
+  "csv": "7F_4_CrossSect_NGBR.csv",
   "study": "seven",
   "name": "4 Cross-sectional momentum · NG+BR",
   "market": "NG+BR",
@@ -78,6 +85,7 @@
  },
  {
   "id": "7F_5_Carry_BR",
+  "csv": "7F_5_Carry_BR.csv",
   "study": "seven",
   "name": "5 Carry / term structure · BR",
   "market": "BR",
@@ -89,6 +97,7 @@
  },
  {
   "id": "7F_5_Carry_NG",
+  "csv": "7F_5_Carry_NG.csv",
   "study": "seven",
   "name": "5 Carry / term structure · NG",
   "market": "NG",
@@ -100,6 +109,7 @@
  },
  {
   "id": "7F_6_PortfolioMA_NGBR",
+  "csv": "7F_6_PortfolioMA_NGBR.csv",
   "study": "seven",
   "name": "6 MA + portfolio · NG+BR",
   "market": "NG+BR",
@@ -111,6 +121,7 @@
  },
  {
   "id": "7F_7_MomRev_BR",
+  "csv": "7F_7_MomRev_BR.csv",
   "study": "seven",
   "name": "7 Momentum + reversal · BR",
   "market": "BR",
@@ -122,6 +133,7 @@
  },
  {
   "id": "7F_7_MomRev_NG",
+  "csv": "7F_7_MomRev_NG.csv",
   "study": "seven",
   "name": "7 Momentum + reversal · NG",
   "market": "NG",

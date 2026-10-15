@@ -17,6 +17,7 @@ from openpyxl.utils import get_column_letter
 HERE = Path(__file__).resolve().parent
 CSV = HERE / "csv"
 OUT = HERE / "trade_log.xlsx"
+OUT_GROUPS = HERE / "trade_log_groups.xlsx"
 
 FONT = "Arial"
 USD = '#,##0.00;[Red]-#,##0.00;0.00'
@@ -43,7 +44,11 @@ def font(**kw):
     return Font(name=FONT, size=kw.pop("size", 10), **kw)
 
 
-def strategies() -> list[dict]:
+def strategies(kind: str = "main") -> list[dict]:
+    if kind == "groups":
+        ma = json.loads((CSV / "ma_groups_meta.json").read_text())
+        _ma_fields(ma, groups=True)
+        return ma
     seven = json.loads((CSV / "seven_meta.json").read_text())
     ma = json.loads((CSV / "ma_meta.json").read_text())
     for m in seven:
@@ -53,19 +58,23 @@ def strategies() -> list[dict]:
         m["ref_note"] = (f"docs/RESULTS_SEVEN_FAMILIES.md, раздел 2, «итог. дох.» "
                          f"{m['oos_return_report']:+.1%} × 1 000 000")
         m["time_fmt"] = "yyyy-mm-dd"
+    _ma_fields(ma, groups=False)
+    return seven + ma
+
+
+def _ma_fields(ma: list[dict], groups: bool):
     for m in ma:
         stage = "этап 1" if m["stage"] == "stage1" else "этап 3"
-        m["study"] = f"Скользящие средние, 5 мин, {stage}"
-        m["title"] = f"{m['market']} · {m['rule']} · {m['name']}"
+        m["study"] = f"Скользящие средние, 5 мин, {stage}" + (", лучшие в группе" if groups else "")
+        m["title"] = f"{m['market']} · " + (f"{m['group']} · " if groups else "") + f"{m['rule']} · {m['name']}"
         m["ref"], m["ref_kind"] = m["full_pnl"], "весь период"
         m["ref_note"] = (f"research/ma_crossover_5m/results/{m['stage']}/{m['market']}/finalists.json, "
                          "full.pnl (VectorBT)")
         m["time_fmt"] = "yyyy-mm-dd hh:mm"
-    return seven + ma
 
 
 def write_strategy(wb: Workbook, m: dict) -> tuple[str, int]:
-    df = pd.read_csv(CSV / f"{m['id']}.csv", keep_default_na=False, na_values=[""])
+    df = pd.read_csv(CSV / m["csv"], keep_default_na=False, na_values=[""])
     ws = wb.create_sheet(m["id"])
     ws["A1"] = m["title"]
     ws["A1"].font = font(size=12, bold=True)
@@ -113,10 +122,7 @@ def write_strategy(wb: Workbook, m: dict) -> tuple[str, int]:
     return ws.title, last
 
 
-def write_summary(ws, rows: list[tuple[dict, str, int]]):
-    ws["A1"] = "Журнал сделок отобранных стратегий"
-    ws["A1"].font = font(size=14, bold=True)
-    notes = [
+MAIN_NOTES = [
         "Лист на каждую стратегию: все сделки по порядку, сколько заработано (+) или потеряно (−) на каждой, "
         "итог нарастающим и серия убытков подряд.",
         "Семь семейств: счёт 1 000 000 USD, размер позиции по целевой волатильности 15%, издержки ~7 б.п. за "
@@ -126,7 +132,21 @@ def write_summary(ws, rows: list[tuple[dict, str, int]]):
         "Синим — числа из отчётов для сверки; всё остальное на этом листе — формулы по листам стратегий. "
         "У семи семейств отчёт даёт доходность с точностью 0.1% (1 000 USD на счёт), поэтому расхождение "
         "до ±500 USD — округление.",
-    ]
+]
+GROUP_NOTES = [
+    "Скользящие средние, лучшие R1–R3 внутри каждой из четырёх групп «модель выхода × метод наклона» на "
+    "этапах 1 и 3. Если лучший в группе совпал с глобальным отбором, он есть только в trade_log.xlsx.",
+    "Лист на каждую стратегию: все сделки по порядку, сколько заработано (+) или потеряно (−) на каждой, "
+    "итог нарастающим и серия убытков подряд.",
+    "1 контракт (NG — 100 MMBtu, BR — 10 баррелей), без издержек, как требовало задание; при 1 тике издержек "
+    "на сделку (0.1 USD) итог уменьшается на 0.1 USD × число сделок.",
+    "Синим — числа из отчёта для сверки; всё остальное на этом листе — формулы по листам стратегий.",
+]
+
+
+def write_summary(ws, rows: list[tuple[dict, str, int]], title: str, notes: list[str]):
+    ws["A1"] = title
+    ws["A1"].font = font(size=14, bold=True)
     for k, text in enumerate(notes, start=2):
         ws[f"A{k}"] = text
         ws[f"A{k}"].font = font(color="52514E")
@@ -173,33 +193,10 @@ def write_summary(ws, rows: list[tuple[dict, str, int]]):
     ws.freeze_panes = f"B{h + 1}"
 
 
-def write_readme(rows: list[tuple[dict, str, int]]):
-    lines = [
-        "# Журнал сделок отобранных стратегий",
-        "",
-        "Все сделки по порядку и результат каждой: **[`trade_log.xlsx`](trade_log.xlsx)** — лист «Сводка» "
-        "и лист на каждую стратегию с итогом нарастающим и сериями убытков (формулы Excel). Те же сделки — "
-        "в CSV в [`csv/`](csv/), по файлу на стратегию.",
-        "",
-        "* **Семь семейств** — победители по in-sample из `docs/RESULTS_SEVEN_FAMILIES.md`; счёт "
-        "1 000 000 USD, позиция по целевой волатильности 15%, издержки вычтены. IS и OOS — отдельные "
-        "прогоны, как в отчёте. Позиция с изменяемым размером: уменьшение позиции записывается движком "
-        "как отдельное закрытие. Последняя строка периода, если позиция осталась открытой, — её "
-        "переоценка по последнему закрытию.",
-        "* **Скользящие средние** — глобальные отборы R1 (макс. PnL), R2 (макс. Шарп), R3 (плато) "
-        "на этапах 1 и 3; 1 контракт, без издержек (так в задании). Котировки — Open бара исполнения. "
-        "«через ролл» — позиция пережила смену контракта: результат включает перекладку и не равен "
-        "разности котировок.",
-        "",
-        "Каждый файл сверен с отчётом при выгрузке (`export_trades.py` падает при расхождении): "
-        "OOS-итог семи семейств — с «итог. дох.» отчёта, итог скользящих средних — с VectorBT-статистикой "
-        "финалиста, а IS/OOS — с полной сеткой.",
-        "",
-        "| Стратегия | Сделок | Прибыльных | Итог IS, USD | Итог OOS, USD | Макс. убыточных сделок подряд | CSV |",
-        "|---|---|---|---|---|---|---|",
-    ]
+def _readme_rows(rows: list[tuple[dict, str, int]]) -> list[str]:
+    out = []
     for m, _sheet, _ in rows:
-        df = pd.read_csv(CSV / f"{m['id']}.csv")
+        df = pd.read_csv(CSV / m["csv"])
         trades = df[df["вход"].notna()]
         streak = best = 0
         for v in df["результат, USD"]:
@@ -207,27 +204,82 @@ def write_readme(rows: list[tuple[dict, str, int]]):
             best = max(best, streak)
         is_, oos = (df.loc[df["период"] == p, "результат, USD"].sum() for p in ("IS", "OOS"))
         num = lambda v: f"{v:+,.0f}".replace(",", " ")  # noqa: E731
-        lines.append(f"| {m['study']}: {m['title']} | {len(trades)} | {(trades['результат, USD'] > 0).mean():.0%} "
-                     f"| {num(is_)} | {num(oos)} | {best} | [{m['id']}.csv](csv/{m['id']}.csv) |")
-    lines += ["", "Пересборка: `python export_trades.py seven` (окружение пакета `exchange`), "
-              "`python export_trades.py ma` (нужен рабочий каталог исследования `MA5M_WORK`), "
-              "`python export_trades.py excel`."]
+        out.append(f"| {m['study']}: {m['title']} | {len(trades)} | {(trades['результат, USD'] > 0).mean():.0%} "
+                   f"| {num(is_)} | {num(oos)} | {best} | [{Path(m['csv']).name}](csv/{m['csv']}) |")
+    return out
+
+
+HEADER = ["| Стратегия | Сделок | Прибыльных | Итог IS, USD | Итог OOS, USD | Макс. убыточных сделок подряд | CSV |",
+          "|---|---|---|---|---|---|---|"]
+
+
+def write_readme(rows, group_rows):
+    n_main = sum(last - FIRST + 1 for _, _, last in rows)
+    n_groups = sum(last - FIRST + 1 for _, _, last in group_rows)
+    lines = [
+        "# Журнал сделок отобранных стратегий",
+        "",
+        "Все сделки по порядку и результат каждой, по листу на стратегию с итогом нарастающим и сериями "
+        "убытков (формулы Excel) и листом «Сводка»:",
+        "",
+        f"* **[`trade_log.xlsx`](trade_log.xlsx)** — основные отборы, {len(rows)} стратегий, "
+        f"{n_main:,} строк: победители семи семейств и глобальные отборы скользящих средних.".replace(",", " "),
+        f"* **[`trade_log_groups.xlsx`](trade_log_groups.xlsx)** — скользящие средние, лучшие внутри "
+        f"каждой группы «модель выхода × метод наклона», {len(group_rows)} стратегий, "
+        f"{n_groups:,} строк.".replace(",", " "),
+        "",
+        "Те же сделки — в CSV: [`csv/`](csv/) для основных отборов, [`csv/groups/`](csv/groups/) "
+        "(сжатые `.csv.gz`) для лучших в группах.",
+        "",
+        "* **Семь семейств** — победители по in-sample из `docs/RESULTS_SEVEN_FAMILIES.md`; счёт "
+        "1 000 000 USD, позиция по целевой волатильности 15%, издержки вычтены. IS и OOS — отдельные "
+        "прогоны, как в отчёте. Позиция с изменяемым размером: уменьшение позиции записывается движком "
+        "как отдельное закрытие. Последняя строка периода, если позиция осталась открытой, — её "
+        "переоценка по последнему закрытию.",
+        "* **Скользящие средние** — правила R1 (макс. PnL), R2 (макс. Шарп), R3 (плато) на этапах 1 и 3: "
+        "по всей сетке (глобальные) и внутри каждой группы «выход × метод наклона». 1 контракт, без "
+        "издержек (так в задании). Котировки — Open бара исполнения. «через ролл» — позиция пережила "
+        "смену контракта: результат включает перекладку и не равен разности котировок. Если лучший в "
+        "группе совпал с глобальным отбором, он записан один раз — среди глобальных.",
+        "",
+        "Каждый файл сверен с отчётом при выгрузке (`export_trades.py` падает при расхождении): "
+        "OOS-итог и число сделок семи семейств — с отчётом, итог скользящих средних — с VectorBT-статистикой "
+        "финалиста, а IS/OOS — с полной сеткой.",
+        "",
+        "## Основные отборы",
+        "",
+        *HEADER, *_readme_rows(rows),
+        "",
+        "## Скользящие средние: лучшие в группах",
+        "",
+        *HEADER, *_readme_rows(group_rows),
+        "",
+        "Пересборка: `python export_trades.py seven` (окружение пакета `exchange`), "
+        "`python export_trades.py ma` (нужен рабочий каталог исследования `MA5M_WORK`), "
+        "`python export_trades.py excel`.",
+    ]
     (HERE / "README.md").write_text("\n".join(lines) + "\n")
 
 
-def main():
+def build(kind: str, out: Path, title: str, notes: list[str]):
     wb = Workbook()
     summary = wb.active
     summary.title = "Сводка"
     rows = []
-    for m in strategies():
+    for m in strategies(kind):
         sheet, last = write_strategy(wb, m)
         rows.append((m, sheet, last))
         print(f"{sheet:22} строк {last - FIRST + 1:5d}")
-    write_summary(summary, rows)
-    wb.save(OUT)
-    write_readme(rows)
-    print(f"записан {OUT} ({OUT.stat().st_size / 1e6:.1f} МБ)")
+    write_summary(summary, rows, title, notes)
+    wb.save(out)
+    print(f"записан {out} ({out.stat().st_size / 1e6:.1f} МБ)")
+    return rows
+
+
+def main():
+    rows = build("main", OUT, "Журнал сделок отобранных стратегий", MAIN_NOTES)
+    group_rows = build("groups", OUT_GROUPS, "Журнал сделок: скользящие средние, лучшие в группах", GROUP_NOTES)
+    write_readme(rows, group_rows)
 
 
 if __name__ == "__main__":

@@ -4,11 +4,13 @@
 
     python export_trades.py seven   # семь семейств: пересчёт через движок пакета (нужен пакет exchange)
     python export_trades.py ma      # скользящие средние: сделки VectorBT из рабочего каталога
+                                    # (глобальные отборы — csv/, лучшие в группах — csv/groups/)
     python export_trades.py excel   # trade_log.xlsx и README.md из CSV
 
 Сделки не отбираются заново: семь семейств — победители из
-docs/RESULTS_SEVEN_FAMILIES.md, скользящие средние — глобальные отборы R1–R3
-из research/ma_crossover_5m/results/<этап>/<рынок>/finalists.json. Каждый
+docs/RESULTS_SEVEN_FAMILIES.md, скользящие средние — все финалисты из
+research/ma_crossover_5m/results/<этап>/<рынок>/finalists.json: глобальные
+отборы R1–R3 и лучшие R1–R3 внутри каждой группы «выход × метод наклона». Каждый
 шаг сверяет сумму сделок с итогом, опубликованным в отчёте, и падает при
 расхождении.
 """
@@ -142,7 +144,7 @@ def export_seven():
         if abs(got - cell.oos_return_report) > 0.0006:          # отчёт округлён до 0.1%
             raise SystemExit(f"{cell.id}: OOS {got:.4%} против отчёта {cell.oos_return_report:.1%}")
         df[COLUMNS].to_csv(CSV / f"{cell.id}.csv", index=False)
-        meta.append({"id": cell.id, "study": "seven", "name": cell.ячейка, "market": market,
+        meta.append({"id": cell.id, "csv": f"{cell.id}.csv", "study": "seven", "name": cell.ячейка, "market": market,
                      "params": cell.лучшая, "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%",
                      "oos_return_report": cell.oos_return_report, "is_pnl": totals["IS"], "oos_pnl": totals["OOS"]})
         print(f"{cell.id:22} сделок {len(df):4d} | IS {totals['IS']:+12,.0f} | OOS {totals['OOS']:+12,.0f} "
@@ -165,14 +167,17 @@ def export_ma():
     import data as D
 
     CSV.mkdir(exist_ok=True)
-    meta = []
+    (CSV / "groups").mkdir(exist_ok=True)
+    meta, groups = [], []
     for stage in ("stage1", "stage3"):
         for t in ("NG", "BR"):
             raw = D.load_raw(t)
             secid = raw["secid"].to_numpy()
             pos = pd.Series(np.arange(len(raw)), index=pd.DatetimeIndex(raw.index))
             finalists = json.loads((MA / "results" / stage / t / "finalists.json").read_text())
-            for f in (x for x in finalists if x["scope"] == "global"):
+            # Если лучший в группе совпал с глобальным отбором, в finalists.json он
+            # записан один раз — как глобальный.
+            for f in finalists:
                 c = f["config"]
                 trades = pd.read_parquet(MA_WORK / "analysis" / stage / t / "finalists" /
                                          f"cfg{f['grid_config']}_trades.parquet")
@@ -222,17 +227,27 @@ def export_ma():
                     if abs(by_period[period] - ref) > 0.51:          # в сетке PnL округлён до 1 USD
                         raise SystemExit(f"{stage}/{t}/{f['grid_config']} {period}: {by_period[period]} против {ref}")
                 rule = f["rule"]
-                sid = f"MA_{stage[-1]}_{t}_{rule.split('_')[0]}"
+                r_code = rule.split("_")[0]
+                if f["scope"] == "global":
+                    sid = f"MA_{stage[-1]}_{t}_{r_code}"
+                    path, group = f"{sid}.csv", ""
+                else:
+                    sid = f"MA_{stage[-1]}_{t}_x{c['exit'][0]}_s{c['method'][0]}_{r_code}"
+                    path, group = f"groups/{sid}.csv.gz", f"выход {c['exit']}, наклон {c['method']}"
                 name = (f"{c['fast_type']}{c['fast_period']} × {c['slow_type']}{c['slow_period']}, "
                         f"наклон {c['method']}, выход {c['exit']}")
-                df[COLUMNS].to_csv(CSV / f"{sid}.csv", index=False)
-                meta.append({"id": sid, "study": "ma", "stage": stage, "market": t, "rule": RULES[rule],
-                             "name": name, "units": "USD на 1 контракт, без издержек (так в задании)",
-                             "is_pnl": by_period["IS"], "oos_pnl": by_period["OOS"], "full_pnl": total,
-                             "slope": {k: f["slope"][k] for k in ("k", "coverage", "atr_period")}})
-                print(f"{sid:14} {name:50} сделок {len(df):5d} | через ролл {rolled.sum():3d} | "
+                # mtime=0: одинаковые сделки дают одинаковый файл при каждой выгрузке.
+                df[COLUMNS].to_csv(CSV / path, index=False,
+                                   compression={"method": "gzip", "mtime": 0} if path.endswith(".gz") else None)
+                (meta if f["scope"] == "global" else groups).append({
+                    "id": sid, "csv": path, "study": "ma", "stage": stage, "market": t, "rule": RULES[rule],
+                    "group": group, "name": name, "units": "USD на 1 контракт, без издержек (так в задании)",
+                    "is_pnl": by_period["IS"], "oos_pnl": by_period["OOS"], "full_pnl": total,
+                    "slope": {k: f["slope"][k] for k in ("k", "coverage", "atr_period")}})
+                print(f"{sid:20} {name:50} сделок {len(df):5d} | через ролл {rolled.sum():3d} | "
                       f"IS {by_period['IS']:+8.1f} | OOS {by_period['OOS']:+8.1f}")
     (CSV / "ma_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
+    (CSV / "ma_groups_meta.json").write_text(json.dumps(groups, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":
