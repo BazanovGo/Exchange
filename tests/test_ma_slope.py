@@ -205,3 +205,28 @@ def test_walk_forward_selects_on_train_years_only():
     first = wf.iloc[0]
     assert 2 <= first["slow_period"] < 10 and 1 <= first["fast_period"] < 5
     assert first["test_t"] < 2  # region A has no edge in the test year
+
+
+def test_presentation_example_window_is_a_representative_weekday_span():
+    from types import SimpleNamespace
+
+    from src.ma_slope.presentation import _example_window
+
+    index = pd.date_range("2026-10-01", "2026-10-09 23:55", freq="5min")  # Thu 1st .. Fri 9th
+    secid = np.where(index < pd.Timestamp("2026-10-08"), "OLD", "NEW")
+    ins = SimpleNamespace(index=index, secid=secid)
+
+    def trade(day, hours, direction, pnl):
+        start = pd.Timestamp(f"2026-10-{day:02d} 10:00")
+        return {"entry_time": start, "exit_time": start + pd.Timedelta(hours=hours), "direction": direction,
+                "pnl": pnl}
+
+    tr = pd.DataFrame([
+        trade(1, 2, 1, 5.0), trade(2, 2, -1, -3.0),                        # Thu-Fri, then a weekend
+        trade(5, 2, 1, 4.0), trade(6, 2, 1, 2.0), trade(6, 5, -1, -1.0), trade(7, 2, 1, 3.0),  # Mon-Wed
+        trade(8, 2, 1, 1.0), trade(9, 2, -1, -2.0),                        # Thu-Fri, new contract
+    ])
+    lo, hi, inside = _example_window(tr, ins)
+    # Oct 7-9 and Oct 6-8 span the contract change; Oct 5-7 is the latest weekday span in one contract.
+    assert (lo, hi) == (pd.Timestamp("2026-10-05"), pd.Timestamp("2026-10-08"))
+    assert len(inside) == 4 and set(inside["direction"]) == {1, -1}
