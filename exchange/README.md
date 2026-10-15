@@ -166,6 +166,11 @@ uv run exchange controls               # the framework's own calibration
   single-path nature of the evidence are accounted for. In Russian, generated
   by [`research/ma_crossover_5m/`](research/ma_crossover_5m/README.md); charts
   in `notebooks/03_ma_crossover_5m.ipynb`.
+* [`research/trade_logs/`](research/trade_logs/README.md) — every trade of
+  the selected strategies of both studies, in order, with its profit or loss:
+  `trade_log.xlsx` (a sheet per strategy, running total and losing streaks as
+  formulas) and the same trades as CSV. Each file is reconciled with the
+  report it came from when it is exported.
 * [`notebooks/00_presentation.ipynb`](notebooks/00_presentation.ipynb) — the
   whole project as one presentation, in Russian: the audit, the framework,
   the data, both studies and what they found. Built from the result files in

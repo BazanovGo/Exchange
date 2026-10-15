@@ -1,0 +1,206 @@
+[
+ {
+  "id": "MA_1_NG_R1",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "name": "WMA2 × VWMA69, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1969.7,
+  "oos_pnl": 822.7,
+  "full_pnl": 2792.3999999999996,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_R2",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "name": "VWMA60 × EMA52, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1436.5,
+  "oos_pnl": 171.89999999999998,
+  "full_pnl": 1608.4,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_R3",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R3 плато",
+  "name": "VWMA81 × EMA81, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1468.8000000000002,
+  "oos_pnl": 211.3,
+  "full_pnl": 1680.1,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_R1",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "name": "VWMA7 × TMA78, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2936.9,
+  "oos_pnl": 302.9000000000001,
+  "full_pnl": 3239.7999999999997,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_R2",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "name": "WMA88 × EMA120, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2586.4,
+  "oos_pnl": 61.399999999999864,
+  "full_pnl": 2647.8,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_R3",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R3 плато",
+  "name": "WMA88 × EMA121, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2564.3,
+  "oos_pnl": 48.30000000000001,
+  "full_pnl": 2612.6000000000004,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_R1",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "name": "EMA12 × WMA131, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1818.4000000000003,
+  "oos_pnl": 517.5,
+  "full_pnl": 2335.9,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_R2",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "name": "TMA21 × EMA20, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1503.8,
+  "oos_pnl": 532.5999999999999,
+  "full_pnl": 2036.4,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_NG_R3",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R3 плато",
+  "name": "TMA38 × SMA250, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1315.6000000000001,
+  "oos_pnl": -305.4,
+  "full_pnl": 1010.1999999999999,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_R1",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "name": "TMA10 × SMA23, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 3357.0000000000005,
+  "oos_pnl": 250.0999999999999,
+  "full_pnl": 3607.1000000000004,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_BR_R2",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "name": "TMA43 × SMA65, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 3082.8,
+  "oos_pnl": 308.0000000000001,
+  "full_pnl": 3390.8,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_R3",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R3 плато",
+  "name": "TMA40 × SMA65, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2950.5,
+  "oos_pnl": 267.9000000000001,
+  "full_pnl": 3218.4000000000005,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ }
+]
