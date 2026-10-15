@@ -7,6 +7,8 @@ Everything here reads the raw grids written by ``scripts/ma_slope_research.py``
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -613,3 +615,98 @@ def selection_skill(write=print) -> pd.DataFrame:
                    "Walk-forward pick vs all configs of the same test year (0 = no better than a random config)",
                    "percentile - 0.5", FIGS / "selection_skill.png")
     return out
+
+
+GRID_DIR = OUT / "grid"
+_GRID_METRICS = ("trades", "pnl", "t", "profit_factor", "win_rate", "max_dd")
+
+
+def _compact(metric: str, v: np.ndarray) -> np.ndarray:
+    """Storage precision: trades exact, money to 0.1 USD, ratios to 0.01, win rate to 0.001."""
+    if metric == "trades":
+        return v.astype(np.int32)
+    digits = {"pnl": 1, "max_dd": 1, "win_rate": 3}.get(metric, 2)
+    return np.round(v, digits).astype(np.float32)
+
+
+def export_grid(stage: str, ticker: str) -> Path:
+    """Every config of a full grid with its key IS/OOS metrics, as compact parquet.
+
+    The raw ``float32`` grids (with year buckets) are several GB per
+    instrument; this keeps the per-config results within GitHub's file limits.
+    """
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    stats, _, meta = A.load_grid(RAW / stage / ticker)
+    t_is, score, _, _ = A.is_scores(stats)
+    shape = stats.shape[:6]
+    axes = np.unravel_index(np.arange(int(np.prod(shape))), shape)
+    cols = {
+        "slow_type": pa.DictionaryArray.from_arrays(axes[0].astype(np.int8), list(meta["slow_types"])),
+        "slow_period": np.asarray(meta["slow_periods"], np.int16)[axes[1]],
+        "method": pa.DictionaryArray.from_arrays(axes[2].astype(np.int8), list(METHODS)),
+        "fast_type": pa.DictionaryArray.from_arrays(axes[3].astype(np.int8), list(meta["fast_types"])),
+        "fast_period": np.asarray(meta["fast_periods"], np.int16)[axes[4]],
+        "model": pa.DictionaryArray.from_arrays(axes[5].astype(np.int8), list(meta["models"])),
+    }
+    for g in ("is", "oos"):
+        m = A.metrics(stats[..., A.GROUP[g], :])
+        for k in _GRID_METRICS:
+            cols[f"{g}_{k}"] = _compact(k, m[k].ravel())
+    cols["is_plateau_t"] = _compact("t", score.ravel())
+    GRID_DIR.mkdir(parents=True, exist_ok=True)
+    path = GRID_DIR / f"{stage}_{ticker}.parquet"
+    table = pa.table(cols)
+    meta_out = {k: meta[k] for k in ("ticker", "bars", "start", "end", "split_time", "multiplier")}
+    meta_out["slopes"] = meta.get("chosen") or {f"{METHODS[m]}/{x}": asdict(BASELINE[m])
+                                                for m in range(2) for x in EXIT_MODELS}
+    table = table.replace_schema_metadata({"ma_slope": json.dumps(meta_out)})
+    pq.write_table(table, path, compression="zstd", compression_level=9, row_group_size=1 << 20)
+    return path
+
+
+def export_sweep(ticker: str) -> Path:
+    """Stage 2 + 2b: every lattice config under each of the 128 slope settings (IS/OOS trades, PnL, t)."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    from src.ma_slope.grid import SLOPE_GRID_BASE, SLOPE_GRID_EXT
+
+    parts = []
+    for stage, slopes in (("stage2", SLOPE_GRID_BASE), ("stage2b", SLOPE_GRID_EXT)):
+        stats, _, meta = A.load_grid(RAW / stage / ticker)
+        shape = stats.shape[:6]
+        axes = np.unravel_index(np.arange(int(np.prod(shape))), shape)
+        method = np.array([s.method for s in slopes], np.int8)[axes[2]]
+        cols = {
+            "slow_type": pa.DictionaryArray.from_arrays(axes[0].astype(np.int8), list(meta["slow_types"])),
+            "slow_period": np.asarray(meta["slow_periods"], np.int16)[axes[1]],
+            "fast_type": pa.DictionaryArray.from_arrays(axes[3].astype(np.int8), list(meta["fast_types"])),
+            "fast_period": np.asarray(meta["fast_periods"], np.int16)[axes[4]],
+            "model": pa.DictionaryArray.from_arrays(axes[5].astype(np.int8), list(meta["models"])),
+            "method": pa.DictionaryArray.from_arrays(method, list(METHODS)),
+            "k": np.array([s.k for s in slopes], np.int16)[axes[2]],
+            "eps": np.array([s.eps for s in slopes], np.float32)[axes[2]],
+            "atr_n": np.array([s.atr_n if s.method else 0 for s in slopes], np.int16)[axes[2]],
+        }
+        for g in ("is", "oos"):
+            m = A.metrics(stats[..., A.GROUP[g], :])
+            for k in ("trades", "pnl", "t"):
+                cols[f"{g}_{k}"] = _compact(k, m[k].ravel())
+        parts.append(pa.table(cols))
+    table = pa.concat_tables(parts)
+    GRID_DIR.mkdir(parents=True, exist_ok=True)
+    path = GRID_DIR / f"stage2_{ticker}.parquet"
+    pq.write_table(table, path, compression="zstd", compression_level=9, row_group_size=1 << 20)
+    return path
+
+
+def export_all(write=print, overwrite: bool = False) -> None:
+    """Export every grid; existing files are kept unless ``overwrite`` (the export is resumable)."""
+    for t in TICKERS:
+        for stage in ("stage1", "stage3", "stage2"):
+            if (GRID_DIR / f"{stage}_{t}.parquet").exists() and not overwrite:
+                continue
+            path = export_sweep(t) if stage == "stage2" else export_grid(stage, t)
+            write(f"{stage} {t}: {path.stat().st_size / 1e6:.1f} MB")

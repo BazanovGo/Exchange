@@ -71,7 +71,8 @@ def metrics(g: np.ndarray) -> dict[str, np.ndarray]:
             "long_share": g[..., S_NLONG] / n,
             "long_pnl": g[..., S_PNLLONG],
         }
-    out["recovery"] = np.where(out["max_dd"] > 0, out["pnl"] / out["max_dd"], np.nan)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        out["recovery"] = np.where(out["max_dd"] > 0, out["pnl"] / out["max_dd"], np.nan)
     return out
 
 
