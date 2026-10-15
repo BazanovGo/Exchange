@@ -24,7 +24,7 @@ reduces it precedes work that adds surface area.
 | Features | 35 fundamental series for natural gas and crude with conservative publication lags, vendor-free provider interface, row-wise term-structure construction |
 | Reporting | 23-section standard report with a generated "what could make this result false?" section |
 | CLI | doctor, data validate/import/continuous, scan, strategies, features, backtest, research, falsify, reproduce, experiments, report, controls |
-| Tests and CI | 467 tests, 83% coverage; temporal integrity runs first and alone, then tests on three Python versions, then controls, reproducibility and the Docker build |
+| Tests and CI | 521 tests, 83% coverage; temporal integrity runs first and alone, then tests on three Python versions, then controls, reproducibility and the Docker build |
 
 ## Deliberately absent
 

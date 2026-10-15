@@ -128,7 +128,7 @@ from a verdict to an order, and there should not be.
 
 ## Tests
 
-467 tests, 83% statement coverage. The ordering in CI is deliberate: temporal
+521 tests, 83% statement coverage. The ordering in CI is deliberate: temporal
 integrity runs **first and alone**, because a lookahead invalidates every
 other number in the build. Then the synthetic controls — a random walk that
 must not earn a verdict above `WEAK`, a constructed edge that must be found,
@@ -166,6 +166,11 @@ uv run exchange controls               # the framework's own calibration
   single-path nature of the evidence are accounted for. In Russian, generated
   by [`research/ma_crossover_5m/`](research/ma_crossover_5m/README.md); charts
   in `notebooks/03_ma_crossover_5m.ipynb`.
+* [`notebooks/00_presentation.ipynb`](notebooks/00_presentation.ipynb) — the
+  whole project as one presentation, in Russian: the audit, the framework,
+  the data, both studies and what they found. Built from the result files in
+  this repository by [`research/presentation/`](research/presentation/build.py);
+  every number in its text is read from those files.
 
 ## A caution
 
