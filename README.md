@@ -28,6 +28,7 @@ python scripts/run_notebook.py notebooks/02_strategy_research.ipynb
 python scripts/run_notebook.py notebooks/03_position_management.ipynb
 python scripts/run_notebook.py notebooks/04_pattern_discovery.ipynb
 python scripts/run_notebook.py notebooks/05_final_report.ipynb
+python scripts/run_notebook.py notebooks/06_ma_slope_research.ipynb   # исследование MA + наклон на фьючерсах MOEX
 ```
 
 `scripts/run_notebook.py` выполняет ноутбук и вычищает widget-метаданные,
@@ -66,6 +67,7 @@ Yahoo Finance на детерминированный локальный сэм�
 | 03 | `03_position_management.ipynb` | SL/TP/Trailing/BreakEven/TimeStop/частичная фиксация + комбинации; честные вердикты real/false improvement |
 | 04 | `04_pattern_discovery.ipynb` | Рыночные признаки, режимы, корреляции, feature importance; проверка фильтров бэктестом IS→OOS |
 | 05 | `05_final_report.ipynb` | Kelly (classical/half/quarter + ограничения), Monte Carlo (разорение, распределения), Walk-Forward, сводка переобучения, рекомендации |
+| 06 | `06_ma_slope_research.ipynb` | Исследование «пересечение цены с быстрой MA + наклон медленной MA» на 5m фьючерсах MOEX: ~9 млн конфигураций на инструмент, рейтинги, OOS, walk-forward, PBO, межрыночная проверка, просмотр любой конфигурации через VectorBT ([отчёт](research/ma_cross_slope_5m/README.md)) |
 
 ## Ключевые интерфейсы
 

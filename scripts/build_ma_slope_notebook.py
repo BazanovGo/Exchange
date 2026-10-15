@@ -86,13 +86,13 @@ pd.set_option("display.width", 220)
 pd.set_option("display.float_format", "{:.3f}".format)
 
 
-def show(name, width=1400, folder=FIGS):
-    \"\"\"Display a figure, downscaled so the executed notebook stays light.\"\"\"
-    img = PILImage.open(Path(folder) / name)
+def show(name, width=1300, folder=FIGS):
+    \"\"\"Display a figure, downscaled to a 256-colour palette so the executed notebook stays light.\"\"\"
+    img = PILImage.open(Path(folder) / name).convert("RGB")
     if img.width > width:
         img = img.resize((width, round(img.height * width / img.width)), PILImage.LANCZOS)
     buf = BytesIO()
-    img.save(buf, format="PNG", optimize=True)
+    img.quantize(colors=256, method=PILImage.Quantize.MEDIANCUT).save(buf, format="PNG", optimize=True)
     display(Image(data=buf.getvalue()))
 
 
