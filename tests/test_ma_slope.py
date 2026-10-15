@@ -240,11 +240,28 @@ def test_trade_ledger_reproduces_the_finalist_trades():
     from src.ma_slope.ledger import ledger, summary_table
     from src.ma_slope.presentation import TABLES
 
-    df, cfg, _ = ledger("copper")  # ledger() itself asserts PnL against the held-contract and raw price moves
+    lg = ledger("copper")  # ledger() itself asserts PnL against the held-contract and raw price moves
+    df = lg.trades
     ref = pd.read_csv(TABLES / "finalist_trades" / "copper.csv")
-    assert cfg.label.startswith("VWMA16 / WMA16")
+    assert lg.config.startswith("VWMA16 / WMA16")
     assert len(df) == len(ref) and list(df["trade"]) == list(range(1, len(ref) + 1))
     np.testing.assert_allclose(df["pnl_usd"], ref["pnl"], atol=1e-3)
     np.testing.assert_allclose(df["cum_pnl_usd"], np.cumsum(ref["pnl"]), atol=1e-3)
-    s = summary_table(df.assign(config=cfg.label)).iloc[0]
+    s = summary_table(df).iloc[0]
     assert s["прибыльных"] + s["убыточных"] <= s["сделок"] == len(df)
+
+
+@pytest.mark.skipif(not (Path(__file__).resolve().parents[1] / "research" / "ma_cross_slope_5m" / "grid"
+                         / "stage1_ng.parquet").exists(), reason="study grid not in the checkout")
+def test_walk_forward_ledger_reproduces_the_study_years():
+    from src.ma_slope.ledger import walk_forward_ledger
+    from src.ma_slope.presentation import TABLES
+
+    lg = walk_forward_ledger("ng")  # asserts each test year's trade count and PnL against walk_forward.csv
+    wf = pd.read_csv(TABLES / "walk_forward.csv")
+    wf = wf[(wf["stage"] == "stage1") & (wf["scope"] == "all") & (wf["ticker"] == "ng")]
+    by_year = lg.trades.groupby("test_year")["pnl_usd"].agg(["sum", "size"])
+    np.testing.assert_allclose(by_year["sum"], wf.set_index("test_year")["test_pnl"], atol=0.05)
+    assert list(lg.trades["trade"]) == list(range(1, len(lg.trades) + 1))
+    assert (lg.trades["exit_time"].dt.year == lg.trades["test_year"]).all()
+    assert walk_forward_ledger("copper") is None  # too short for walk-forward

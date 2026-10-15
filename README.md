@@ -31,6 +31,7 @@ python scripts/run_notebook.py notebooks/05_final_report.ipynb
 python scripts/run_notebook.py notebooks/06_ma_slope_research.ipynb   # исследование MA + наклон на фьючерсах MOEX
 python scripts/run_notebook.py notebooks/07_project_presentation.ipynb  # презентация: что сделано и что получилось
 python scripts/run_notebook.py notebooks/08_trade_ledger.ipynb          # все сделки лучших конфигураций по порядку
+python scripts/run_notebook.py notebooks/09_walk_forward_ledger.ipynb   # все сделки ежегодного переотбора (walk-forward)
 ```
 
 `scripts/run_notebook.py` выполняет ноутбук и вычищает widget-метаданные,
@@ -72,6 +73,7 @@ Yahoo Finance на детерминированный локальный сэм�
 | 06 | `06_ma_slope_research.ipynb` | Исследование «пересечение цены с быстрой MA + наклон медленной MA» на 5m фьючерсах MOEX: ~9 млн конфигураций на инструмент, рейтинги, OOS, walk-forward, PBO, межрыночная проверка, просмотр любой конфигурации через VectorBT ([отчёт](research/ma_cross_slope_5m/README.md)) |
 | 07 | `07_project_presentation.ipynb` | Презентация проекта: данные AlgoPack, пропорциональная склейка, исправление годовых метрик, исследование MA + наклон и его итоги; есть версия-слайды `07_project_presentation.slides.html` (сборка — `scripts/build_presentation_notebook.py`) |
 | 08 | `08_trade_ledger.ipynb` | Все сделки лучших конфигураций по каждому инструменту по порядку: вход, выход, цены, PnL в $ и тиках, накопленный итог; Excel-версия — `research/ma_cross_slope_5m/tables/trade_ledger.xlsx` (сборка — `scripts/build_trade_ledger.py`) |
+| 09 | `09_walk_forward_ledger.ipynb` | Все сделки walk-forward (конфигурация выбирается каждый год по трём предыдущим) по порядку, год за годом: конфигурация и итог каждого года со сверкой с исследованием, проверка учёта на границах лет; Excel — `research/ma_cross_slope_5m/tables/trade_ledger_walk_forward.xlsx` |
 
 ## Ключевые интерфейсы
 

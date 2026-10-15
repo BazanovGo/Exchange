@@ -611,6 +611,7 @@ python -c "from src.ma_slope import study; study.export_all()"    # компак
 | `finalists.csv` | лучшие конфигурации инструментов (общая и по категориям) с Sharpe, Sortino, MC, поправкой Холма |
 | `finalist_trades/*.csv`, `finalist_monthly_pnl.csv`, `finalist_yearly_pnl.csv` | сделки и календарь финалистов |
 | `trade_ledger.xlsx`, `trade_ledger.csv` | реестр всех 16 349 сделок финалистов этапа 3 по порядку: время, контракт и цена входа и выхода, роллы внутри сделки, PnL в $ и тиках, накопленный итог; в Excel — сводка, все сделки в порядке закрытия и лист на инструмент (итоги, просадка и серии убытков — формулы). Сборка — `python scripts/build_trade_ledger.py`, просмотр — `notebooks/08_trade_ledger.ipynb` |
+| `trade_ledger_walk_forward.xlsx`, `trade_ledger_walk_forward.csv` | реестр всех 35 844 сделок walk-forward этапа 1 по порядку: тестовый год и его конфигурация, сделки с теми же полями; в Excel — сводка, «По годам» (результат каждого года со сверкой с `walk_forward.csv`), все сделки и лист на инструмент. Просмотр — `notebooks/09_walk_forward_ledger.ipynb` (там же пересчёт с переключением конфигурации ровно 1 января: 10 512 $ против 10 460 $ по учёту исследования) |
 | `slope_sweep.csv` | этап 2: все 128 настроек наклона × выход по инструментам |
 | `walk_forward.csv`, `walk_forward_summary.csv` | выбор и результат каждого тестового года, совокупный t |
 | `selection_skill.csv` | перцентиль выбора среди всех конфигураций периода |
