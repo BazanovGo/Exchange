@@ -588,20 +588,40 @@ def sec_deviations(stage_main):
     w()
 
 
+def sec_figures():
+    from export_figures import FIGURES, OUT
+    w("## 13. Графики")
+    w()
+    w("Те же графики, что в ноутбуке `notebooks/03_ma_crossover_5m.ipynb` (по этапу 3), отдельными файлами "
+      "в `docs/figures/ma_crossover_5m/`.")
+    w()
+    for name, caption in FIGURES:
+        if (OUT / name).exists():
+            w(f"**{caption}**"); w()
+            w(f"![{caption}](figures/ma_crossover_5m/{name})"); w()
+
+
 def sec_files():
-    w("## 13. Код и машиночитаемые результаты")
+    w("## 14. Код и машиночитаемые результаты")
     w()
     w("Код: `exchange/research/ma_crossover_5m/` — `data.py` (данные, роллы), `ma.py` (шесть средних), "
       "`slope.py` (наклон), `kernel.py` (ядро), `grid.py`, `stage1.py`, `stage2.py`, `stage3.py` (сетки), "
       "`analyze.py`, `analyze_stage2.py`, `extras.py`, `crossmarket.py`, `robust.py` (анализ и устойчивость), "
       "`finalists.py` (VectorBT), `validate_vbt.py`, `verify_grid.py`, тесты `test_*.py`, отчёт `report.py`, "
-      "ноутбук `build_notebook.py` → `notebooks/03_ma_crossover_5m.ipynb`.")
+      "ноутбук `build_notebook.py` → `notebooks/03_ma_crossover_5m.ipynb`, графики `export_figures.py`.")
     w()
     w("Машиночитаемые результаты: `exchange/research/ma_crossover_5m/results/` — таблицы семейств, отборов, "
-      "walk-forward, PBO, RC/SPA, издержек, кросс-рынка, этапа 2 (CSV/JSON), а также топ-10 000 "
-      "конфигураций каждого инструмента по сглаженному IS-Шарпу со всеми метриками (parquet). Полные "
-      "сетки (по ~1.6–3 ГБ на инструмент и этап) в git не помещаются; они воспроизводятся командами из "
-      "`README.md` каталога за ~1 час на 4 ядрах.")
+      "walk-forward, PBO, RC/SPA, издержек, кросс-рынка, этапа 2 (CSV/JSON); топ-10 000 "
+      "конфигураций каждого инструмента по сглаженному IS-Шарпу со всеми метриками (parquet); и **вся сетка** — "
+      "3 471 552 конфигурации на инструмент и этап (`results/<этап>/<инструмент>/grid_A_pct.parquet`, "
+      "`grid_B_atr.parquet`, оси — `grid_meta.json`): параметры, PnL и максимальная просадка IS/OOS (USD, "
+      "округлены до 1), число сделок IS/OOS, месячный Шарп IS/OOS и сглаженный по плато IS-Шарп (×1000, "
+      "целые). Чтение в исходных единицах — `export.load_full_grid(\"stage3\", \"NG\")`. Из-за округления PnL "
+      "до доллара доли прибыльных конфигураций по этим файлам расходятся с отчётом не больше чем на 0.1 п.п.")
+    w()
+    w("Сырые сетки (`stats.npy` со всеми 11 счётчиками по трём периодам и `monthly.npy` с помесячным PnL, "
+      "~8.5 ГБ на оба этапа, плюс ~2 ГБ `summary.parquet` со всеми метриками) в git не помещаются; они воспроизводятся командами из `README.md` каталога "
+      "за ~1 час на 4 ядрах.")
     w()
 
 
@@ -751,6 +771,7 @@ def main(stages):
     sec_costs(s_final)
     sec_cross(s_final)
     sec_oos_positive(s_final)
+    sec_figures()
     sec_files()
     w("---"); w()
     w("_Отчёт собран `report.py` из результатов в рабочем каталоге; числа в таблицах не набраны руками._")

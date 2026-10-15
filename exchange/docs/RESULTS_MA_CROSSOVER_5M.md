@@ -1290,11 +1290,81 @@ N_full — все конфигурации сетки (верхняя грани
 | TMA42 × SSMA6, наклон B, выход A | 0.69 | 1.23 | 741.60 | 235.80 | 5058 | 0.76 | 1.00 |
 | SSMA34 × SMA45, наклон B, выход A | 0.47 | 0.72 | 465.30 | 0.80 | 4645 | 0.61 | 1.00 |
 
-## 13. Код и машиночитаемые результаты
+## 13. Графики
 
-Код: `exchange/research/ma_crossover_5m/` — `data.py` (данные, роллы), `ma.py` (шесть средних), `slope.py` (наклон), `kernel.py` (ядро), `grid.py`, `stage1.py`, `stage2.py`, `stage3.py` (сетки), `analyze.py`, `analyze_stage2.py`, `extras.py`, `crossmarket.py`, `robust.py` (анализ и устойчивость), `finalists.py` (VectorBT), `validate_vbt.py`, `verify_grid.py`, тесты `test_*.py`, отчёт `report.py`, ноутбук `build_notebook.py` → `notebooks/03_ma_crossover_5m.ipynb`.
+Те же графики, что в ноутбуке `notebooks/03_ma_crossover_5m.ipynb` (по этапу 3), отдельными файлами в `docs/figures/ma_crossover_5m/`.
 
-Машиночитаемые результаты: `exchange/research/ma_crossover_5m/results/` — таблицы семейств, отборов, walk-forward, PBO, RC/SPA, издержек, кросс-рынка, этапа 2 (CSV/JSON), а также топ-10 000 конфигураций каждого инструмента по сглаженному IS-Шарпу со всеми метриками (parquet). Полные сетки (по ~1.6–3 ГБ на инструмент и этап) в git не помещаются; они воспроизводятся командами из `README.md` каталога за ~1 час на 4 ядрах.
+**Тепловые карты Fast × Slow, природный газ**
+
+![Тепловые карты Fast × Slow, природный газ](figures/ma_crossover_5m/01_heatmaps_NG.png)
+
+**Тепловые карты Fast × Slow, Brent**
+
+![Тепловые карты Fast × Slow, Brent](figures/ma_crossover_5m/01_heatmaps_BR.png)
+
+**36 сочетаний типов средних, природный газ**
+
+![36 сочетаний типов средних, природный газ](figures/ma_crossover_5m/02_type_pairs_NG.png)
+
+**36 сочетаний типов средних, Brent**
+
+![36 сочетаний типов средних, Brent](figures/ma_crossover_5m/02_type_pairs_BR.png)
+
+**Модели выхода A и B**
+
+![Модели выхода A и B](figures/ma_crossover_5m/03_exits.png)
+
+**Методы нейтральной зоны A (процент) и B (ATR)**
+
+![Методы нейтральной зоны A (процент) и B (ATR)](figures/ma_crossover_5m/04_slope_methods.png)
+
+**Период определения наклона k**
+
+![Период определения наклона k](figures/ma_crossover_5m/04b_slope_period_k.png)
+
+**Карты устойчивости параметров, природный газ**
+
+![Карты устойчивости параметров, природный газ](figures/ma_crossover_5m/05_stability_NG.png)
+
+**Карты устойчивости параметров, Brent**
+
+![Карты устойчивости параметров, Brent](figures/ma_crossover_5m/05_stability_BR.png)
+
+**Накопленный PnL отобранных стратегий, природный газ**
+
+![Накопленный PnL отобранных стратегий, природный газ](figures/ma_crossover_5m/06_equity_NG.png)
+
+**Накопленный PnL отобранных стратегий, Brent**
+
+![Накопленный PnL отобранных стратегий, Brent](figures/ma_crossover_5m/06_equity_BR.png)
+
+**Распределение результатов сделок, природный газ**
+
+![Распределение результатов сделок, природный газ](figures/ma_crossover_5m/07_trades_NG.png)
+
+**Распределение результатов сделок, Brent**
+
+![Распределение результатов сделок, Brent](figures/ma_crossover_5m/07_trades_BR.png)
+
+**Одна и та же конфигурация на NG и BR**
+
+![Одна и та же конфигурация на NG и BR](figures/ma_crossover_5m/08_cross_market.png)
+
+**In-sample против out-of-sample на всей сетке**
+
+![In-sample против out-of-sample на всей сетке](figures/ma_crossover_5m/09_is_vs_oos.png)
+
+**Walk-forward с переоптимизацией и PBO**
+
+![Walk-forward с переоптимизацией и PBO](figures/ma_crossover_5m/10_walkforward_pbo.png)
+
+## 14. Код и машиночитаемые результаты
+
+Код: `exchange/research/ma_crossover_5m/` — `data.py` (данные, роллы), `ma.py` (шесть средних), `slope.py` (наклон), `kernel.py` (ядро), `grid.py`, `stage1.py`, `stage2.py`, `stage3.py` (сетки), `analyze.py`, `analyze_stage2.py`, `extras.py`, `crossmarket.py`, `robust.py` (анализ и устойчивость), `finalists.py` (VectorBT), `validate_vbt.py`, `verify_grid.py`, тесты `test_*.py`, отчёт `report.py`, ноутбук `build_notebook.py` → `notebooks/03_ma_crossover_5m.ipynb`, графики `export_figures.py`.
+
+Машиночитаемые результаты: `exchange/research/ma_crossover_5m/results/` — таблицы семейств, отборов, walk-forward, PBO, RC/SPA, издержек, кросс-рынка, этапа 2 (CSV/JSON); топ-10 000 конфигураций каждого инструмента по сглаженному IS-Шарпу со всеми метриками (parquet); и **вся сетка** — 3 471 552 конфигурации на инструмент и этап (`results/<этап>/<инструмент>/grid_A_pct.parquet`, `grid_B_atr.parquet`, оси — `grid_meta.json`): параметры, PnL и максимальная просадка IS/OOS (USD, округлены до 1), число сделок IS/OOS, месячный Шарп IS/OOS и сглаженный по плато IS-Шарп (×1000, целые). Чтение в исходных единицах — `export.load_full_grid("stage3", "NG")`. Из-за округления PnL до доллара доли прибыльных конфигураций по этим файлам расходятся с отчётом не больше чем на 0.1 п.п.
+
+Сырые сетки (`stats.npy` со всеми 11 счётчиками по трём периодам и `monthly.npy` с помесячным PnL, ~8.5 ГБ на оба этапа, плюс ~2 ГБ `summary.parquet` со всеми метриками) в git не помещаются; они воспроизводятся командами из `README.md` каталога за ~1 час на 4 ядрах.
 
 ---
 

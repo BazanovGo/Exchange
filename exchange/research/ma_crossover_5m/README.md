@@ -38,9 +38,27 @@ python finalists.py stage3 NG BR  # VectorBT: полная статистика,
 python nulls.py                   # нулевые рынки
 python -c "import signflip; signflip.main(n_paths=200)"   # тест траекторий
 python export.py stage1 stage3    # машиночитаемые результаты в results/
-python report.py stage1 stage3    # отчёт
 python build_notebook.py          # ноутбук
+python export_figures.py          # графики ноутбука -> docs/figures/ma_crossover_5m/
+python report.py stage1 stage3    # отчёт (ссылается на графики)
 ```
+
+## Что лежит в `results/`
+
+- таблицы анализа по этапам и инструментам (CSV/JSON): семейства, отборы, walk-forward, PBO, RC/SPA,
+  издержки, годы, кросс-рынок, финалисты VectorBT, нулевые рынки, тест траекторий;
+- `top10000_by_plateau_is.parquet` — верх сетки со всеми метриками;
+- `grid_A_pct.parquet`, `grid_B_atr.parquet` — **все** 3 471 552 конфигурации на инструмент и этап:
+  параметры, PnL и просадка IS/OOS (USD, до 1), сделки IS/OOS, месячный Шарп IS/OOS и плато-Шарп IS
+  (×1000, целые); `grid_meta.json` — оси сетки и параметры наклона.
+
+```python
+from export import load_full_grid
+g = load_full_grid("stage3", "NG")   # 3.47 млн строк, метрики в исходных единицах
+```
+
+Сырые `stats.npy`/`monthly.npy` (~8.5 ГБ) и `summary.parquet` (~2 ГБ) в git не помещаются и
+пересчитываются командами выше.
 
 ## Устройство
 
@@ -54,4 +72,4 @@ python build_notebook.py          # ноутбук
 | `results.py`, `analyze*.py`, `extras.py`, `crossmarket.py`, `robust.py` | анализ и проверки устойчивости |
 | `finalists.py` | финалисты через `vectorbt.Portfolio.from_signals` |
 | `validate_vbt.py`, `verify_grid.py`, `test_*.py`, `nulls.py` | проверки корректности |
-| `report.py`, `export.py`, `build_notebook.py`, `nb/`, `plots.py` | отчёт, выгрузка, ноутбук |
+| `report.py`, `export.py`, `build_notebook.py`, `export_figures.py`, `nb/`, `plots.py` | отчёт, выгрузка, ноутбук, графики |

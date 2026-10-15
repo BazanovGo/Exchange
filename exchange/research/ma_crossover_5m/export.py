@@ -1,19 +1,59 @@
-"""Машиночитаемые результаты в git: компактные таблицы и верх сетки.
+"""Машиночитаемые результаты в git: компактные таблицы, верх сетки и
+ключевые метрики каждой конфигурации полной сетки.
 
-Полные сетки (stats.npy, monthly.npy, summary.parquet) весят гигабайты и
+Сырые сетки (stats.npy, monthly.npy, summary.parquet) весят гигабайты и
 воспроизводятся скриптами; сюда попадает всё, на чём построен отчёт.
 """
 import shutil
 import sys
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
-
 from report import WORK
 
 HERE = Path(__file__).parent
 OUT = HERE / "results"
 SMALL = (".csv", ".json")
+
+# Полная сетка: параметры + ключевые метрики каждой конфигурации, целыми
+# числами (USD округлены до 1, коэффициенты умножены на 1000) — так файл
+# сжимается вдвое лучше float32. Два файла на инструмент и этап (по методу
+# нейтрали), каждый ~25 МБ: ниже предупреждения GitHub в 50 МБ.
+PARAMS = ["config", "method", "exit", "fast_type", "fast_period", "slow_type", "slow_period"]
+USD = ["pnl_is", "pnl_oos", "max_dd_is", "max_dd_oos"]
+COUNT = ["trades_is", "trades_oos"]
+X1000 = ["sharpe_m_is", "sharpe_m_oos", "plateau_sharpe_is"]
+
+
+def full_grid(src: Path, dst: Path):
+    df = pd.read_parquet(src / "summary.parquet", columns=PARAMS + USD + COUNT + X1000)
+    for m, part in df.groupby("method", observed=True, sort=True):
+        q = pd.DataFrame({"config": part["config"].astype("int32")})
+        for c in PARAMS[1:]:
+            q[c] = part[c].astype("int16") if c.endswith("period") else part[c]
+        for c in USD:
+            v = np.round(part[c].to_numpy())
+            assert np.isfinite(v).all() and np.abs(v).max() < 32_000, c
+            q[c] = v.astype("int16")
+        for c in COUNT:
+            q[c] = part[c].astype("int32")
+        for c in X1000:
+            v = np.round(part[c].to_numpy() * 1000)
+            assert np.isfinite(v).all() and np.abs(v).max() < 32_000, c
+            q[f"{c}_x1000"] = v.astype("int16")
+        f = dst / f"grid_{m}.parquet"
+        q.to_parquet(f, compression="zstd", compression_level=19, index=False, row_group_size=1 << 20)
+        print(f"{f.relative_to(HERE)}: {len(q):,} конфигураций, {f.stat().st_size / 1e6:.1f} МБ")
+
+
+def load_full_grid(stage: str, ticker: str, results: Path = OUT) -> pd.DataFrame:
+    """Полная сетка из results/ с метриками в исходных единицах."""
+    parts = sorted((results / stage / ticker).glob("grid_*.parquet"))
+    df = pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True).sort_values("config")
+    for c in X1000:
+        df[c] = df.pop(f"{c}_x1000") / 1000
+    return df.reset_index(drop=True)
 
 
 def main(stages):
@@ -43,8 +83,12 @@ def main(stages):
                 (dst / "finalists").mkdir(exist_ok=True)
                 for f in fin.glob("*.csv"):
                     shutil.copy(f, dst / "finalists" / f.name)
+            meta = WORK / stage / t / "meta.json"
+            if meta.exists():
+                shutil.copy(meta, dst / "grid_meta.json")
             sp = src / "summary.parquet"
             if sp.exists():
+                full_grid(src, dst)
                 df = pd.read_parquet(sp)
                 ok = df["trades_is"] >= 100
                 top = df[ok].nlargest(10_000, "plateau_sharpe_is")
