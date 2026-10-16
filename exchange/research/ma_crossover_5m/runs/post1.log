@@ -1,0 +1,95 @@
+== extras NG Wed Oct 14 12:54:03 UTC 2026
+{
+ "tick_usd": 0.1,
+ "walk_forward_vs_average_config": {
+  "pnl": {
+   "wf_total": 143.20000656694174,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": -459.3007959152632,
+   "excess_t": -1.230180522546216
+  },
+  "sharpe": {
+   "wf_total": 711.7999816536903,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": 109.2991791714855,
+   "excess_t": 0.35533648810648616
+  },
+  "plateau": {
+   "wf_total": 658.2000131607056,
+   "avg_config_total": 602.5008024822049,
+   "excess_total": 55.69921067850065,
+   "excess_t": 0.22684219913712028
+  }
+ },
+ "monthly_ac1_median": -0.050225132079703375,
+ "monthly_ac1_p90": 0.11674420571940769
+}
+  издержки 0.0 тика: прибыльных IS 0.853 OOS 0.918 | лучший по IS: IS 1,970 -> OOS 823 | верхний 1%: OOS 465, доля OOS>0 1.00
+  издержки 0.5 тика: прибыльных IS 0.739 OOS 0.711 | лучший по IS: IS 1,840 -> OOS 715 | верхний 1%: OOS 403, доля OOS>0 0.99
+  издержки 1.0 тика: прибыльных IS 0.605 OOS 0.540 | лучший по IS: IS 1,738 -> OOS 332 | верхний 1%: OOS 347, доля OOS>0 0.98
+  издержки 2.0 тика: прибыльных IS 0.455 OOS 0.386 | лучший по IS: IS 1,658 -> OOS 261 | верхний 1%: OOS 247, доля OOS>0 0.95
+== verify BR Wed Oct 14 13:20:55 UTC 2026
+несовпадений: 0 из 25
+== analyze BR Wed Oct 14 13:20:59 UTC 2026
+== stage1/BR: 3,471,552 конфигураций
+   summary 48 с
+   WF pnl: {'steps': 52, 'test_months': 155, 'total_pnl': 1132.3999979421496, 'sharpe_annual': 0.5249547583140206, 'share_pos_steps': 0.6153846153846154, 'distinct_configs': 45, 't_stat': 1.886675034570572}
+   WF sharpe: {'steps': 52, 'test_months': 155, 'total_pnl': 820.1999973356724, 'sharpe_annual': 0.34147911410022885, 'share_pos_steps': 0.5384615384615384, 'distinct_configs': 47, 't_stat': 1.227267891559505}
+   WF plateau: {'steps': 52, 'test_months': 155, 'total_pnl': 1695.2999809980392, 'sharpe_annual': 0.8515530337570936, 'share_pos_steps': 0.5961538461538461, 'distinct_configs': 50, 't_stat': 3.0604615425569537}
+   PBO IS 0.229 | full 0.305
+   RC/SPA is: RC p=0.054 SPA p=0.042
+   RC/SPA full: RC p=0.043 SPA p=0.011
+== stage1/BR анализ за 24.5 мин
+== extras BR Wed Oct 14 13:45:29 UTC 2026
+{
+ "tick_usd": 0.1,
+ "walk_forward_vs_average_config": {
+  "pnl": {
+   "wf_total": 1132.3999979421496,
+   "avg_config_total": 768.4461677464182,
+   "excess_total": 363.9538301957315,
+   "excess_t": 0.6706818827169999
+  },
+  "sharpe": {
+   "wf_total": 820.1999973356724,
+   "avg_config_total": 768.4461677464182,
+   "excess_total": 51.753829589254366,
+   "excess_t": 0.09120634299883539
+  },
+  "plateau": {
+   "wf_total": 1695.2999809980392,
+   "avg_config_total": 768.4461677464182,
+   "excess_total": 926.853813251621,
+   "excess_t": 2.0290121580302367
+  }
+ },
+ "monthly_ac1_median": 0.08724756181513221,
+ "monthly_ac1_p90": 0.18496397036218148
+}
+  издержки 0.0 тика: прибыльных IS 0.798 OOS 0.727 | лучший по IS: IS 2,937 -> OOS 303 | верхний 1%: OOS 303, доля OOS>0 0.94
+  издержки 0.5 тика: прибыльных IS 0.540 OOS 0.505 | лучший по IS: IS 2,733 -> OOS -90 | верхний 1%: OOS 274, доля OOS>0 0.91
+  издержки 1.0 тика: прибыльных IS 0.427 OOS 0.405 | лучший по IS: IS 2,560 -> OOS -136 | верхний 1%: OOS 262, доля OOS>0 0.89
+  издержки 2.0 тика: прибыльных IS 0.382 OOS 0.316 | лучший по IS: IS 2,214 -> OOS -228 | верхний 1%: OOS 254, доля OOS>0 0.86
+== crossmarket Wed Oct 14 13:45:34 UTC 2026
+{
+ "spearman_sharpe_m_is_NG_vs_BR": 0.6962368316171194,
+ "spearman_sharpe_m_oos_NG_vs_BR": 0.09525736326510317,
+ "spearman_plateau_sharpe_is_NG_vs_BR": 0.7417763983472573,
+ "share_pos_is_NG": 0.8532494976310308,
+ "share_pos_is_BR": 0.7976948062422801,
+ "share_pos_is_both": 0.778977529358627,
+ "share_pos_is_both_if_independent": 0.6806326926891079,
+ "share_pos_oos_NG": 0.9178180249064395,
+ "share_pos_oos_BR": 0.7266723932120274,
+ "share_pos_oos_both": 0.6957349335398116,
+ "share_pos_oos_both_if_independent": 0.6669530206918985,
+ "n_pos_all_four": 2105253,
+ "n_pos_is_both": 2704261,
+ "share_oos_both_given_is_both": 0.7784947532801013,
+ "share_oos_both_unconditional": 0.6957349335398116,
+ "families_spearman_is": 0.8831122900088417,
+ "families_spearman_oos": 0.25622136484205454,
+ "candidates": 25,
+ "candidates_oos_positive_both": 25
+}
+== post1 done Wed Oct 14 13:45:44 UTC 2026

@@ -136,6 +136,11 @@ and two planted lookaheads that must be caught — then the tests on three
 Python versions, the reproducibility check, and the Docker build (whose
 image runs `doctor` and the controls during the build itself).
 
+Before every publication `tools/run_checks.py` runs these tests together with
+the research tests, a static check and a scan for secrets and e-mail
+addresses, and prepends the result to
+[`docs/VERIFICATION_LOG.md`](docs/VERIFICATION_LOG.md).
+
 ```bash
 uv run pytest tests -q                 # everything
 uv run pytest tests/test_lookahead.py  # the module whose failure invalidates the rest

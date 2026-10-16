@@ -51,6 +51,9 @@ python report.py stage1 stage3    # отчёт (ссылается на граф
 - `grid_A_pct.parquet`, `grid_B_atr.parquet` — **все** 3 471 552 конфигурации на инструмент и этап:
   параметры, PnL и просадка IS/OOS (USD, до 1), сделки IS/OOS, месячный Шарп IS/OOS и плато-Шарп IS
   (×1000, целые); `grid_meta.json` — оси сетки и параметры наклона.
+- `finalists/` — помесячный и годовой PnL финалистов (CSV) и их дневная кривая капитала с переоценкой
+  (`cfg<номер>_equity.parquet`, VectorBT); все сделки финалистов — в `../trade_logs/`.
+- [`runs/`](runs/README.md) — сценарии и журналы исходного прогона, включая сверки сетки с пересчётом.
 
 ```python
 from export import load_full_grid

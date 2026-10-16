@@ -1,0 +1,254 @@
+== stage2 BR 17:22:31
+  BR slow SMA5: 200/10800, 43 с, осталось ~2,289 с
+  BR slow SMA8: 400/10800, 74 с, осталось ~1,930 с
+  BR slow SMA13: 600/10800, 110 с, осталось ~1,864 с
+  BR slow SMA21: 800/10800, 145 с, осталось ~1,808 с
+  BR slow SMA34: 1000/10800, 177 с, осталось ~1,731 с
+  BR slow SMA55: 1200/10800, 205 с, осталось ~1,636 с
+  BR slow SMA89: 1400/10800, 235 с, осталось ~1,575 с
+  BR slow SMA144: 1600/10800, 263 с, осталось ~1,510 с
+  BR slow SMA233: 1800/10800, 290 с, осталось ~1,451 с
+  BR slow EMA5: 2000/10800, 320 с, осталось ~1,406 с
+  BR slow EMA8: 2200/10800, 348 с, осталось ~1,360 с
+  BR slow EMA13: 2400/10800, 377 с, осталось ~1,319 с
+  BR slow EMA21: 2600/10800, 405 с, осталось ~1,278 с
+  BR slow EMA34: 2800/10800, 435 с, осталось ~1,242 с
+  BR slow EMA55: 3000/10800, 464 с, осталось ~1,205 с
+  BR slow EMA89: 3200/10800, 493 с, осталось ~1,170 с
+  BR slow EMA144: 3400/10800, 520 с, осталось ~1,131 с
+  BR slow EMA233: 3600/10800, 548 с, осталось ~1,096 с
+  BR slow WMA5: 3800/10800, 579 с, осталось ~1,067 с
+  BR slow WMA8: 4000/10800, 609 с, осталось ~1,035 с
+  BR slow WMA13: 4200/10800, 640 с, осталось ~1,005 с
+  BR slow WMA21: 4400/10800, 665 с, осталось ~967 с
+  BR slow WMA34: 4600/10800, 690 с, осталось ~929 с
+  BR slow WMA55: 4800/10800, 714 с, осталось ~893 с
+  BR slow WMA89: 5000/10800, 740 с, осталось ~858 с
+  BR slow WMA144: 5200/10800, 766 с, осталось ~825 с
+  BR slow WMA233: 5400/10800, 792 с, осталось ~792 с
+  BR slow SSMA5: 5600/10800, 819 с, осталось ~761 с
+  BR slow SSMA8: 5800/10800, 846 с, осталось ~729 с
+  BR slow SSMA13: 6000/10800, 874 с, осталось ~699 с
+  BR slow SSMA21: 6200/10800, 901 с, осталось ~668 с
+  BR slow SSMA34: 6400/10800, 929 с, осталось ~639 с
+  BR slow SSMA55: 6600/10800, 954 с, осталось ~607 с
+  BR slow SSMA89: 6800/10800, 981 с, осталось ~577 с
+  BR slow SSMA144: 7000/10800, 1,007 с, осталось ~546 с
+  BR slow SSMA233: 7200/10800, 1,032 с, осталось ~516 с
+  BR slow VWMA5: 7400/10800, 1,057 с, осталось ~486 с
+  BR slow VWMA8: 7600/10800, 1,083 с, осталось ~456 с
+  BR slow VWMA13: 7800/10800, 1,108 с, осталось ~426 с
+  BR slow VWMA21: 8000/10800, 1,135 с, осталось ~397 с
+  BR slow VWMA34: 8200/10800, 1,161 с, осталось ~368 с
+  BR slow VWMA55: 8400/10800, 1,188 с, осталось ~339 с
+  BR slow VWMA89: 8600/10800, 1,214 с, осталось ~311 с
+  BR slow VWMA144: 8800/10800, 1,241 с, осталось ~282 с
+  BR slow VWMA233: 9000/10800, 1,269 с, осталось ~254 с
+  BR slow TMA5: 9200/10800, 1,296 с, осталось ~225 с
+  BR slow TMA8: 9400/10800, 1,320 с, осталось ~197 с
+  BR slow TMA13: 9600/10800, 1,345 с, осталось ~168 с
+  BR slow TMA21: 9800/10800, 1,370 с, осталось ~140 с
+  BR slow TMA34: 10000/10800, 1,396 с, осталось ~112 с
+  BR slow TMA55: 10200/10800, 1,424 с, осталось ~84 с
+  BR slow TMA89: 10400/10800, 1,451 с, осталось ~56 с
+  BR slow TMA144: 10600/10800, 1,478 с, осталось ~28 с
+  BR slow TMA233: 10800/10800, 1,505 с, осталось ~0 с
+== BR этап 2 готов за 25.1 мин
+== analyze_stage2 17:47:42
+{
+ "ticker": "NG",
+ "A_pct_spearman_settings_is_oos": 0.20900562851782367,
+ "A_pct_neutral_drift_abs_mean": 0.04186346144357435,
+ "A_pct_reference_row": {
+  "median_sharpe_is": 0.10979011654853821,
+  "median_sharpe_oos": 0.4576236605644226,
+  "share_pos_oos": 0.7527434842249657
+ },
+ "B_atr_spearman_settings_is_oos": 0.6576470930467363,
+ "B_atr_neutral_drift_abs_mean": 0.017590611942838008,
+ "B_atr_reference_row": {
+  "median_sharpe_is": 0.13546571135520935,
+  "median_sharpe_oos": 0.4817764461040497,
+  "share_pos_oos": 0.7378257887517147
+ },
+ "best": {
+  "A_pct": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "B_atr": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  }
+ }
+}
+{
+ "ticker": "BR",
+ "A_pct_spearman_settings_is_oos": 0.80187617260788,
+ "A_pct_neutral_drift_abs_mean": 0.014937501041869666,
+ "A_pct_reference_row": {
+  "median_sharpe_is": -0.12904773652553558,
+  "median_sharpe_oos": 0.05595632269978523,
+  "share_pos_oos": 0.5305212620027435
+ },
+ "B_atr_spearman_settings_is_oos": 0.7293893939935364,
+ "B_atr_neutral_drift_abs_mean": 0.0023835891312082133,
+ "B_atr_reference_row": {
+  "median_sharpe_is": -0.07851511240005493,
+  "median_sharpe_oos": 0.03885876387357712,
+  "share_pos_oos": 0.5180041152263375
+ },
+ "best": {
+  "A_pct": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14,
+   "median_sharpe_is": 0.2720174193382263,
+   "median_sharpe_oos": 0.5325309038162231,
+   "setting": 39
+  },
+  "B_atr": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28,
+   "median_sharpe_is": 0.326903760433197,
+   "median_sharpe_oos": 0.301621675491333,
+   "setting": 194
+  }
+ }
+}
+== stage3 NG 17:48:48
+== NG: параметры наклона {'A_pct': {'k': 34, 'coverage': 0.4, 'atr_period': 14}, 'B_atr': {'k': 34, 'coverage': 0.25, 'atr_period': 28}}
+  NG 246/2952 slow-состояний, 82 с, осталось ~901 с
+  NG 492/2952 slow-состояний, 175 с, осталось ~875 с
+  NG 738/2952 slow-состояний, 266 с, осталось ~797 с
+  NG 984/2952 slow-состояний, 355 с, осталось ~710 с
+  NG 1230/2952 slow-состояний, 449 с, осталось ~629 с
+  NG 1476/2952 slow-состояний, 542 с, осталось ~542 с
+  NG 1722/2952 slow-состояний, 637 с, осталось ~455 с
+  NG 1968/2952 slow-состояний, 734 с, осталось ~367 с
+  NG 2214/2952 slow-состояний, 830 с, осталось ~277 с
+  NG 2460/2952 slow-состояний, 922 с, осталось ~184 с
+  NG 2706/2952 slow-состояний, 1,018 с, осталось ~93 с
+  NG 2952/2952 slow-состояний, 1,116 с, осталось ~0 с
+== NG этап 3 готов за 18.6 мин
+== stage3 BR 18:07:26
+== BR: параметры наклона {'A_pct': {'k': 34, 'coverage': 0.6, 'atr_period': 14}, 'B_atr': {'k': 34, 'coverage': 0.4, 'atr_period': 28}}
+  BR 246/2952 slow-состояний, 183 с, осталось ~2,017 с
+  BR 492/2952 slow-состояний, 372 с, осталось ~1,860 с
+  BR 738/2952 slow-состояний, 554 с, осталось ~1,661 с
+  BR 984/2952 slow-состояний, 734 с, осталось ~1,468 с
+  BR 1230/2952 slow-состояний, 917 с, осталось ~1,284 с
+  BR 1476/2952 slow-состояний, 1,101 с, осталось ~1,101 с
+  BR 1722/2952 slow-состояний, 1,275 с, осталось ~911 с
+  BR 1968/2952 slow-состояний, 1,446 с, осталось ~723 с
+  BR 2214/2952 slow-состояний, 1,609 с, осталось ~536 с
+  BR 2460/2952 slow-состояний, 1,779 с, осталось ~356 с
+  BR 2706/2952 slow-состояний, 1,942 с, осталось ~177 с
+  BR 2952/2952 slow-состояний, 2,107 с, осталось ~0 с
+== BR этап 3 готов за 35.1 мин
+== verify stage3 BR 18:42:36
+несовпадений: 0 из 25
+== analyze stage3 BR 18:42:40
+== stage3/BR: 3,471,552 конфигураций
+   summary 46 с
+   WF pnl: {'steps': 52, 'test_months': 155, 'total_pnl': 129.89998621493578, 'sharpe_annual': 0.05945757484813288, 'share_pos_steps': 0.4230769230769231, 'distinct_configs': 45, 't_stat': 0.21368912331104295}
+   WF sharpe: {'steps': 52, 'test_months': 155, 'total_pnl': 1787.8999949395657, 'sharpe_annual': 0.7495217384759291, 'share_pos_steps': 0.6346153846153846, 'distinct_configs': 45, 't_stat': 2.6937634709552847}
+   WF plateau: {'steps': 52, 'test_months': 155, 'total_pnl': 935.100016772747, 'sharpe_annual': 0.4051473128581661, 'share_pos_steps': 0.6153846153846154, 'distinct_configs': 51, 't_stat': 1.4560898980091017}
+   PBO IS 0.091 | full 0.156
+   RC/SPA is: RC p=0.027 SPA p=0.009
+   RC/SPA full: RC p=0.028 SPA p=0.007
+== stage3/BR анализ за 19.7 мин
+== extras stage3 BR 19:02:27
+{
+ "tick_usd": 0.1,
+ "walk_forward_vs_average_config": {
+  "pnl": {
+   "wf_total": 129.89998621493578,
+   "avg_config_total": 719.0964501136923,
+   "excess_total": -589.1964638987566,
+   "excess_t": -0.9124414482632021
+  },
+  "sharpe": {
+   "wf_total": 1787.8999949395657,
+   "avg_config_total": 719.0964501136923,
+   "excess_total": 1068.8035448258734,
+   "excess_t": 1.8802892387556789
+  },
+  "plateau": {
+   "wf_total": 935.100016772747,
+   "avg_config_total": 719.0964501136923,
+   "excess_total": 216.00356665905474,
+   "excess_t": 0.34994879214337443
+  }
+ },
+ "monthly_ac1_median": 0.07725928836408234,
+ "monthly_ac1_p90": 0.18080609127130243
+}
+  издержки 0.0 тика: прибыльных IS 0.827 OOS 0.719 | лучший по IS: IS 3,357 -> OOS 250 | верхний 1%: OOS 527, доля OOS>0 0.99
+  издержки 0.5 тика: прибыльных IS 0.538 OOS 0.519 | лучший по IS: IS 3,149 -> OOS 358 | верхний 1%: OOS 531, доля OOS>0 0.98
+  издержки 1.0 тика: прибыльных IS 0.482 OOS 0.429 | лучший по IS: IS 3,036 -> OOS 328 | верхний 1%: OOS 527, доля OOS>0 0.99
+  издержки 2.0 тика: прибыльных IS 0.462 OOS 0.366 | лучший по IS: IS 2,863 -> OOS 292 | верхний 1%: OOS 488, доля OOS>0 0.99
+== years stage3 BR 19:02:33
+BR 
+  год  месяцев  доля прибыльных конфигураций  медианный PnL, USD  PnL 10-го перцентиля  PnL 90-го перцентиля
+2011        1                         0.500                 0.0                -20.10                  21.3
+2012       12                         0.622                41.4               -121.90                 242.5
+2013       12                         0.626                38.9               -120.20                 195.6
+2014       12                         0.806                98.8                -54.80                 212.5
+2015       12                         0.922               182.6                 20.10                 340.0
+2016       12                         0.673                44.7                -87.40                 179.7
+2017       12                         0.500                 0.0                -85.80                  92.8
+2018       12                         0.799                80.5                -45.90                 205.5
+2019       12                         0.316               -47.2               -182.20                  80.0
+2020       12                         0.883               142.7                 -8.90                 392.6
+2021       12                         0.791               100.1                -61.20                 275.8
+2022       12                         0.590                71.7               -417.41                 415.8
+2023       12                         0.310              -124.4               -335.30                 145.6
+2024       12                         0.154              -111.3               -258.10                  34.5
+2025       12                         0.405               -31.6               -194.80                 146.9
+2026       10                         0.926               300.4                 34.60                 593.2
+BR {'oos_months': 34, 'early_months': 24, 'last_year': 2026, 'last_months': 10, 'share_pos_all': 0.7188053066755158, 'share_pos_early': 0.23133025229061815, 'share_pos_last': 0.9257277436719945}
+== crossmarket stage3 19:02:56
+{
+ "spearman_sharpe_m_is_NG_vs_BR": 0.579381395700294,
+ "spearman_sharpe_m_oos_NG_vs_BR": 0.14393656304551927,
+ "spearman_plateau_sharpe_is_NG_vs_BR": 0.6123709443090837,
+ "share_pos_is_NG": 0.8898590601552274,
+ "share_pos_is_BR": 0.8267789161735155,
+ "share_pos_is_both": 0.810603441918773,
+ "share_pos_is_both_if_independent": 0.735716709302322,
+ "share_pos_oos_NG": 0.8419496524897222,
+ "share_pos_oos_BR": 0.7188214377892078,
+ "share_pos_oos_both": 0.6357375606068986,
+ "share_pos_oos_both_if_independent": 0.605211459748786,
+ "n_pos_all_four": 1940240,
+ "n_pos_is_both": 2814052,
+ "share_oos_both_given_is_both": 0.6894826392689261,
+ "share_oos_both_unconditional": 0.6357375606068986,
+ "families_spearman_is": 0.6824853307611929,
+ "families_spearman_oos": -0.27817699541837476,
+ "candidates": 25,
+ "candidates_oos_positive_both": 25
+}
+== finalists stage3 BR 19:03:06
+  BR                     global R1_max_pnl     TMA10/SMA23 B_atr B_slow_flip: vbt PnL 3,607 vs сетка 3,607 | OOS 232 Sharpe 0.24
+  BR                     global R2_max_sharpe  TMA43/SMA65 A_pct B_slow_flip: vbt PnL 3,391 vs сетка 3,391 | OOS 298 Sharpe 0.33
+  BR                     global R3_plateau     TMA40/SMA65 A_pct B_slow_flip: vbt PnL 3,218 vs сетка 3,218 | OOS 257 Sharpe 0.28
+  BR         A_fast_cross|A_pct R1_max_pnl     TMA44/SMA57 A_pct A_fast_cross: vbt PnL 1,959 vs сетка 1,959 | OOS 258 Sharpe 0.40
+  BR         A_fast_cross|A_pct R2_max_sharpe  TMA44/TMA62 A_pct A_fast_cross: vbt PnL 2,092 vs сетка 2,092 | OOS 448 Sharpe 0.65
+  BR         A_fast_cross|A_pct R3_plateau     TMA42/SMA60 A_pct A_fast_cross: vbt PnL 1,759 vs сетка 1,759 | OOS 265 Sharpe 0.41
+  BR         A_fast_cross|B_atr R1_max_pnl     TMA44/VWMA33 B_atr A_fast_cross: vbt PnL 1,990 vs сетка 1,990 | OOS 452 Sharpe 0.70
+  BR         A_fast_cross|B_atr R3_plateau     TMA43/VWMA35 B_atr A_fast_cross: vbt PnL 1,665 vs сетка 1,665 | OOS 441 Sharpe 0.69
+  BR          B_slow_flip|A_pct R1_max_pnl     EMA12/TMA70 A_pct B_slow_flip: vbt PnL 3,649 vs сетка 3,649 | OOS 369 Sharpe 0.38
+  BR          B_slow_flip|B_atr R2_max_sharpe  TMA38/SMA51 B_atr B_slow_flip: vbt PnL 3,248 vs сетка 3,248 | OOS 522 Sharpe 0.56
+  BR          B_slow_flip|B_atr R3_plateau     TMA41/TMA54 B_atr B_slow_flip: vbt PnL 2,601 vs сетка 2,600 | OOS 241 Sharpe 0.25
+== ALL DONE 19:04:20

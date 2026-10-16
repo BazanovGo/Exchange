@@ -1,0 +1,15 @@
+== analyze NG x2 19:11:29
+== analyze BR x2 19:14:38
+== extras stage1 19:20:25
+== years stage1 19:20:35
+== crossmarket stage1 19:21:01
+== finalists stage1 19:21:09
+== extras stage3 19:22:54
+== years stage3 19:23:06
+== crossmarket stage3 19:23:34
+== finalists stage3 19:23:43
+   WF plateau: {'steps': 52, 'test_months': 155, 'total_pnl': 1585.99997651577, 'sharpe_annual': 0.8074170838200602, 'share_pos_steps': 0.5961538461538461, 'distinct_configs': 51, 't_stat': 2.901837978231727}
+   WF plateau: {'steps': 19, 'test_months': 57, 'total_pnl': 688.7000141143799, 'sharpe_annual': 0.8619304827494071, 'share_pos_steps': 0.5789473684210527, 'distinct_configs': 18, 't_stat': 1.878533935330947}
+   WF plateau: {'steps': 52, 'test_months': 155, 'total_pnl': 878.1000148653984, 'sharpe_annual': 0.38450443892041064, 'share_pos_steps': 0.5961538461538461, 'distinct_configs': 51, 't_stat': 1.381899895378716}
+   WF plateau: {'steps': 19, 'test_months': 57, 'total_pnl': 391.80001160502434, 'sharpe_annual': 0.50255938910587, 'share_pos_steps': 0.7368421052631579, 'distinct_configs': 19, 't_stat': 1.0953027951200116}
+== REPLATEAU DONE 19:25:25

@@ -1,0 +1,67 @@
+== verify
+несовпадений: 0 из 25
+== analyze
+== stage3/NG: 3,471,552 конфигураций
+   summary 38 с
+   WF pnl: {'steps': 19, 'test_months': 57, 'total_pnl': -155.29999321699142, 'sharpe_annual': -0.14006323686547, 'share_pos_steps': 0.5263157894736842, 'distinct_configs': 19, 't_stat': -0.3052607476008922}
+   WF sharpe: {'steps': 19, 'test_months': 57, 'total_pnl': 629.2000022828579, 'sharpe_annual': 0.7951605708457763, 'share_pos_steps': 0.7368421052631579, 'distinct_configs': 16, 't_stat': 1.7330122861024266}
+   WF plateau: {'steps': 19, 'test_months': 57, 'total_pnl': 317.20000797510147, 'sharpe_annual': 0.388812657718265, 'share_pos_steps': 0.6842105263157895, 'distinct_configs': 19, 't_stat': 0.8473975414816934}
+   PBO IS 0.614 | full 0.472
+   RC/SPA is: RC p=0.071 SPA p=0.250
+   RC/SPA full: RC p=0.036 SPA p=0.061
+== stage3/NG анализ за 16.3 мин
+== extras
+{
+ "tick_usd": 0.1,
+ "walk_forward_vs_average_config": {
+  "pnl": {
+   "wf_total": -155.29999321699142,
+   "avg_config_total": 556.024614522681,
+   "excess_total": -711.3246077396724,
+   "excess_t": -1.7196963318109326
+  },
+  "sharpe": {
+   "wf_total": 629.2000022828579,
+   "avg_config_total": 556.024614522681,
+   "excess_total": 73.1753877601769,
+   "excess_t": 0.2458799502157848
+  },
+  "plateau": {
+   "wf_total": 317.20000797510147,
+   "avg_config_total": 556.024614522681,
+   "excess_total": -238.82460654757952,
+   "excess_t": -0.9997354030348438
+  }
+ },
+ "monthly_ac1_median": -0.0760304621708339,
+ "monthly_ac1_p90": 0.08801179173314401
+}
+  издержки 0.0 тика: прибыльных IS 0.890 OOS 0.842 | лучший по IS: IS 1,818 -> OOS 518 | верхний 1%: OOS 314, доля OOS>0 0.95
+  издержки 0.5 тика: прибыльных IS 0.794 OOS 0.624 | лучший по IS: IS 1,789 -> OOS 494 | верхний 1%: OOS 268, доля OOS>0 0.93
+  издержки 1.0 тика: прибыльных IS 0.656 OOS 0.445 | лучший по IS: IS 1,759 -> OOS 470 | верхний 1%: OOS 229, доля OOS>0 0.90
+  издержки 2.0 тика: прибыльных IS 0.498 OOS 0.332 | лучший по IS: IS 1,714 -> OOS 144 | верхний 1%: OOS 165, доля OOS>0 0.84
+== years
+NG 
+  год  месяцев  доля прибыльных конфигураций  медианный PnL, USD  PnL 10-го перцентиля  PnL 90-го перцентиля
+2020       11                         0.391               -16.6                 -98.7                  70.4
+2021       12                         0.867               147.3                 -27.8                 276.6
+2022       12                         0.863               347.2                 -89.2                 716.0
+2023       12                         0.771                94.7                 -84.6                 291.6
+2024       12                         0.892               116.2                  -4.5                 219.8
+2025       12                         0.733                64.8                 -82.5                 178.0
+2026       10                         0.642                40.1                -115.3                 170.8
+NG {'oos_months': 34, 'early_months': 24, 'last_year': 2026, 'last_months': 10, 'share_pos_all': 0.8419335213760301, 'share_pos_early': 0.8620026431982006, 'share_pos_last': 0.642426787788286}
+== finalists
+  NG                     global R1_max_pnl     EMA12/WMA131 A_pct B_slow_flip: vbt PnL 2,336 vs сетка 2,336 | OOS 499 Sharpe 0.85
+  NG                     global R2_max_sharpe  TMA21/EMA20 B_atr B_slow_flip: vbt PnL 2,036 vs сетка 2,036 | OOS 522 Sharpe 0.97
+  NG                     global R3_plateau     VWMA24/SMA250 A_pct B_slow_flip: vbt PnL 1,218 vs сетка 1,218 | OOS -279 Sharpe -0.48
+  NG         A_fast_cross|A_pct R1_max_pnl     SSMA92/SSMA206 A_pct A_fast_cross: vbt PnL 1,563 vs сетка 1,563 | OOS 304 Sharpe 0.76
+  NG         A_fast_cross|A_pct R2_max_sharpe  TMA73/EMA83 A_pct A_fast_cross: vbt PnL 1,222 vs сетка 1,222 | OOS 211 Sharpe 0.60
+  NG         A_fast_cross|A_pct R3_plateau     TMA70/EMA250 A_pct A_fast_cross: vbt PnL 1,320 vs сетка 1,320 | OOS 213 Sharpe 0.54
+  NG         A_fast_cross|B_atr R1_max_pnl     SSMA92/SSMA246 B_atr A_fast_cross: vbt PnL 1,444 vs сетка 1,444 | OOS 210 Sharpe 0.57
+  NG         A_fast_cross|B_atr R2_max_sharpe  SMA95/SMA200 B_atr A_fast_cross: vbt PnL 1,420 vs сетка 1,420 | OOS 425 Sharpe 1.06
+  NG         A_fast_cross|B_atr R3_plateau     TMA70/SSMA155 B_atr A_fast_cross: vbt PnL 1,434 vs сетка 1,434 | OOS 357 Sharpe 0.89
+  NG          B_slow_flip|A_pct R2_max_sharpe  VWMA16/EMA38 A_pct B_slow_flip: vbt PnL 2,007 vs сетка 2,007 | OOS 386 Sharpe 0.62
+  NG          B_slow_flip|B_atr R1_max_pnl     SMA2/SMA79 B_atr B_slow_flip: vbt PnL 2,355 vs сетка 2,355 | OOS 643 Sharpe 1.05
+  NG          B_slow_flip|B_atr R3_plateau     VWMA19/EMA22 B_atr B_slow_flip: vbt PnL 1,913 vs сетка 1,913 | OOS 407 Sharpe 0.70
+== NG3 DONE

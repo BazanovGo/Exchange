@@ -4,6 +4,7 @@
 Сырые сетки (stats.npy, monthly.npy, summary.parquet) весят гигабайты и
 воспроизводятся скриптами; сюда попадает всё, на чём построен отчёт.
 """
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -83,6 +84,14 @@ def main(stages):
                 (dst / "finalists").mkdir(exist_ok=True)
                 for f in fin.glob("*.csv"):
                     shutil.copy(f, dst / "finalists" / f.name)
+                # Дневная кривая капитала (VectorBT, с переоценкой) — только текущих
+                # финалистов: в рабочем каталоге могут лежать кривые прежних отборов.
+                current = src / "finalists.json"
+                if current.exists():
+                    for x in json.loads(current.read_text()):
+                        eq = fin / f"cfg{x['grid_config']}_equity.parquet"
+                        if eq.exists():
+                            shutil.copy(eq, dst / "finalists" / eq.name)
             meta = WORK / stage / t / "meta.json"
             if meta.exists():
                 shutil.copy(meta, dst / "grid_meta.json")
