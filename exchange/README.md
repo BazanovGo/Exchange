@@ -181,7 +181,9 @@ uv run exchange controls               # the framework's own calibration
   the selected strategies of both studies, in order, with its profit or loss:
   `trade_log.xlsx` (a sheet per strategy, running total and losing streaks as
   formulas), `trade_log_groups.xlsx` (the best moving-average strategies of
-  each exit × slope-method group, 346k trades) and the same trades as CSV. Each file is reconciled with the
+  each exit × slope-method group, 346k trades), `points/` (the outcome of
+  every trade at each strategy's best parameters, in price points, one table
+  per asset, with statistics) and the same trades as CSV. Each file is reconciled with the
   report it came from when it is exported.
 * [`notebooks/00_presentation.ipynb`](notebooks/00_presentation.ipynb) — the
   whole project as one presentation, in Russian: the audit, the framework,
