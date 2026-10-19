@@ -171,6 +171,12 @@ uv run exchange controls               # the framework's own calibration
   single-path nature of the evidence are accounted for. In Russian, generated
   by [`research/ma_crossover_5m/`](research/ma_crossover_5m/README.md); charts
   in `notebooks/03_ma_crossover_5m.ipynb`.
+* [`docs/figures/investor/`](docs/figures/investor/README.md) — one
+  presentation dashboard per strategy (the seven families and the
+  moving-average crossover on NG and BR): what was optimised, the map of the
+  parameter search, the best in-sample combinations next to their
+  out-of-sample result, equity, stability over time and the verdict. Built by
+  `research/investor_charts/build.py` from the result files.
 * [`research/trade_logs/`](research/trade_logs/README.md) — every trade of
   the selected strategies of both studies, in order, with its profit or loss:
   `trade_log.xlsx` (a sheet per strategy, running total and losing streaks as

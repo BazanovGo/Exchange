@@ -38,6 +38,7 @@ python finalists.py stage3 NG BR  # VectorBT: полная статистика,
 python nulls.py                   # нулевые рынки
 python -c "import signflip; signflip.main(n_paths=200)"   # тест траекторий
 python export.py stage1 stage3    # машиночитаемые результаты в results/
+python export_slice.py            # годовой PnL среза R2 для карт устойчивости во времени
 python build_notebook.py          # ноутбук
 python export_figures.py          # графики ноутбука -> docs/figures/ma_crossover_5m/
 python report.py stage1 stage3    # отчёт (ссылается на графики)

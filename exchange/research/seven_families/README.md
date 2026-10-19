@@ -16,6 +16,7 @@ python run_final.py    # леджер p-value поиска                    ->
 python add_hac.py      # HAC-p (без порога разрешения бутстрэпа)  -> search.pkl
 python run_final.py    # мультитест, RC/SPA, серии, вердикты      -> final.pkl
 python make_report.py  # рендер отчёта из пиклов                  -> REPORT.md
+python sweep.py        # весь перебор: IS и OOS каждой из 125 конфигураций -> results/
 ```
 
 Скрипты запускаются из этого каталога (они импортируют друг друга как
