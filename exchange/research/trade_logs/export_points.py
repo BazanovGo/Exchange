@@ -16,6 +16,7 @@
     python export_points.py seven    # окружение пакета exchange; EXCHANGE_MOEX_DATA
     python export_points.py ma       # из журнала сделок csv/MA_3_*_R1.csv
     python export_points.py tables   # points/README.md и points/points.xlsx
+    python export_points.py sequence # points/sequence/: только числа, шаги цены, по файлу на актив
 """
 from __future__ import annotations
 
@@ -195,12 +196,57 @@ def export_ma():
     (OUT / "ma_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
 
 
+# ------------------------------------------------------------------ только числа
+def export_sequence():
+    """По файлу на стратегию и актив: исходы по порядку, целым числом шагов цены, без заголовка.
+
+    Пункт здесь — минимальный шаг цены (BR 0.01 USD, NG 0.001 USD): плюс — прибыль, минус —
+    убыток, 0 — выход по цене входа. Строки переоценки открытой позиции на конец периода
+    сделками не являются и не включаются.
+    """
+    seq = OUT / "sequence"
+    seq.mkdir(exist_ok=True)
+    meta = json.loads((OUT / "seven_meta.json").read_text()) + json.loads((OUT / "ma_meta.json").read_text())
+    lines = []
+    for m in meta:
+        df = pd.read_csv(OUT / f"{m['id']}.csv")
+        steps = df.loc[df["вход"].notna(), "результат, шагов цены"].to_numpy(float)
+        whole = (np.sign(steps) * np.floor(np.abs(steps) + 0.5)).astype(int)
+        if m["study"] == "ma" and not np.array_equal(whole, np.round(steps).astype(int)):
+            raise SystemExit(f"{m['id']}: у скользящих средних шаги должны быть целыми")
+        if np.abs(whole - steps).max() > 0.5 + 1e-9:
+            raise SystemExit(f"{m['id']}: округление больше полшага")
+        (seq / f"{m['id']}.csv").write_text("\n".join(str(v) for v in whole) + "\n")
+        lines.append((m, len(whole), int((whole > 0).sum()), int((whole < 0).sum()), int((whole == 0).sum()),
+                      int(whole.sum())))
+        print(f"{m['id']:26} исходов {len(whole):5d} | + {lines[-1][2]:5d} | − {lines[-1][3]:5d} | 0 {lines[-1][4]:3d}")
+    readme = [
+        "# Исходы сделок: только числа", "",
+        "По файлу на стратегию и актив: результат каждой сделки по порядку, одно число в строке, без "
+        "заголовка. **Пункт — минимальный шаг цены**: у BR 0.01 USD за баррель, у NG 0.001 USD за MMBtu. "
+        "Плюс — прибыльный исход, минус — убыточный, 0 — выход по цене входа.", "",
+        "Параметры — выгоднейшие по оптимизации: у семи семейств выбранные оптимизатором (лучший Шарп в "
+        "выборке), у скользящих средних — R1, максимальная прибыль в выборке (этап 3). У семи семейств "
+        "издержки вычтены и результат дан на единицу позиции, округлён до целого шага; у скользящих средних — "
+        "1 контракт без издержек, шаги целые точно. Подробные таблицы с датами, ценами и USD — в "
+        "[`../`](../README.md).", "",
+        "| Стратегия | Актив | Параметры | Исходов | Плюс | Минус | Ноль | Файл |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for m, n, pos, neg, zero, _ in lines:
+        readme.append(f"| {m['strategy']} | {m['asset']} | {m['params']} | {n} | {pos} | {neg} | {zero} "
+                      f"| [{m['id']}.csv]({m['id']}.csv) |")
+    (seq / "README.md").write_text("\n".join(readme) + "\n")
+
+
 if __name__ == "__main__":
     step = sys.argv[1] if len(sys.argv) > 1 else ""
     if step == "seven":
         export_seven()
     elif step == "ma":
         export_ma()
+    elif step == "sequence":
+        export_sequence()
     elif step == "tables":
         import build_points
         build_points.main()
