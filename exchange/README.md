@@ -3,6 +3,12 @@
 A falsification-first quantitative research framework for futures and
 commodities.
 
+**All research in this repository runs on Moscow Exchange futures quotes
+obtained through MOEX AlgoPack** — natural gas (NG) and Brent (BR), 1-, 5- and
+60-minute candles over their full history (NG from 2020-02, BR from 2011-12,
+both to 2026-10). Synthetic series with a known answer are used only to
+calibrate the framework itself: its controls and tests.
+
 > **The objective is not to find strategies that backtest well. The objective
 > is to find effects that survive attempts to falsify them.**
 
@@ -92,6 +98,12 @@ from a verdict to an order, and there should not be.
   (timestamps, duplicates, OHLC consistency, gaps, jumps, staleness);
   point-in-time series with publication lags and first-print revision
   policies; two independent lookahead guards.
+* **MOEX AlgoPack** — `exchange.data.moex` reads AlgoPack candle files
+  (Moscow time, vendor-spliced by nearest expiry), recovers every roll from
+  the contract code and builds an auditable continuous series: ratio-adjusted
+  for signals, tradeable for P&L. No network and no API key: it reads files
+  already on disk. CSV, Parquet and Yahoo providers remain for other data;
+  Yahoo is for equity checks only and unsuitable for futures.
 * **Futures** — contract grammar and specifications (multiplier, tick size,
   tick value, expiry, first notice) for eight roots; calendar, volume,
   open-interest and N-days roll rules; unadjusted, backward and ratio
@@ -193,12 +205,14 @@ uv run exchange controls               # the framework's own calibration
 
 ## A caution
 
-Everything in this repository has so far been validated on synthetic series
-with known ground truth. That is the right first step — a framework that
-cannot find a constructed edge, or that finds edges in random walks, is
-broken in a way real data would hide — but it is not evidence about any
-market. The first real natural-gas contract panel will expose calendar
-details no generator produces.
+The framework was first validated on synthetic series with known ground
+truth: a framework that cannot find a constructed edge, or that finds edges
+in random walks, is broken in a way real data would hide. Both studies since
+then ran on real MOEX AlgoPack quotes, and real data did expose what no
+generator produces — a vendor splice that had to be unpicked into rolls,
+trading sessions that had to be inferred, and two calibration bugs in the
+scanner. Calibrating the moving-average study on noise also caught Hansen's
+SPA rejecting far above its nominal size. All were fixed and pinned by tests.
 
 Treat a `ROBUST` verdict as a hypothesis that has survived the attacks this
 framework knows how to make. The important failure modes are usually the ones

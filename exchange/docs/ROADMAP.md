@@ -12,6 +12,7 @@ reduces it precedes work that adds surface area.
 |---|---|
 | Reproducibility core | Determinism, canonical hashing of configs and datasets, environment capture and diff, typed error hierarchy |
 | Data engine | UTC canonical schema, severity-graded quality gate, point-in-time series with publication lags and revision policies, two independent lookahead guards |
+| Real data | MOEX AlgoPack reader for NG and BR futures (1-, 5- and 60-minute candles, Moscow time): vendor splice recovered into rolls, ratio-adjusted and tradeable continuous series; both studies run on it |
 | Futures | Contract symbol grammar and specifications for 8 roots, four roll rules, three adjustment methods, roll provenance, roll-gap diagnostics in basis points |
 | Execution | Commission / spread / slippage / square-root impact with a participation cap and partial fills; market, limit, stop and stop-limit matching with gap-aware fills; four scenarios as a ladder |
 | Backtest engine | Next-bar execution by construction, average-cost accounting, reversal split into close and open, trade reconciliation |
@@ -46,10 +47,9 @@ reduces it precedes work that adds surface area.
 
 ## Next, in order
 
-1. **Real data for natural gas and crude.** The framework's futures machinery
-   has only been exercised on synthetic ladders. The first real contract panel
-   will expose calendar details no generator can: exchange holidays, settlement
-   conventions, illiquid back months, bad prints.
+1. **Real spreads.** Both studies ran on MOEX AlgoPack candles; what decides
+   whether an intraday effect is tradable is the cost of trading it. Bid/ask
+   quotes, not candle opens, are the next data to add.
 2. **A real contract calendar.** Specifications currently derive estimated
    dates when none are supplied, and flag them. Exact first-notice and
    last-trade dates per contract move every roll and therefore every result.

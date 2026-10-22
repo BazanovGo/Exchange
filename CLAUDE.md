@@ -50,5 +50,6 @@ python tools/run_checks.py --title "<что сделано>"
 - `exchange/notebooks/00_presentation.ipynb` — презентация всего проекта.
 - `exchange/docs/` — аудит, методология, отчёты по исследованиям, журнал проверок.
 - `exchange/research/` — код и машиночитаемые результаты исследований, журнал сделок.
+- `data/raw/moex_algopack/` — котировки MOEX AlgoPack (NG и BR, 1/5/60 мин), на которых идут все исследования.
 - Корень репозитория вне `exchange/` — исходный проект, разобранный в
   `exchange/docs/ARCHITECTURE_AUDIT.md`.
