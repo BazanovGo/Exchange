@@ -1,0 +1,667 @@
+[
+ {
+  "id": "MA_1_NG_xA_sA_R1",
+  "csv": "groups/MA_1_NG_xA_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "SSMA85 × SSMA129, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1452.4,
+  "oos_pnl": 181.8,
+  "full_pnl": 1634.2000000000003,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xA_sA_R2",
+  "csv": "groups/MA_1_NG_xA_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA73 × WMA112, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 998.9000000000001,
+  "oos_pnl": 546.6,
+  "full_pnl": 1545.5,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xA_sA_R3",
+  "csv": "groups/MA_1_NG_xA_sA_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA73 × WMA108, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 934.3,
+  "oos_pnl": 436.4,
+  "full_pnl": 1370.7,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xA_sB_R1",
+  "csv": "groups/MA_1_NG_xA_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "SMA89 × VWMA250, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1324.3,
+  "oos_pnl": 214.10000000000002,
+  "full_pnl": 1538.3999999999999,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xA_sB_R2",
+  "csv": "groups/MA_1_NG_xA_sB_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "VWMA59 × EMA52, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1154.6,
+  "oos_pnl": 112.70000000000005,
+  "full_pnl": 1267.3,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xA_sB_R3",
+  "csv": "groups/MA_1_NG_xA_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "SMA98 × EMA186, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1235.5,
+  "oos_pnl": 326.5,
+  "full_pnl": 1561.9999999999998,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xB_sA_R2",
+  "csv": "groups/MA_1_NG_xB_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход B_slow_flip, наклон A_pct",
+  "name": "TMA4 × SMA51, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1625.7,
+  "oos_pnl": 534.5,
+  "full_pnl": 2160.2,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xB_sA_R3",
+  "csv": "groups/MA_1_NG_xB_sA_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход B_slow_flip, наклон A_pct",
+  "name": "VWMA2 × WMA88, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1497.8999999999999,
+  "oos_pnl": 846.5999999999999,
+  "full_pnl": 2344.5,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_NG_xB_sB_R1",
+  "csv": "groups/MA_1_NG_xB_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "WMA3 × SMA145, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1818.3,
+  "oos_pnl": 403.60000000000014,
+  "full_pnl": 2221.9000000000005,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sA_R1",
+  "csv": "groups/MA_1_BR_xA_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA86 × EMA104, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2004.2,
+  "oos_pnl": -28.400000000000034,
+  "full_pnl": 1975.8000000000002,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sA_R2",
+  "csv": "groups/MA_1_BR_xA_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA86 × EMA91, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1956.8,
+  "oos_pnl": -76.30000000000004,
+  "full_pnl": 1880.4999999999998,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sA_R3",
+  "csv": "groups/MA_1_BR_xA_sA_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA87 × EMA104, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1942.0,
+  "oos_pnl": -6.399999999999892,
+  "full_pnl": 1935.6000000000001,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sB_R1",
+  "csv": "groups/MA_1_BR_xA_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "SMA99 × EMA7, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1900.5,
+  "oos_pnl": -724.7,
+  "full_pnl": 1175.7999999999997,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sB_R2",
+  "csv": "groups/MA_1_BR_xA_sB_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "TMA44 × TMA86, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1396.9,
+  "oos_pnl": 259.5,
+  "full_pnl": 1656.4,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xA_sB_R3",
+  "csv": "groups/MA_1_BR_xA_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "VWMA60 × EMA144, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1256.2,
+  "oos_pnl": 415.0000000000001,
+  "full_pnl": 1671.1999999999998,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xB_sA_R1",
+  "csv": "groups/MA_1_BR_xB_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход B_slow_flip, наклон A_pct",
+  "name": "TMA86 × EMA104, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2906.2,
+  "oos_pnl": -44.20000000000001,
+  "full_pnl": 2862.0,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xB_sB_R2",
+  "csv": "groups/MA_1_BR_xB_sB_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "TMA42 × EMA102, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2582.8999999999996,
+  "oos_pnl": -42.99999999999994,
+  "full_pnl": 2539.8999999999996,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_1_BR_xB_sB_R3",
+  "csv": "groups/MA_1_BR_xB_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage1",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "TMA41 × EMA106, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2344.6000000000004,
+  "oos_pnl": -41.60000000000008,
+  "full_pnl": 2303.0,
+  "slope": {
+   "k": 5,
+   "coverage": 0.25,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sA_R1",
+  "csv": "groups/MA_3_NG_xA_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "SSMA92 × SSMA206, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1249.5,
+  "oos_pnl": 313.30000000000007,
+  "full_pnl": 1562.8000000000002,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sA_R2",
+  "csv": "groups/MA_3_NG_xA_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA73 × EMA83, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1005.1,
+  "oos_pnl": 217.29999999999995,
+  "full_pnl": 1222.4000000000003,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sA_R3",
+  "csv": "groups/MA_3_NG_xA_sA_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA70 × EMA250, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1101.3,
+  "oos_pnl": 218.40000000000006,
+  "full_pnl": 1319.6999999999998,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sB_R1",
+  "csv": "groups/MA_3_NG_xA_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "SSMA92 × SSMA246, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1224.4000000000003,
+  "oos_pnl": 219.10000000000002,
+  "full_pnl": 1443.5,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sB_R2",
+  "csv": "groups/MA_3_NG_xA_sB_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "SMA95 × SMA200, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 985.4,
+  "oos_pnl": 434.29999999999995,
+  "full_pnl": 1419.7,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_NG_xA_sB_R3",
+  "csv": "groups/MA_3_NG_xA_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "TMA70 × SSMA155, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1071.9,
+  "oos_pnl": 362.40000000000003,
+  "full_pnl": 1434.3,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_NG_xB_sA_R2",
+  "csv": "groups/MA_3_NG_xB_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R2 макс. Шарп",
+  "group": "выход B_slow_flip, наклон A_pct",
+  "name": "VWMA16 × EMA38, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1610.4,
+  "oos_pnl": 396.80000000000007,
+  "full_pnl": 2007.1999999999998,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_NG_xB_sB_R1",
+  "csv": "groups/MA_3_NG_xB_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R1 макс. PnL",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "SMA2 × SMA79, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1705.4,
+  "oos_pnl": 649.2999999999998,
+  "full_pnl": 2354.7,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_NG_xB_sB_R3",
+  "csv": "groups/MA_3_NG_xB_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "NG",
+  "rule": "R3 плато",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "VWMA19 × EMA22, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1495.1999999999998,
+  "oos_pnl": 418.0,
+  "full_pnl": 1913.2,
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_BR_xA_sA_R1",
+  "csv": "groups/MA_3_BR_xA_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA44 × SMA57, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1696.6,
+  "oos_pnl": 262.70000000000005,
+  "full_pnl": 1959.3000000000002,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_xA_sA_R2",
+  "csv": "groups/MA_3_BR_xA_sA_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA44 × TMA62, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1639.5,
+  "oos_pnl": 452.3,
+  "full_pnl": 2091.7999999999997,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_xA_sA_R3",
+  "csv": "groups/MA_3_BR_xA_sA_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон A_pct",
+  "name": "TMA42 × SMA60, наклон A_pct, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1490.4,
+  "oos_pnl": 268.79999999999995,
+  "full_pnl": 1759.1999999999998,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_xA_sB_R1",
+  "csv": "groups/MA_3_BR_xA_sB_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "TMA44 × VWMA33, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1533.3,
+  "oos_pnl": 456.2,
+  "full_pnl": 1989.5,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_BR_xA_sB_R3",
+  "csv": "groups/MA_3_BR_xA_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход A_fast_cross, наклон B_atr",
+  "name": "TMA43 × VWMA35, наклон B_atr, выход A_fast_cross",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 1220.3000000000002,
+  "oos_pnl": 445.0999999999999,
+  "full_pnl": 1665.3999999999999,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_BR_xB_sA_R1",
+  "csv": "groups/MA_3_BR_xB_sA_R1.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R1 макс. PnL",
+  "group": "выход B_slow_flip, наклон A_pct",
+  "name": "EMA12 × TMA70, наклон A_pct, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 3261.3999999999996,
+  "oos_pnl": 388.0,
+  "full_pnl": 3649.3999999999996,
+  "slope": {
+   "k": 34,
+   "coverage": 0.6,
+   "atr_period": 14
+  }
+ },
+ {
+  "id": "MA_3_BR_xB_sB_R2",
+  "csv": "groups/MA_3_BR_xB_sB_R2.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R2 макс. Шарп",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "TMA38 × SMA51, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2709.6,
+  "oos_pnl": 538.6,
+  "full_pnl": 3248.2,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28
+  }
+ },
+ {
+  "id": "MA_3_BR_xB_sB_R3",
+  "csv": "groups/MA_3_BR_xB_sB_R3.csv.gz",
+  "study": "ma",
+  "stage": "stage3",
+  "market": "BR",
+  "rule": "R3 плато",
+  "group": "выход B_slow_flip, наклон B_atr",
+  "name": "TMA41 × TMA54, наклон B_atr, выход B_slow_flip",
+  "units": "USD на 1 контракт, без издержек (так в задании)",
+  "is_pnl": 2370.0,
+  "oos_pnl": 230.50000000000014,
+  "full_pnl": 2600.5,
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 28
+  }
+ }
+]

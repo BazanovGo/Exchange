@@ -1,0 +1,150 @@
+# Continuous integration for the research OS.
+#
+# The job order is deliberate. Temporal integrity runs first and alone,
+# because a lookahead invalidates every other number in the build: there is
+# no point learning that the statistics are correct on contaminated data.
+# The controls then establish that the framework can still find a known
+# edge and still rejects noise, and only after that does anything else
+# matter.
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: exchange
+
+env:
+  # Pinned so set/dict iteration order cannot move a number between runs.
+  PYTHONHASHSEED: "0"
+  # One BLAS thread: multi-threaded reductions sum in a non-deterministic
+  # order, which changes the last bits of a float and therefore breaks the
+  # reproducibility check below.
+  OMP_NUM_THREADS: "1"
+  OPENBLAS_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+
+jobs:
+  lint:
+    name: lint and types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: ruff
+        run: uv run ruff check src tests
+      - name: import the package without optional extras
+        run: uv run python -c "import exchange; print(exchange.__version__)"
+
+  temporal-integrity:
+    name: temporal integrity (runs first, alone)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: lookahead and leakage guards
+        run: uv run pytest tests/test_lookahead.py -q
+      - name: every registered strategy is causal
+        run: |
+          uv run python - <<'PY'
+          from exchange.strategies.base import available, strategy_class
+          from exchange.synthetic.generators import random_walk
+
+          bars = random_walk(n=600, seed=20260902).bars
+          for name in available():
+              strategy_class(name)().check_causality(bars)
+          print(f"{len(available())} strategies proved causal")
+          PY
+
+  tests:
+    name: tests (python ${{ matrix.python }})
+    needs: temporal-integrity
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras --python ${{ matrix.python }}
+      - name: unit and integration tests
+        run: uv run pytest tests -q -m "not slow" --cov=exchange --cov-report=term-missing
+      - name: slow tests
+        if: matrix.python == '3.12'
+        run: uv run pytest tests -q -m slow
+
+  controls:
+    name: synthetic controls
+    needs: temporal-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: doctor
+        run: uv run exchange doctor
+      - name: negative, positive and leakage controls
+        # Non-zero exit if a random walk earns a verdict above WEAK, if a
+        # constructed edge is missed, or if a planted lookahead is not
+        # caught. Any of those means the instrument is broken.
+        run: uv run exchange controls --quick
+
+  reproducibility:
+    name: reproducibility
+    needs: temporal-integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --all-extras
+      - name: a recorded experiment reproduces exactly
+        run: |
+          uv run exchange research \
+            'synthetic:signal_plus_noise:7:edge_per_bar=0.003,lookback=5' \
+            --hypothesis examples/momentum.yaml \
+            --multiplier 1000 --no-scan
+          uv run exchange reproduce "$(uv run python -c '
+          from exchange.registry.store import ExperimentStore
+          print(ExperimentStore("experiments").ids()[-1])')"
+      - name: the same run twice gives the same hash
+        run: |
+          uv run python - <<'PY'
+          from exchange.core.hashing import hash_dataframe
+          from exchange.synthetic.generators import signal_plus_noise
+
+          a = signal_plus_noise(n=500, seed=7).bars
+          b = signal_plus_noise(n=500, seed=7).bars
+          assert hash_dataframe(a) == hash_dataframe(b), "generators are not deterministic"
+          print("deterministic:", hash_dataframe(a))
+          PY
+
+  docker:
+    name: docker build
+    needs: [lint, temporal-integrity]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build (the image runs doctor and the controls during the build)
+        run: docker build -t exchange-research:ci exchange

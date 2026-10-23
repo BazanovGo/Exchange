@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Research artifacts: the registry index is tracked, payloads are not.
+experiments/**
+!experiments/.gitkeep
+data/raw/**
+data/processed/**
+!data/**/.gitkeep
+out/

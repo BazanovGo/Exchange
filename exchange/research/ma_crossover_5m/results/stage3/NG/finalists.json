@@ -1,0 +1,1106 @@
+[
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "WMA",
+   "slow_period": 131,
+   "exit": "B_slow_flip",
+   "fast_type": "EMA",
+   "fast_period": 12
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.403867468510858,
+  "neutral_is": 0.4000039478619038,
+  "neutral_oos": 0.4571586254071155,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 2335.89999999851,
+   "trades": 1067,
+   "sharpe_daily": 1.476897565639529,
+   "sortino_daily": 2.4532445144824764,
+   "max_dd_mtm": 417.29999999993015,
+   "win_rate": 0.3795688847235239,
+   "profit_factor": 1.451809442757394
+  },
+  "is": {
+   "pnl": 1836.5999999990454,
+   "trades": 592,
+   "sharpe_daily": 1.8817890128290884,
+   "sortino_daily": 3.0813131082032297,
+   "max_dd_mtm": 417.29999999993015,
+   "win_rate": 0.38344594594594594,
+   "profit_factor": 1.584206129923537
+  },
+  "oos": {
+   "pnl": 499.2999999994645,
+   "trades": 475,
+   "sharpe_daily": 0.8459211042543243,
+   "sortino_daily": 1.4490534655347784,
+   "max_dd_mtm": 235.49999999988358,
+   "win_rate": 0.37473684210526315,
+   "profit_factor": 1.2515188335358445
+  },
+  "exposure": 0.9522212013077203,
+  "avg_duration_bars": 250.58762886597938,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 1215.7800000000002,
+    "p50": 2329.7999999999997,
+    "p95": 3505.0549999999994
+   },
+   "p_total_negative": 0.0,
+   "max_dd_bootstrap": {
+    "p5": 174.09499999999946,
+    "p50": 266.9000000000008,
+    "p95": 461.01000000000204
+   },
+   "max_dd_permutation": {
+    "p5": 186.800000000001,
+    "p50": 264.69999999999914,
+    "p95": 414.71999999999946
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -59.23499999999986,
+    "p50": 507.60000000000025,
+    "p95": 1134.6100000000008
+   },
+   "p_total_negative": 0.076,
+   "max_dd_bootstrap": {
+    "p5": 124.89500000000051,
+    "p50": 216.34999999999974,
+    "p95": 420.80500000000023
+   },
+   "max_dd_permutation": {
+    "p5": 143.89999999999998,
+    "p50": 210.5,
+    "p95": 337.0000000000004
+   }
+  },
+  "scope": "global",
+  "rule": "R1_max_pnl",
+  "grid_config": 727464,
+  "grid_pnl_full": 2335.9
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "EMA",
+   "slow_period": 20,
+   "exit": "B_slow_flip",
+   "fast_type": "TMA",
+   "fast_period": 21
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 1.107856857763049,
+  "neutral_is": 0.25,
+  "neutral_oos": 0.28330573887088123,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 2036.4000000011874,
+   "trades": 3039,
+   "sharpe_daily": 1.4967510379902234,
+   "sortino_daily": 2.5610038562693527,
+   "max_dd_mtm": 243.4000000002561,
+   "win_rate": 0.3333333333333333,
+   "profit_factor": 1.2812746032403768
+  },
+  "is": {
+   "pnl": 1514.5000000023283,
+   "trades": 1666,
+   "sharpe_daily": 1.854563702555369,
+   "sortino_daily": 3.2917504287876604,
+   "max_dd_mtm": 125.79999999969732,
+   "win_rate": 0.3433373349339736,
+   "profit_factor": 1.3442844387463102
+  },
+  "oos": {
+   "pnl": 521.8999999988591,
+   "trades": 1373,
+   "sharpe_daily": 0.9714141706445439,
+   "sortino_daily": 1.5618120444476171,
+   "max_dd_mtm": 243.4000000002561,
+   "win_rate": 0.3211944646758922,
+   "profit_factor": 1.1854456824512525
+  },
+  "exposure": 0.7815124254791769,
+  "avg_duration_bars": 72.20895031260282,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 1103.9950000000024,
+    "p50": 2017.050000000006,
+    "p95": 2983.5550000000194
+   },
+   "p_total_negative": 0.0,
+   "max_dd_bootstrap": {
+    "p5": 157.19999999999982,
+    "p50": 237.89999999999992,
+    "p95": 394.4150000000006
+   },
+   "max_dd_permutation": {
+    "p5": 166.90000000000012,
+    "p50": 233.60000000000042,
+    "p95": 361.915
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": 18.17999999999829,
+    "p50": 537.9499999999975,
+    "p95": 1076.9000000000012
+   },
+   "p_total_negative": 0.0436,
+   "max_dd_bootstrap": {
+    "p5": 111.80000000000007,
+    "p50": 185.7000000000006,
+    "p95": 349.3050000000008
+   },
+   "max_dd_permutation": {
+    "p5": 127.39499999999946,
+    "p50": 185.10000000000042,
+    "p95": 289.72499999999997
+   }
+  },
+  "scope": "global",
+  "rule": "R2_max_sharpe",
+  "grid_config": 2043809,
+  "grid_pnl_full": 2036.4
+ },
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "SMA",
+   "slow_period": 250,
+   "exit": "B_slow_flip",
+   "fast_type": "TMA",
+   "fast_period": 38
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.2907299019134284,
+  "neutral_is": 0.40000131698515756,
+  "neutral_oos": 0.43889186857262785,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1010.2000000006519,
+   "trades": 520,
+   "sharpe_daily": 0.6387772977200291,
+   "sortino_daily": 0.9652190951964309,
+   "max_dd_mtm": 573.6999999990221,
+   "win_rate": 0.37115384615384617,
+   "profit_factor": 1.2565131278248947
+  },
+  "is": {
+   "pnl": 1329.0999999999767,
+   "trades": 273,
+   "sharpe_daily": 1.3461088400586,
+   "sortino_daily": 2.0500416619070454,
+   "max_dd_mtm": 230.09999999997672,
+   "win_rate": 0.4249084249084249,
+   "profit_factor": 1.625077208153181
+  },
+  "oos": {
+   "pnl": -318.8999999993248,
+   "trades": 247,
+   "sharpe_daily": -0.556603347451136,
+   "sortino_daily": -0.8218368422489758,
+   "max_dd_mtm": 573.6999999990221,
+   "win_rate": 0.3117408906882591,
+   "profit_factor": 0.8334333242432506
+  },
+  "exposure": 0.9422103036389666,
+  "avg_duration_bars": 508.78076923076924,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": -47.965000000000494,
+    "p50": 1007.8500000000007,
+    "p95": 2107.019999999998
+   },
+   "p_total_negative": 0.06,
+   "max_dd_bootstrap": {
+    "p5": 232.90000000000072,
+    "p50": 392.15,
+    "p95": 725.6099999999997
+   },
+   "max_dd_permutation": {
+    "p5": 261.6000000000004,
+    "p50": 387.35000000000076,
+    "p95": 612.1250000000003
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -801.2050000000004,
+    "p50": -306.64999999999964,
+    "p95": 232.28000000000017
+   },
+   "p_total_negative": 0.8296,
+   "max_dd_bootstrap": {
+    "p5": 235.2949999999999,
+    "p50": 500.2500000000002,
+    "p95": 890.7150000000007
+   },
+   "max_dd_permutation": {
+    "p5": 352.20000000000016,
+    "p50": 485.45000000000005,
+    "p95": 660.2049999999999
+   }
+  },
+  "scope": "global",
+  "rule": "R3_plateau",
+  "grid_config": 289234,
+  "grid_pnl_full": 1010.2
+ },
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "SSMA",
+   "slow_period": 206,
+   "exit": "A_fast_cross",
+   "fast_type": "SSMA",
+   "fast_period": 92
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.23006649928003753,
+  "neutral_is": 0.40000394981106735,
+  "neutral_oos": 0.4364588920240344,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1562.8000000019092,
+   "trades": 4940,
+   "sharpe_daily": 1.2729609028341415,
+   "sortino_daily": 2.318523387953231,
+   "max_dd_mtm": 205.5999999960186,
+   "win_rate": 0.17449392712550607,
+   "profit_factor": 1.3296211929469333
+  },
+  "is": {
+   "pnl": 1258.9999999960419,
+   "trades": 2718,
+   "sharpe_daily": 1.579822705658197,
+   "sortino_daily": 3.004226105132029,
+   "max_dd_mtm": 160.10000000114087,
+   "win_rate": 0.18800588668138338,
+   "profit_factor": 1.4129895884977686
+  },
+  "oos": {
+   "pnl": 303.80000000586733,
+   "trades": 2222,
+   "sharpe_daily": 0.7568626395181014,
+   "sortino_daily": 1.2257350366561441,
+   "max_dd_mtm": 205.5999999960186,
+   "win_rate": 0.15796579657965795,
+   "profit_factor": 1.1826076819956879
+  },
+  "exposure": 0.491256935689509,
+  "avg_duration_bars": 27.92348178137652,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 787.3800000000044,
+    "p50": 1556.9499999999998,
+    "p95": 2409.420000000003
+   },
+   "p_total_negative": 0.0006,
+   "max_dd_bootstrap": {
+    "p5": 136.88500000000013,
+    "p50": 209.4999999999986,
+    "p95": 355.0299999999915
+   },
+   "max_dd_permutation": {
+    "p5": 146.79500000000093,
+    "p50": 209.50000000000125,
+    "p95": 325.81000000000006
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -25.70500000000068,
+    "p50": 310.05000000000274,
+    "p95": 667.220000000002
+   },
+   "p_total_negative": 0.0646,
+   "max_dd_bootstrap": {
+    "p5": 79.69999999999985,
+    "p50": 136.64999999999958,
+    "p95": 267.20999999999907
+   },
+   "max_dd_permutation": {
+    "p5": 94.20000000000005,
+    "p50": 137.44999999999933,
+    "p95": 215.40499999999946
+   }
+  },
+  "scope": "A_fast_cross|A_pct",
+  "rule": "R1_max_pnl",
+  "grid_config": 1104648,
+  "grid_pnl_full": 1562.8
+ },
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "EMA",
+   "slow_period": 83,
+   "exit": "A_fast_cross",
+   "fast_type": "TMA",
+   "fast_period": 73
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.40460372367156183,
+  "neutral_is": 0.4000026310769656,
+  "neutral_oos": 0.4620478977683464,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1222.4000000001397,
+   "trades": 7956,
+   "sharpe_daily": 1.1355077676993754,
+   "sortino_daily": 2.0011015172417292,
+   "max_dd_mtm": 155.89999999979045,
+   "win_rate": 0.19670688788335847,
+   "profit_factor": 1.1910865861093314
+  },
+  "is": {
+   "pnl": 1011.7999999985332,
+   "trades": 4265,
+   "sharpe_daily": 1.4489023459241848,
+   "sortino_daily": 2.5073817773693623,
+   "max_dd_mtm": 155.89999999979045,
+   "win_rate": 0.21172332942555686,
+   "profit_factor": 1.2490336967294358
+  },
+  "oos": {
+   "pnl": 210.60000000160653,
+   "trades": 3691,
+   "sharpe_daily": 0.5969532342721248,
+   "sortino_daily": 1.116520409836581,
+   "max_dd_mtm": 119.99999999650754,
+   "win_rate": 0.17935518829585478,
+   "profit_factor": 1.092033374274704
+  },
+  "exposure": 0.44065400257840265,
+  "avg_duration_bars": 15.552036199095022,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 518.1650000000113,
+    "p50": 1213.3500000000006,
+    "p95": 1948.030000000012
+   },
+   "p_total_negative": 0.0016,
+   "max_dd_bootstrap": {
+    "p5": 138.19499999999982,
+    "p50": 213.60000000000036,
+    "p95": 375.6349999999981
+   },
+   "max_dd_permutation": {
+    "p5": 150.29499999999666,
+    "p50": 214.69999999999726,
+    "p95": 331.90999999999894
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -139.7049999999938,
+    "p50": 212.3000000000019,
+    "p95": 594.7000000000023
+   },
+   "p_total_negative": 0.1628,
+   "max_dd_bootstrap": {
+    "p5": 95.20000000000046,
+    "p50": 164.09999999999803,
+    "p95": 315.60499999999774
+   },
+   "max_dd_permutation": {
+    "p5": 109.20000000000019,
+    "p50": 159.99999999999855,
+    "p95": 252.79999999999833
+   }
+  },
+  "scope": "A_fast_cross|A_pct",
+  "rule": "R2_max_sharpe",
+  "grid_config": 381585,
+  "grid_pnl_full": 1222.4
+ },
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "EMA",
+   "slow_period": 250,
+   "exit": "A_fast_cross",
+   "fast_type": "TMA",
+   "fast_period": 70
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.28238739151720144,
+  "neutral_is": 0.40000131698515756,
+  "neutral_oos": 0.4437111831417267,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1319.6999999968102,
+   "trades": 8469,
+   "sharpe_daily": 1.1235989679949683,
+   "sortino_daily": 2.089602456180645,
+   "max_dd_mtm": 228.1999999975087,
+   "win_rate": 0.2010863147951352,
+   "profit_factor": 1.184410938613529
+  },
+  "is": {
+   "pnl": 1106.7999999960884,
+   "trades": 4528,
+   "sharpe_daily": 1.4627298521724938,
+   "sortino_daily": 2.7085613002988773,
+   "max_dd_mtm": 173.50000000034925,
+   "win_rate": 0.21135159010600707,
+   "profit_factor": 1.2434350132625993
+  },
+  "oos": {
+   "pnl": 212.90000000072177,
+   "trades": 3941,
+   "sharpe_daily": 0.5417159807259576,
+   "sortino_daily": 1.0185640988541695,
+   "max_dd_mtm": 228.1999999975087,
+   "win_rate": 0.18929205785333672,
+   "profit_factor": 1.0829692664210002
+  },
+  "exposure": 0.4742729545503109,
+  "avg_duration_bars": 15.724642814972253,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 585.1749999999963,
+    "p50": 1336.100000000006,
+    "p95": 2096.4299999999967
+   },
+   "p_total_negative": 0.002,
+   "max_dd_bootstrap": {
+    "p5": 144.1850000000003,
+    "p50": 224.199999999998,
+    "p95": 390.825000000001
+   },
+   "max_dd_permutation": {
+    "p5": 159.00000000000148,
+    "p50": 224.29999999999916,
+    "p95": 351.90499999999605
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -173.62500000000472,
+    "p50": 220.04999999999512,
+    "p95": 622.5050000000012
+   },
+   "p_total_negative": 0.1758,
+   "max_dd_bootstrap": {
+    "p5": 103.99499999999927,
+    "p50": 183.70000000000084,
+    "p95": 362.2050000000036
+   },
+   "max_dd_permutation": {
+    "p5": 122.00000000000072,
+    "p50": 181.0500000000004,
+    "p95": 283.3050000000023
+   }
+  },
+  "scope": "A_fast_cross|A_pct",
+  "rule": "R3_plateau",
+  "grid_config": 577974,
+  "grid_pnl_full": 1319.7
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "SSMA",
+   "slow_period": 246,
+   "exit": "A_fast_cross",
+   "fast_type": "SSMA",
+   "fast_period": 92
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 0.436320058521103,
+  "neutral_is": 0.25000329237617375,
+  "neutral_oos": 0.2492440671905728,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1443.500000002212,
+   "trades": 4881,
+   "sharpe_daily": 1.1982696729281073,
+   "sortino_daily": 2.172005827744044,
+   "max_dd_mtm": 235.69999999611173,
+   "win_rate": 0.17332513829133375,
+   "profit_factor": 1.3049411665293533
+  },
+  "is": {
+   "pnl": 1233.8999999966472,
+   "trades": 2692,
+   "sharpe_daily": 1.5471272284763717,
+   "sortino_daily": 2.897755480687328,
+   "max_dd_mtm": 176.20000000006985,
+   "win_rate": 0.187592867756315,
+   "profit_factor": 1.4070478723404247
+  },
+  "oos": {
+   "pnl": 209.60000000556465,
+   "trades": 2189,
+   "sharpe_daily": 0.5700771129696882,
+   "sortino_daily": 0.9258483201253365,
+   "max_dd_mtm": 235.69999999611173,
+   "win_rate": 0.15577889447236182,
+   "profit_factor": 1.1269629715477785
+  },
+  "exposure": 0.4796256330263467,
+  "avg_duration_bars": 27.591886908420406,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 682.4950000000011,
+    "p50": 1424.6499999999987,
+    "p95": 2268.505
+   },
+   "p_total_negative": 0.001,
+   "max_dd_bootstrap": {
+    "p5": 141.49499999999986,
+    "p50": 218.79999999999927,
+    "p95": 373.2050000000003
+   },
+   "max_dd_permutation": {
+    "p5": 150.60000000000034,
+    "p50": 215.4000000000006,
+    "p95": 338.20500000000004
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -113.6049999999989,
+    "p50": 214.60000000000315,
+    "p95": 570.5550000000019
+   },
+   "p_total_negative": 0.1358,
+   "max_dd_bootstrap": {
+    "p5": 88.29999999999994,
+    "p50": 156.10000000000085,
+    "p95": 292.19999999999857
+   },
+   "max_dd_permutation": {
+    "p5": 104.0000000000004,
+    "p50": 154.34999999999934,
+    "p95": 241.79999999999964
+   }
+  },
+  "scope": "A_fast_cross|B_atr",
+  "rule": "R1_max_pnl",
+  "grid_config": 2887464,
+  "grid_pnl_full": 1443.5
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "SMA",
+   "slow_period": 200,
+   "exit": "A_fast_cross",
+   "fast_type": "SMA",
+   "fast_period": 95
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 0.6413839731995523,
+  "neutral_is": 0.25,
+  "neutral_oos": 0.25088418876166935,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1419.7000000027474,
+   "trades": 6835,
+   "sharpe_daily": 1.249851986677003,
+   "sortino_daily": 2.2771900026553036,
+   "max_dd_mtm": 161.19999999995343,
+   "win_rate": 0.1932699341623994,
+   "profit_factor": 1.2370156429990489
+  },
+  "is": {
+   "pnl": 994.9000000000233,
+   "trades": 3683,
+   "sharpe_daily": 1.3866822456271002,
+   "sortino_daily": 2.5463684712671917,
+   "max_dd_mtm": 137.90000000060536,
+   "win_rate": 0.20553896280206355,
+   "profit_factor": 1.2570362834859286
+  },
+  "oos": {
+   "pnl": 424.8000000027241,
+   "trades": 3152,
+   "sharpe_daily": 1.05656201849479,
+   "sortino_daily": 1.8880534179679953,
+   "max_dd_mtm": 161.19999999995343,
+   "win_rate": 0.17893401015228427,
+   "profit_factor": 1.2014191633429174
+  },
+  "exposure": 0.46210389110878436,
+  "avg_duration_bars": 18.98390636430139,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 658.7900000000071,
+    "p50": 1415.0000000000032,
+    "p95": 2201.2000000000044
+   },
+   "p_total_negative": 0.0,
+   "max_dd_bootstrap": {
+    "p5": 141.19999999999993,
+    "p50": 217.14999999999836,
+    "p95": 366.00999999999755
+   },
+   "max_dd_permutation": {
+    "p5": 150.30000000000112,
+    "p50": 215.29999999999978,
+    "p95": 333.70500000000135
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": 39.394999999999094,
+    "p50": 433.9499999999989,
+    "p95": 840.5450000000005
+   },
+   "p_total_negative": 0.0352,
+   "max_dd_bootstrap": {
+    "p5": 83.89499999999984,
+    "p50": 138.90000000000043,
+    "p95": 262.3000000000004
+   },
+   "max_dd_permutation": {
+    "p5": 96.99999999999982,
+    "p50": 139.05000000000098,
+    "p95": 214.70499999999961
+   }
+  },
+  "scope": "A_fast_cross|B_atr",
+  "rule": "R2_max_sharpe",
+  "grid_config": 1965189,
+  "grid_pnl_full": 1419.7
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "SSMA",
+   "slow_period": 155,
+   "exit": "A_fast_cross",
+   "fast_type": "TMA",
+   "fast_period": 70
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 0.533659054019874,
+  "neutral_is": 0.2500049356067835,
+  "neutral_oos": 0.24496886878250124,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1434.299999996787,
+   "trades": 8433,
+   "sharpe_daily": 1.2068487857061596,
+   "sortino_daily": 2.274507724481849,
+   "max_dd_mtm": 199.20000000030268,
+   "win_rate": 0.20277481323372465,
+   "profit_factor": 1.1992221682061253
+  },
+  "is": {
+   "pnl": 1077.399999996298,
+   "trades": 4506,
+   "sharpe_daily": 1.4117759826337903,
+   "sortino_daily": 2.631181581456694,
+   "max_dd_mtm": 199.20000000030268,
+   "win_rate": 0.2103861517976032,
+   "profit_factor": 1.2356601077278222
+  },
+  "oos": {
+   "pnl": 356.90000000048894,
+   "trades": 3927,
+   "sharpe_daily": 0.887742893094405,
+   "sortino_daily": 1.7291865674936122,
+   "max_dd_mtm": 190.7999999972526,
+   "win_rate": 0.19404125286478227,
+   "profit_factor": 1.136703130894002
+  },
+  "exposure": 0.47367821249741804,
+  "avg_duration_bars": 15.771967271433654,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 673.0650000000024,
+    "p50": 1428.7500000000005,
+    "p95": 2238.034999999994
+   },
+   "p_total_negative": 0.0008,
+   "max_dd_bootstrap": {
+    "p5": 144.79499999999769,
+    "p50": 223.0999999999965,
+    "p95": 380.7050000000029
+   },
+   "max_dd_permutation": {
+    "p5": 155.09999999999974,
+    "p50": 219.99999999999926,
+    "p95": 342.8100000000002
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -43.305000000000554,
+    "p50": 351.00000000000097,
+    "p95": 773.9999999999982
+   },
+   "p_total_negative": 0.0718,
+   "max_dd_bootstrap": {
+    "p5": 98.20000000000007,
+    "p50": 164.75000000000054,
+    "p95": 308.304999999999
+   },
+   "max_dd_permutation": {
+    "p5": 110.68999999999933,
+    "p50": 162.3999999999996,
+    "p95": 251.7150000000004
+   }
+  },
+  "scope": "A_fast_cross|B_atr",
+  "rule": "R3_plateau",
+  "grid_config": 2780622,
+  "grid_pnl_full": 1434.3
+ },
+ {
+  "config": {
+   "method": "A_pct",
+   "slow_type": "EMA",
+   "slow_period": 38,
+   "exit": "B_slow_flip",
+   "fast_type": "VWMA",
+   "fast_period": 16
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.4,
+   "atr_period": 14,
+   "median_sharpe_is": 0.715421736240387,
+   "median_sharpe_oos": 0.3538128137588501,
+   "setting": 38
+  },
+  "eps": 0.4822066410163068,
+  "neutral_is": 0.4000026302984074,
+  "neutral_oos": 0.4694478775583176,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 2007.1999999994878,
+   "trades": 1929,
+   "sharpe_daily": 1.3116652581810433,
+   "sortino_daily": 2.084404394454495,
+   "max_dd_mtm": 230.8999999986263,
+   "win_rate": 0.3634007257646449,
+   "profit_factor": 1.3029004315938797
+  },
+  "is": {
+   "pnl": 1621.0999999988126,
+   "trades": 1093,
+   "sharpe_daily": 1.7963904833400723,
+   "sortino_daily": 3.014523659053029,
+   "max_dd_mtm": 168.20000000006985,
+   "win_rate": 0.3705397987191217,
+   "profit_factor": 1.4029324192458783
+  },
+  "oos": {
+   "pnl": 386.1000000006752,
+   "trades": 836,
+   "sharpe_daily": 0.6197540826015305,
+   "sortino_daily": 0.9080832551219464,
+   "max_dd_mtm": 230.8999999986263,
+   "win_rate": 0.35406698564593303,
+   "profit_factor": 1.1508802616069056
+  },
+  "exposure": 0.8924015470416035,
+  "avg_duration_bars": 129.90150336962157,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 1039.7749999999999,
+    "p50": 1971.6000000000051,
+    "p95": 2989.2750000000055
+   },
+   "p_total_negative": 0.0,
+   "max_dd_bootstrap": {
+    "p5": 174.69000000000065,
+    "p50": 267.4500000000015,
+    "p95": 447.405
+   },
+   "max_dd_permutation": {
+    "p5": 185.5949999999998,
+    "p50": 262.5500000000002,
+    "p95": 407.80500000000006
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -157.6150000000008,
+    "p50": 380.50000000000045,
+    "p95": 954.8599999999991
+   },
+   "p_total_negative": 0.1246,
+   "max_dd_bootstrap": {
+    "p5": 135.89999999999998,
+    "p50": 238.94999999999914,
+    "p95": 464.619999999999
+   },
+   "max_dd_permutation": {
+    "p5": 156.89999999999972,
+    "p50": 231.29999999999998,
+    "p95": 361.9050000000003
+   }
+  },
+  "scope": "B_slow_flip|A_pct",
+  "rule": "R2_max_sharpe",
+  "grid_config": 329098,
+  "grid_pnl_full": 2007.2
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "SMA",
+   "slow_period": 79,
+   "exit": "B_slow_flip",
+   "fast_type": "SMA",
+   "fast_period": 2
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 0.8762800474354753,
+  "neutral_is": 0.2500049331395158,
+  "neutral_oos": 0.2745299225023125,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 2354.7000000007683,
+   "trades": 1672,
+   "sharpe_daily": 1.4465440072759752,
+   "sortino_daily": 2.355937602409786,
+   "max_dd_mtm": 324.39999999990687,
+   "win_rate": 0.375,
+   "profit_factor": 1.386415478280847
+  },
+  "is": {
+   "pnl": 1711.6999999997206,
+   "trades": 926,
+   "sharpe_daily": 1.708233504742113,
+   "sortino_daily": 2.732148857116072,
+   "max_dd_mtm": 324.39999999990687,
+   "win_rate": 0.38228941684665224,
+   "profit_factor": 1.460495760652372
+  },
+  "oos": {
+   "pnl": 643.0000000010477,
+   "trades": 746,
+   "sharpe_daily": 1.051486173287046,
+   "sortino_daily": 1.7835489893479073,
+   "max_dd_mtm": 175.99999999976717,
+   "win_rate": 0.36595174262734587,
+   "profit_factor": 1.2716395431535796
+  },
+  "exposure": 0.9822788236215874,
+  "avg_duration_bars": 164.96232057416267,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 1290.3499999999945,
+    "p50": 2360.349999999994,
+    "p95": 3451.6049999999914
+   },
+   "p_total_negative": 0.0002,
+   "max_dd_bootstrap": {
+    "p5": 170.69499999999985,
+    "p50": 259.9500000000005,
+    "p95": 442.5050000000009
+   },
+   "max_dd_permutation": {
+    "p5": 182.67999999999935,
+    "p50": 258.25000000000017,
+    "p95": 404.7300000000007
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": 63.08000000000028,
+    "p50": 628.6000000000006,
+    "p95": 1263.6100000000017
+   },
+   "p_total_negative": 0.0344,
+   "max_dd_bootstrap": {
+    "p5": 119.49999999999999,
+    "p50": 200.94999999999993,
+    "p95": 370.30499999999984
+   },
+   "max_dd_permutation": {
+    "p5": 133.39999999999995,
+    "p50": 196.00000000000017,
+    "p95": 309.0199999999994
+   }
+  },
+  "scope": "B_slow_flip|B_atr",
+  "rule": "R1_max_pnl",
+  "grid_config": 1823388,
+  "grid_pnl_full": 2354.7
+ },
+ {
+  "config": {
+   "method": "B_atr",
+   "slow_type": "EMA",
+   "slow_period": 22,
+   "exit": "B_slow_flip",
+   "fast_type": "VWMA",
+   "fast_period": 19
+  },
+  "slope": {
+   "k": 34,
+   "coverage": 0.25,
+   "atr_period": 28,
+   "median_sharpe_is": 0.7066466808319092,
+   "median_sharpe_oos": 0.5340191125869751,
+   "setting": 190
+  },
+  "eps": 1.0954852519930434,
+  "neutral_is": 0.2500032875271221,
+  "neutral_oos": 0.2827072110937512,
+  "capital_usd": 996.5,
+  "trading_days_per_year": 267.40981922760886,
+  "full": {
+   "pnl": 1913.2000000011176,
+   "trades": 3032,
+   "sharpe_daily": 1.3133669968227093,
+   "sortino_daily": 2.115651126817126,
+   "max_dd_mtm": 263.69999999995343,
+   "win_rate": 0.34201846965699206,
+   "profit_factor": 1.2521848019508341
+  },
+  "is": {
+   "pnl": 1505.9000000006054,
+   "trades": 1666,
+   "sharpe_daily": 1.7374413909743314,
+   "sortino_daily": 3.01373201035881,
+   "max_dd_mtm": 143.70000000030268,
+   "win_rate": 0.3487394957983193,
+   "profit_factor": 1.3260855342071405
+  },
+  "oos": {
+   "pnl": 407.3000000005122,
+   "trades": 1366,
+   "sharpe_daily": 0.6971586156561258,
+   "sortino_daily": 1.0066433019896874,
+   "max_dd_mtm": 263.69999999995343,
+   "win_rate": 0.33382137628111275,
+   "profit_factor": 1.1392776222844199
+  },
+  "exposure": 0.814077223872305,
+  "avg_duration_bars": 75.3914907651715,
+  "monte_carlo": {
+   "total_pnl": {
+    "p5": 953.4000000000071,
+    "p50": 1912.9500000000066,
+    "p95": 2896.590000000006
+   },
+   "p_total_negative": 0.0,
+   "max_dd_bootstrap": {
+    "p5": 175.29499999999982,
+    "p50": 268.9000000000006,
+    "p95": 457.9049999999992
+   },
+   "max_dd_permutation": {
+    "p5": 189.08999999999997,
+    "p50": 266.999999999999,
+    "p95": 417.4049999999993
+   }
+  },
+  "monte_carlo_oos": {
+   "total_pnl": {
+    "p5": -93.10500000000067,
+    "p50": 407.90000000000066,
+    "p95": 969.250000000001
+   },
+   "p_total_negative": 0.0918,
+   "max_dd_bootstrap": {
+    "p5": 127.69500000000025,
+    "p50": 217.7999999999988,
+    "p95": 414.8999999999985
+   },
+   "max_dd_permutation": {
+    "p5": 145.40000000000032,
+    "p50": 214.60000000000014,
+    "p95": 336.5099999999999
+   }
+  },
+  "scope": "B_slow_flip|B_atr",
+  "rule": "R3_plateau",
+  "grid_config": 2046061,
+  "grid_pnl_full": 1913.2
+ }
+]

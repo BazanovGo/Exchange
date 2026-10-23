@@ -1,0 +1,57 @@
+# Synthetic controls.
+#
+# These are the calibration of the whole framework. The negative controls
+# have no exploitable structure by construction, so any verdict above WEAK
+# on one is a false discovery and a bug. The positive control has a known
+# analytic Sharpe, so failing to find it is also a bug. CI runs both on
+# every pull request, and the build fails on either.
+#
+# Run them with: exchange controls [--quick]
+
+seed: 20260902
+n_bars: 2000
+
+negative:
+  - kind: random_walk
+    label: "pure random walk, no structure of any kind"
+    params: {seed: 11, s0: 3.0, vol: 0.02}
+    expect_max_verdict: WEAK
+  - kind: random_walk
+    label: "random walk, different seed - the false-discovery rate is measured, not assumed"
+    params: {seed: 23, s0: 50.0, vol: 0.015}
+    expect_max_verdict: WEAK
+  - kind: regime_switch
+    label: "volatility regimes with zero drift in every regime"
+    params: {seed: 31}
+    expect_max_verdict: WEAK
+  - kind: structural_break
+    label: "a level break, which looks like trend and is not tradeable"
+    params: {seed: 37}
+    expect_max_verdict: WEAK
+
+positive:
+  - kind: signal_plus_noise
+    label: "known edge: sign of the trailing 5-bar return earns edge_per_bar"
+    params: {seed: 7, edge_per_bar: 0.003, lookback: 5, vol: 0.012}
+    strategy: ts_momentum
+    param_space: {lookback: [3, 5, 10, 20]}
+    instrument: {multiplier: 1000.0}
+    expect_min_verdict: PROMISING
+  - kind: mean_reverting
+    label: "Ornstein-Uhlenbeck with a known half-life"
+    params: {seed: 13, half_life: 8.0}
+    strategy: zscore_reversion
+    param_space: {window: [10, 20, 40], entry_z: [1.0, 1.5, 2.0]}
+    instrument: {multiplier: 1000.0}
+    expect_min_verdict: WEAK
+
+# Leakage controls: a deliberately planted lookahead that the guards must
+# catch. If one of these passes silently, the temporal integrity of the
+# whole pipeline is unproven.
+leakage:
+  - kind: lookahead_trap
+    label: "next-bar return planted as a feature column"
+    expect: LookaheadError
+  - kind: same_close_execution
+    label: "execution at the signal's own close"
+    expect: invalid_result

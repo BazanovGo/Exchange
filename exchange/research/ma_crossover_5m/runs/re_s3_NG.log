@@ -1,0 +1,7 @@
+== stage3/NG: 3,471,552 конфигураций
+   summary 33 с
+   WF pnl: {'steps': 19, 'test_months': 57, 'total_pnl': -155.29999321699142, 'sharpe_annual': -0.14006323686547, 'share_pos_steps': 0.5263157894736842, 'distinct_configs': 19, 't_stat': -0.3052607476008922}
+   WF sharpe: {'steps': 19, 'test_months': 57, 'total_pnl': 629.2000022828579, 'sharpe_annual': 0.7951605708457763, 'share_pos_steps': 0.7368421052631579, 'distinct_configs': 16, 't_stat': 1.7330122861024266}
+   WF plateau: {'steps': 19, 'test_months': 57, 'total_pnl': 391.80001160502434, 'sharpe_annual': 0.50255938910587, 'share_pos_steps': 0.7368421052631579, 'distinct_configs': 19, 't_stat': 1.0953027951200116}
+   PBO (из прошлого прогона) IS 0.614 | full 0.472
+== stage3/NG анализ за 2.7 мин

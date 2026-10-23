@@ -1,0 +1,29 @@
+# A pre-registered mean-reversion hypothesis, with its own falsification
+# criteria in addition to the defaults.
+
+statement: >
+  Deviations of price from its trailing twenty-bar mean, measured in
+  trailing standard deviations, revert within the following ten bars.
+
+rationale: >
+  Tests the liquidity-provision account of short-horizon reversal directly,
+  on the one series property that account predicts: a variance ratio below
+  one at the holding horizon.
+
+mechanism: >
+  Liquidity demand from non-informational traders pushes price away from
+  fair value. Market makers absorb the imbalance and are compensated as it
+  decays, so a position taken against the deviation is paid for providing
+  that liquidity rather than for predicting anything.
+
+expected_regime: >
+  Should hold where the variance ratio is below one and the estimated
+  half-life is short relative to the holding period, and nowhere else. It
+  should fail in a trending or crisis regime, when the flow pushing price
+  away is informed rather than liquidity-driven.
+
+strategy: zscore_reversion
+
+param_space:
+  window: [10, 20, 40]
+  entry_z: [1.0, 1.5, 2.0]

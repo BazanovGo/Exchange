@@ -1,0 +1,30 @@
+# A pre-registered hypothesis.
+#
+# Written and committed BEFORE the run. The file's content is hashed into
+# the experiment record, so a hypothesis edited afterwards to match its
+# result can be detected. That is the whole point of keeping it in a file
+# rather than assembling it from command-line flags.
+
+statement: >
+  The sign of the trailing five-bar return predicts the sign of the next
+  bar's return with a positive coefficient.
+
+rationale: >
+  A direct test of positive return autocorrelation at a five-bar horizon,
+  with no smoothing to obscure what is being measured.
+
+mechanism: >
+  Information reaches slower participants over several bars rather than
+  instantly. Their order flow therefore arrives after a move has begun and
+  extends it, which shows up as positive autocorrelation at the horizon
+  over which that flow arrives.
+
+expected_regime: >
+  Should appear while a material share of flow is slow-moving, and should
+  weaken or disappear as execution speeds up and the same information is
+  priced within a single bar. It should be absent in a random walk.
+
+strategy: ts_momentum
+
+param_space:
+  lookback: [3, 5, 10, 20]

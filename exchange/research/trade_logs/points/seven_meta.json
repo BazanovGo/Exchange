@@ -1,0 +1,128 @@
+[
+ {
+  "id": "7F_1_TSMOM_BR",
+  "study": "seven",
+  "strategy": "1 Time-Series Momentum",
+  "asset": "BR",
+  "params": "lookback=40",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_1_TSMOM_NG",
+  "study": "seven",
+  "strategy": "1 Time-Series Momentum",
+  "asset": "NG",
+  "params": "lookback=90",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_2_DualMA_BR",
+  "study": "seven",
+  "strategy": "2 Dual Moving Average",
+  "asset": "BR",
+  "params": "fast=20,slow=60",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_2_DualMA_NG",
+  "study": "seven",
+  "strategy": "2 Dual Moving Average",
+  "asset": "NG",
+  "params": "fast=20,slow=150",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_3_Breakout_BR",
+  "study": "seven",
+  "strategy": "3 Channel Breakout",
+  "asset": "BR",
+  "params": "entry=40,exit_=20",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_3_Breakout_NG",
+  "study": "seven",
+  "strategy": "3 Channel Breakout",
+  "asset": "NG",
+  "params": "entry=20,exit_=10",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_4_CrossSect_NGBR_NG",
+  "study": "seven",
+  "strategy": "4 Cross-sectional momentum",
+  "asset": "NG",
+  "params": "lookback=120",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_4_CrossSect_NGBR_BR",
+  "study": "seven",
+  "strategy": "4 Cross-sectional momentum",
+  "asset": "BR",
+  "params": "lookback=120",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_5_Carry_BR",
+  "study": "seven",
+  "strategy": "5 Carry / term structure",
+  "asset": "BR",
+  "params": "smooth=1,threshold=0.15",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_5_Carry_NG",
+  "study": "seven",
+  "strategy": "5 Carry / term structure",
+  "asset": "NG",
+  "params": "smooth=1,threshold=0.15",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_6_PortfolioMA_NGBR_NG",
+  "study": "seven",
+  "strategy": "6 MA + portfolio",
+  "asset": "NG",
+  "params": "fast=20,slow=100",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_6_PortfolioMA_NGBR_BR",
+  "study": "seven",
+  "strategy": "6 MA + portfolio",
+  "asset": "BR",
+  "params": "fast=20,slow=100",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_7_MomRev_BR",
+  "study": "seven",
+  "strategy": "7 Momentum + reversal",
+  "asset": "BR",
+  "params": "momentum=60,reversal=750",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ },
+ {
+  "id": "7F_7_MomRev_NG",
+  "study": "seven",
+  "strategy": "7 Momentum + reversal",
+  "asset": "NG",
+  "params": "momentum=60,reversal=500",
+  "selection": "лучший Шарп в выборке",
+  "costs": "издержки ~7 б.п. за оборот вычтены"
+ }
+]
