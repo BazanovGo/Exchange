@@ -44,6 +44,12 @@ MOEX_TZ = "Europe/Moscow"
 TIMEFRAMES = {"1m": "1m", "5m": "5m", "60m": "1h"}
 #: AlgoPack ticker -> contract root used for labelling and specifications.
 ROOTS = {"ng": "NG", "br": "BR"}
+#: MOEX contract terms: NG is 100 MMBtu quoted to 0.001 USD, BR is 10 barrels
+#: quoted to 0.01 USD. These are the FORTS contracts, not the NYMEX/ICE ones.
+CONTRACTS = {
+    "ng": {"multiplier": 100.0, "tick_size": 0.001, "allow_fractional": False},
+    "br": {"multiplier": 10.0, "tick_size": 0.01, "allow_fractional": False},
+}
 
 
 def load_moex_algopack(
@@ -141,6 +147,8 @@ def moex_dataset(
     dataset = dataset_from_continuous(series, strict=strict)
     label = TIMEFRAMES.get(timeframe, timeframe)
     dataset.meta.update({"vendor": "moex_algopack", "ticker": ticker, "timeframe": label})
+    if ticker.lower() in CONTRACTS:
+        dataset.meta["instrument"] = dict(CONTRACTS[ticker.lower()])
     dataset.provenance.update(
         {"source": f"moex_algopack:{ticker}/{timeframe}", "timezone": MOEX_TZ}
     )

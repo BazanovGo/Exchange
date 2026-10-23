@@ -19,21 +19,11 @@ venv/
 .coverage
 htmlcov/
 
-# Data: keep directory structure and the bundled sample, ignore downloads
+# Data: only the MOEX AlgoPack quotes are tracked, everything else is a download or a derivative
 data/**
 !data/raw/
-!data/processed/
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/raw/SAMPLE.csv
 !data/raw/moex_algopack/
 !data/raw/moex_algopack/**
-
-# Generated outputs: keep directories, ignore artifacts
-results/**
-!results/.gitkeep
-reports/**
-!reports/.gitkeep
 
 # OS / IDE
 .DS_Store

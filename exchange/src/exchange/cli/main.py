@@ -180,7 +180,7 @@ def data_validate(
 
 @data_app.command("import")
 def data_import(
-    source: Annotated[str, typer.Argument(help="File, symbol or synthetic:<kind>.")],
+    source: Annotated[str, typer.Argument(help="File, moex:<ticker>[:<timeframe>], symbol or synthetic:<kind>.")],
     out: Annotated[Path, typer.Option("--out", help="Where to write the normalised dataset.")],
     symbol: Annotated[str | None, typer.Option("--symbol")] = None,
     timeframe: Annotated[str | None, typer.Option("--timeframe")] = None,
@@ -260,7 +260,7 @@ def data_continuous(
 
 @app.command()
 def scan(
-    source: Annotated[str, typer.Argument(help="File, symbol or synthetic:<kind>.")],
+    source: Annotated[str, typer.Argument(help="File, moex:<ticker>[:<timeframe>], symbol or synthetic:<kind>.")],
     symbol: Annotated[str | None, typer.Option("--symbol")] = None,
     save: Annotated[Path | None, typer.Option("--save")] = None,
     config: ConfigOption = None,
@@ -345,7 +345,7 @@ def backtest(
     strategy: Annotated[str, typer.Argument()],
     param: Annotated[list[str] | None, typer.Option("--param", "-p", help="name=value, repeatable.")] = None,
     scenario: Annotated[str | None, typer.Option("--scenario")] = None,
-    multiplier: Annotated[float, typer.Option("--multiplier", help="Contract multiplier.")] = 1.0,
+    multiplier: Annotated[float | None, typer.Option("--multiplier", help="Contract multiplier; defaults to the dataset's contract, else 1.")] = None,
     symbol: Annotated[str | None, typer.Option("--symbol")] = None,
     config: ConfigOption = None,
     seed: SeedOption = None,
@@ -357,8 +357,9 @@ def backtest(
     that produced the parameters, and no attack. Use ``exchange research``
     for anything that will inform a decision.
     """
-    from exchange.backtest.engine import InstrumentSpec
-    from exchange.cli.runner import load_dataset, run_backtest_once
+    from dataclasses import replace as _replace
+
+    from exchange.cli.runner import default_instrument, load_dataset, run_backtest_once
 
     cfg = _config(config, seed=seed)
     params: dict = {}
@@ -369,9 +370,12 @@ def backtest(
         params[key] = _coerce(value)
     try:
         dataset = load_dataset(source, config=cfg, symbol=symbol)
+        instrument = default_instrument(dataset)
+        if multiplier is not None:
+            instrument = _replace(instrument, multiplier=multiplier)
         result, metrics = run_backtest_once(
             dataset, strategy, config=cfg, params=params,
-            instrument=InstrumentSpec(symbol=dataset.symbol, multiplier=multiplier),
+            instrument=instrument,
             scenario=scenario,
         )
     except ExchangeError as exc:
@@ -399,11 +403,11 @@ def backtest(
 
 @app.command()
 def research(
-    source: Annotated[str, typer.Argument(help="File, symbol or synthetic:<kind>.")],
+    source: Annotated[str, typer.Argument(help="File, moex:<ticker>[:<timeframe>], symbol or synthetic:<kind>.")],
     hypothesis: Annotated[Path, typer.Option("--hypothesis", "-h", help="Pre-registered hypothesis file.")],
     symbol: Annotated[str | None, typer.Option("--symbol")] = None,
-    multiplier: Annotated[float, typer.Option("--multiplier")] = 1.0,
-    tick_size: Annotated[float, typer.Option("--tick-size")] = 0.0,
+    multiplier: Annotated[float | None, typer.Option("--multiplier", help="Defaults to the dataset's contract, else 1.")] = None,
+    tick_size: Annotated[float | None, typer.Option("--tick-size", help="Defaults to the dataset's contract, else 0.")] = None,
     contracts_dir: Annotated[Path | None, typer.Option("--contracts", help="Dated contracts, for the roll attack.")] = None,
     scan_first: Annotated[bool, typer.Option("--scan/--no-scan", help="Run the structural scanner first.")] = True,
     attacks: Annotated[bool, typer.Option("--attacks/--no-attacks")] = True,
@@ -420,9 +424,9 @@ def research(
     """
     from dataclasses import replace as _replace
 
-    from exchange.backtest.engine import InstrumentSpec
     from exchange.cli.runner import (
         alternative_constructions,
+        default_instrument,
         load_dataset,
         load_hypothesis,
         run_research,
@@ -440,11 +444,13 @@ def research(
             alternative_constructions(contracts_dir) if contracts_dir is not None else None
         )
         store = ExperimentStore(cfg.registry_root)
+        overrides = {"multiplier": multiplier, "tick_size": tick_size}
+        instrument = _replace(
+            default_instrument(dataset), **{k: v for k, v in overrides.items() if v is not None}
+        )
         outcome = run_research(
             dataset, hyp, config=cfg,
-            instrument=InstrumentSpec(
-                symbol=dataset.symbol, multiplier=multiplier, tick_size=tick_size
-            ),
+            instrument=instrument,
             store=store,
             alternative_bars=alternatives,
             scan_first=scan_first,

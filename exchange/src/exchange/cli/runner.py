@@ -19,6 +19,7 @@ is why two obligations live here rather than being left to callers:
 
 from __future__ import annotations
 
+import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -84,13 +85,21 @@ def load_dataset(
     ``source`` is one of
 
     * a path to a CSV or Parquet file;
+    * ``moex:<ticker>[:<timeframe>][:<adjustment>]`` — MOEX AlgoPack files
+      under ``$EXCHANGE_MOEX_DATA``, e.g. ``moex:ng:60m``. The adjustment
+      defaults to ``ratio`` (returns are preserved across rolls), and the
+      quality gate is not strict unless asked, for the reason given in
+      :func:`exchange.data.moex.moex_dataset`;
     * ``synthetic:<kind>[:seed][:k=v,k=v]`` — a named control from
-      :mod:`exchange.synthetic.generators`, which is how every example and
-      every test gets data without a vendor. The trailing pairs set
+      :mod:`exchange.synthetic.generators`, which is how the framework's own
+      controls and tests get series with a known answer. The trailing pairs set
       generator parameters, e.g.
       ``synthetic:signal_plus_noise:7:edge_per_bar=0.003,lookback=5``;
     * a plain symbol, fetched through the provider in the configuration.
     """
+    if source.startswith("moex:"):
+        return _load_moex(source, symbol=symbol, strict=bool(strict))
+
     strict = config.data.strict if strict is None else strict
     timeframe = timeframe or config.data.timeframe
 
@@ -146,6 +155,32 @@ def load_dataset(
     return load_bars(
         provider, symbol or source, timeframe=timeframe, strict=strict
     )
+
+
+def default_instrument(dataset: Dataset) -> InstrumentSpec:
+    """The dataset's own contract specification if it carries one, else a unit spec."""
+    spec = dataset.meta.get("instrument") or {}
+    return InstrumentSpec(symbol=dataset.symbol, **spec)
+
+
+def _load_moex(source: str, *, symbol: str | None, strict: bool) -> Dataset:
+    from exchange.data.moex import moex_dataset
+
+    parts = source.split(":")
+    if len(parts) < 2 or not parts[1] or len(parts) > 4:
+        raise ConfigError(f"expected moex:<ticker>[:<timeframe>][:<adjustment>], got {source!r}")
+    ticker = parts[1].lower()
+    timeframe = parts[2] if len(parts) > 2 and parts[2] else "60m"
+    adjustment = parts[3] if len(parts) > 3 and parts[3] else "ratio"
+    directory = os.environ.get("EXCHANGE_MOEX_DATA")
+    if not directory:
+        raise ConfigError(
+            f"{source!r} is read from $EXCHANGE_MOEX_DATA; set it to the AlgoPack directory"
+        )
+    dataset = moex_dataset(directory, ticker, timeframe, adjustment=adjustment, strict=strict)
+    # The spec string is the reproduction input, as for the other sources.
+    dataset.provenance["source"] = source
+    return replace(dataset, symbol=symbol) if symbol else dataset
 
 
 def validate_file(source: str, *, symbol: str | None = None, timeframe: str | None = None):
@@ -258,7 +293,7 @@ def run_research(
 ) -> ResearchOutcome:
     """The full pipeline for one hypothesis, recorded and reported."""
     store = store if store is not None else ExperimentStore(config.registry_root)
-    instrument = instrument or InstrumentSpec(symbol=dataset.symbol)
+    instrument = instrument or default_instrument(dataset)
 
     # -- charge the ledger before anything is measured ------------------
     prior = store.prior_trials(dataset.data_hash)
@@ -354,7 +389,7 @@ def run_backtest_once(
 
     strategy = build(strategy_name, **dict(params or {}))
     strategy.check_causality(dataset.bars.iloc[: min(len(dataset.bars), 400)])
-    instrument = instrument or InstrumentSpec(symbol=dataset.symbol)
+    instrument = instrument or default_instrument(dataset)
     execution = get_scenario(scenario or config.execution_scenario)
     cfg = BacktestConfig(
         initial_cash=config.funnel.initial_cash,

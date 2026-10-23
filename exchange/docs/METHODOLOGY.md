@@ -30,8 +30,8 @@ Annualisation is measured from the return series' own index
 (`empirical_bars_per_year`), never assumed. A business-day series yields ≈261
 bars per year, not 252 and certainly not 365; using 365 on daily bars
 overstates an annualised Sharpe by about 18%, which is larger than most
-effects worth acting on. Where a synthetic series has no real calendar, the
-factor is passed explicitly.
+effects worth acting on. Where a series has no real calendar (a test
+fixture), the factor is passed explicitly.
 
 ## 3. Sharpe inference
 
