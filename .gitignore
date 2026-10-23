@@ -26,6 +26,8 @@ data/**
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/raw/SAMPLE.csv
+!data/raw/moex_algopack/
+!data/raw/moex_algopack/**
 
 # Generated outputs: keep directories, ignore artifacts
 results/**
