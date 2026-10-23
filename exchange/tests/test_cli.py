@@ -153,6 +153,62 @@ class TestInspectionCommands:
         assert result.exit_code == 1
 
 
+class TestMoexSource:
+    @pytest.fixture
+    def algopack(self, workspace, monkeypatch):
+        """A miniature AlgoPack directory under $EXCHANGE_MOEX_DATA."""
+        import numpy as np
+        import pandas as pd
+
+        folder = workspace / "algopack" / "ng" / "60m"
+        folder.mkdir(parents=True)
+        stamps = pd.date_range("2025-01-03 10:00", periods=600, freq="h")
+        close = 3.0 * np.exp(np.cumsum(np.random.default_rng(3).normal(0, 0.004, 600)))
+        pd.DataFrame(
+            {
+                "ticker": "ng",
+                "secid": ["NGF5"] * 300 + ["NGG5"] * 300,
+                "begin": stamps,
+                "end": stamps + pd.Timedelta(minutes=59, seconds=59),
+                "open": close, "high": close * 1.002, "low": close * 0.998, "close": close,
+                "volume": 1_000, "value": 0,
+            }
+        ).to_csv(folder / "2025.csv", index=False)
+        monkeypatch.setenv("EXCHANGE_MOEX_DATA", str(workspace / "algopack"))
+        return workspace / "algopack"
+
+    def test_the_spec_string_is_the_recorded_source(self, algopack):
+        from exchange.cli.runner import load_dataset
+        from exchange.core.config import build_config
+
+        dataset = load_dataset("moex:ng:60m", config=build_config({}))
+        assert dataset.provenance["source"] == "moex:ng:60m"
+        assert dataset.provenance["continuous"]["adjustment"] == "ratio"
+
+    def test_the_contract_specification_is_the_default_instrument(self, algopack):
+        from exchange.cli.runner import default_instrument, load_dataset
+        from exchange.core.config import build_config
+
+        instrument = default_instrument(load_dataset("moex:ng", config=build_config({})))
+        assert (instrument.multiplier, instrument.tick_size) == (100.0, 0.001)
+        assert instrument.allow_fractional is False
+
+    def test_an_unset_data_directory_is_an_error(self, workspace, monkeypatch):
+        monkeypatch.delenv("EXCHANGE_MOEX_DATA", raising=False)
+        result = _run("scan", "moex:ng:60m")
+        assert result.exit_code == 1
+        assert "EXCHANGE_MOEX_DATA" in result.output
+
+    def test_a_malformed_spec_is_an_error(self, algopack):
+        assert _run("scan", "moex:").exit_code == 1
+        assert _run("scan", "moex:ng:60m:ratio:extra").exit_code == 1
+
+    def test_scan_runs_on_algopack_files(self, algopack):
+        result = _run("scan", "moex:ng:60m")
+        assert result.exit_code == 0
+        assert "variance" in result.stdout.lower()
+
+
 class TestResearchFlow:
     @pytest.mark.slow
     def test_research_records_reports_and_reproduces(self, workspace):

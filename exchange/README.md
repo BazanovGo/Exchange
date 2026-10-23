@@ -6,8 +6,7 @@ commodities.
 **All research in this repository runs on Moscow Exchange futures quotes
 obtained through MOEX AlgoPack** — natural gas (NG) and Brent (BR), 1-, 5- and
 60-minute candles over their full history (NG from 2020-02, BR from 2011-12,
-both to 2026-10). Synthetic series with a known answer are used only to
-calibrate the framework itself: its controls and tests.
+both to 2026-10).
 
 > **The objective is not to find strategies that backtest well. The objective
 > is to find effects that survive attempts to falsify them.**
@@ -55,15 +54,23 @@ conventional:
 ```bash
 cd exchange
 uv sync --all-extras
+export EXCHANGE_MOEX_DATA=$PWD/../data/raw/moex_algopack   # the AlgoPack quotes in this repository
 
 exchange doctor                   # can this installation produce a reproducible result?
-exchange controls --quick         # is the framework calibrated? (synthetic positive/negative/leakage)
-exchange scan synthetic:mean_reverting            # does this series have exploitable structure at all?
-exchange research synthetic:mean_reverting \
-    --hypothesis examples/mean_reversion.yaml     # push one pre-registered hypothesis through the funnel
-exchange experiments list                         # the registry, with the multiple-testing ledger
-exchange reproduce EXP-20260902-000000            # re-run it and compare against the record
+exchange controls --quick         # is the framework calibrated? (planted edge, random walk, lookahead)
+exchange scan moex:ng:60m         # does hourly natural gas have exploitable structure at all?
+exchange research moex:ng:60m \
+    --hypothesis examples/momentum.yaml     # push one pre-registered hypothesis through the funnel
+exchange experiments list                   # the registry, with the multiple-testing ledger
+exchange reproduce EXP-20261023-000000      # the id research printed: re-run it and compare
 ```
+
+`moex:<ticker>[:<timeframe>][:<adjustment>]` reads the AlgoPack files: `ng`
+or `br`, `1m`, `5m` or `60m` (the default), ratio-adjusted unless told
+otherwise, with the FORTS contract (NG 100 MMBtu, BR 10 barrels) as the
+instrument. The example's verdict is `REJECTED`: hourly time-series momentum
+on NG loses money out of sample even under the optimistic cost scenario, and
+the run reproduces exactly.
 
 `exchange --help` lists every command. All of them take `--config`, print
 their reasoning rather than only their result, and exit non-zero when
@@ -140,9 +147,9 @@ from a verdict to an order, and there should not be.
 
 ## Tests
 
-521 tests, 83% statement coverage. The ordering in CI is deliberate: temporal
+527 tests, 84% statement coverage. The ordering in CI is deliberate: temporal
 integrity runs **first and alone**, because a lookahead invalidates every
-other number in the build. Then the synthetic controls — a random walk that
+other number in the build. Then the controls — a random walk that
 must not earn a verdict above `WEAK`, a constructed edge that must be found,
 and two planted lookaheads that must be caught — then the tests on three
 Python versions, the reproducibility check, and the Docker build (whose
@@ -205,14 +212,14 @@ uv run exchange controls               # the framework's own calibration
 
 ## A caution
 
-The framework was first validated on synthetic series with known ground
-truth: a framework that cannot find a constructed edge, or that finds edges
-in random walks, is broken in a way real data would hide. Both studies since
-then ran on real MOEX AlgoPack quotes, and real data did expose what no
-generator produces — a vendor splice that had to be unpicked into rolls,
-trading sessions that had to be inferred, and two calibration bugs in the
-scanner. Calibrating the moving-average study on noise also caught Hansen's
-SPA rejecting far above its nominal size. All were fixed and pinned by tests.
+Before any study the framework had to pass its controls: a framework that
+cannot find a planted edge, or that finds edges in a random walk, is broken
+in a way real data would hide. Both studies then ran on MOEX AlgoPack
+quotes, and the market exposed what the controls could not — a vendor splice
+that had to be unpicked into rolls, trading sessions that had to be inferred,
+and two calibration bugs in the scanner. Calibrating the moving-average
+study's tests on martingales also caught Hansen's SPA rejecting far above
+its nominal size. All were fixed and pinned by tests.
 
 Treat a `ROBUST` verdict as a hypothesis that has survived the attacks this
 framework knows how to make. The important failure modes are usually the ones

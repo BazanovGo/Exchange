@@ -3,6 +3,9 @@
 **Subject:** `BazanovGo/Exchange` as of the branch point — 47 Python modules,
 5,376 lines under `src/`, 12 test modules, an autonomous research loop under
 `orchestrator/`, and a catalogue of 19 hypothesis runs under `research/`.
+That prototype has since been removed from the repository's tree; every
+`file:line` below refers to it as it stands at commit
+[`c8dbde9`](https://github.com/BazanovGo/Exchange/tree/c8dbde9e4ed33026daa375bf1fb460018ee71969).
 
 **Method:** every finding below was read off the source and is cited by file
 and line. Where a claim is about behaviour rather than code, it was
@@ -81,11 +84,12 @@ Two things make this worse than an ordinary mistake:
 **Consequence for the catalogue.** All 19 runs in `research/catalog.csv`,
 including the five graded `promising`, were produced through this path, so
 their reported out-of-sample figures cannot be taken at face value. A
-mitigating fact: every run was on synthetic GBM or Ornstein-Uhlenbeck series,
-and the `promising` verdicts are on OU data where mean reversion exists by
-construction. The catalogue therefore contains no claim about a real market
-that this defect could have falsified — but it also contains no clean
-out-of-sample measurement of anything.
+mitigating fact: none of these runs used market quotes — they were GBM and
+Ornstein-Uhlenbeck processes, and the `promising` verdicts are on OU paths
+where mean reversion exists by construction. The catalogue therefore contains
+no claim about a real market that this defect could have falsified — but it
+also contains no clean out-of-sample measurement of anything. Every study in
+this repository since then runs on MOEX AlgoPack quotes.
 
 ---
 
@@ -229,8 +233,8 @@ rejected" and "this hypothesis was never run" is not preserved by the storage.
 
 Kept, because it is right: the exit-mechanics simulator's gap-aware
 conservative fills; walk-forward with re-optimisation; the honest overfitting
-flags; typed strategy classes with declared parameter grids; synthetic
-generators with known ground truth as controls.
+flags; typed strategy classes with declared parameter grids; control series
+with a known answer, used to test the framework itself.
 
 Changed structurally rather than by convention, so the honest behaviour is the
 only behaviour available:

@@ -92,7 +92,7 @@ jobs:
         run: uv run pytest tests -q -m slow
 
   controls:
-    name: synthetic controls
+    name: framework controls
     needs: temporal-integrity
     runs-on: ubuntu-latest
     steps:

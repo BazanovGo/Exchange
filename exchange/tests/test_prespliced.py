@@ -244,3 +244,10 @@ class TestMoexLoader:
         assert dataset.provenance["source"] == "moex_algopack:ng/60m"
         assert dataset.provenance["timezone"] == "Europe/Moscow"
         assert dataset.provenance["continuous"]["adjustment"] == "none"
+
+    def test_dataset_carries_the_forts_contract_not_the_nymex_one(self, algopack):
+        # MOEX NG is 100 MMBtu; NYMEX NG is 10,000. The wrong one changes every cost ratio.
+        dataset = moex_dataset(algopack, "ng", "60m")
+        assert dataset.meta["instrument"] == {
+            "multiplier": 100.0, "tick_size": 0.001, "allow_fractional": False,
+        }

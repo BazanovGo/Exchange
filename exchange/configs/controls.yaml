@@ -1,4 +1,4 @@
-# Synthetic controls.
+# Framework controls.
 #
 # These are the calibration of the whole framework. The negative controls
 # have no exploitable structure by construction, so any verdict above WEAK
