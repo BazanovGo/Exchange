@@ -18,6 +18,7 @@ HERE = Path(__file__).resolve().parent
 CSV = HERE / "csv"
 OUT = HERE / "trade_log.xlsx"
 OUT_GROUPS = HERE / "trade_log_groups.xlsx"
+OUT_FULL = HERE / "trade_log_full.xlsx"
 
 FONT = "Arial"
 USD = '#,##0.00;[Red]-#,##0.00;0.00'
@@ -45,6 +46,16 @@ def font(**kw):
 
 
 def strategies(kind: str = "main") -> list[dict]:
+    if kind == "full":
+        seven = json.loads((CSV / "seven_full_meta.json").read_text())
+        for m in seven:
+            m["study"] = "Семь семейств (дневные бары), сквозной прогон"
+            m["title"] = m["name"] + " · " + m["params"]
+            m["ref"], m["ref_kind"] = m["equity_change"], "весь период"
+            m["ref_note"] = ("изменение капитала сквозного прогона (export_trades.py seven-full); сделки до "
+                             "конца IS совпадают с IS-журналом отчёта")
+            m["time_fmt"] = "yyyy-mm-dd"
+        return seven
     if kind == "groups":
         ma = json.loads((CSV / "ma_groups_meta.json").read_text())
         _ma_fields(ma, groups=True)
@@ -144,6 +155,17 @@ GROUP_NOTES = [
 ]
 
 
+FULL_NOTES = [
+    "Семь семейств: те же победители и параметры, что в trade_log.xlsx, но одним прогоном по всей истории — "
+    "все сделки подряд, без разрыва между выборкой и проверкой.",
+    "В прогонах отчёта OOS начинается без позиции и с пустыми индикаторами, а между периодами — эмбарго 10 "
+    "дней; здесь этих разрывов нет. «период» — по дате выхода: IS, эмбарго или OOS. Итог OOS здесь не равен "
+    "итогу отчёта: отчёт оценивает систему, запущенную с нуля в начале OOS.",
+    "Счёт 1 000 000 USD, размер позиции по целевой волатильности 15%, издержки ~7 б.п. за оборот вычтены.",
+    "Синим — изменение капитала прогона для сверки; всё остальное на этом листе — формулы по листам.",
+]
+
+
 def write_summary(ws, rows: list[tuple[dict, str, int]], title: str, notes: list[str]):
     ws["A1"] = title
     ws["A1"].font = font(size=14, bold=True)
@@ -193,19 +215,26 @@ def write_summary(ws, rows: list[tuple[dict, str, int]], title: str, notes: list
     ws.freeze_panes = f"B{h + 1}"
 
 
+def _streak(values) -> int:
+    streak = best = 0
+    for v in values:
+        streak = streak + 1 if v < 0 else 0
+        best = max(best, streak)
+    return best
+
+
+def num(v) -> str:
+    return f"{v:+,.0f}".replace(",", " ")
+
+
 def _readme_rows(rows: list[tuple[dict, str, int]]) -> list[str]:
     out = []
     for m, _sheet, _ in rows:
         df = pd.read_csv(CSV / m["csv"])
         trades = df[df["вход"].notna()]
-        streak = best = 0
-        for v in df["результат, USD"]:
-            streak = streak + 1 if v < 0 else 0
-            best = max(best, streak)
         is_, oos = (df.loc[df["период"] == p, "результат, USD"].sum() for p in ("IS", "OOS"))
-        num = lambda v: f"{v:+,.0f}".replace(",", " ")  # noqa: E731
         out.append(f"| {m['study']}: {m['title']} | {len(trades)} | {(trades['результат, USD'] > 0).mean():.0%} "
-                   f"| {num(is_)} | {num(oos)} | {best} | [{Path(m['csv']).name}](csv/{m['csv']}) |")
+                   f"| {num(is_)} | {num(oos)} | {_streak(df['результат, USD'])} | [{Path(m['csv']).name}](csv/{m['csv']}) |")
     return out
 
 
@@ -217,40 +246,122 @@ def sp(v: int) -> str:
     return f"{v:,}".replace(",", " ")
 
 
-def write_readme(rows, group_rows):
+def rows_for(kind: str) -> list[tuple[dict, str, int]]:
+    """Те же (стратегия, лист, последняя строка), что даёт build, — без сборки книги."""
+    out = []
+    for m in strategies(kind):
+        n = len(pd.read_csv(CSV / m["csv"]))
+        out.append((m, m["id"], FIRST + n - 1))
+    return out
+
+
+def _full_rows(rows) -> list[str]:
+    out = []
+    for m, _sheet, _ in rows:
+        df = pd.read_csv(CSV / m["csv"])
+        trades = df[df["вход"].notna()]
+        part = {p: df.loc[df["период"] == p, "результат, USD"].sum() for p in ("IS", "эмбарго", "OOS")}
+        out.append(f"| {m['title']} | {len(trades)} | {(trades['результат, USD'] > 0).mean():.0%} | {num(part['IS'])} "
+                   f"| {num(part['эмбарго'])} | {num(part['OOS'])} | {num(df['результат, USD'].sum())} "
+                   f"| {_streak(df['результат, USD'])} | [{Path(m['csv']).name}](csv/{m['csv']}) |")
+    return out
+
+
+def _wf_rows() -> list[str]:
+    out = ["| Система | Шагов | Сделок | Итог, USD | Сверка с отчётом | CSV |", "|---|---|---|---|---|---|"]
+    for m in json.loads((CSV / "seven_wf_meta.json").read_text()):
+        r = m["report"]
+        out.append(f"| Семь семейств: {m['name']} | {len(m['windows'])} окон | {m['trades']} | {num(m['pnl'])} "
+                   f"| эффективность {r['WF эффект.']:+.3f}, окон>0 {r['WF окон>0']:.3f}, стабильность "
+                   f"{r['WF стабил. параметров']:.3f} — как в разделе 3 | [{Path(m['csv']).name}](csv/{m['csv']}) |")
+    for m in json.loads((CSV / "ma_wf_meta.json").read_text()):
+        stage = "этап 1" if m["stage"] == "stage1" else "этап 3"
+        out.append(f"| Скользящие средние, {stage}: {m['market']} · критерий «{m['rule']}» | шагов по 3 мес.: {m['steps']}, "
+                   f"конфигураций: {m['configs']} | {m['trades']} | {num(m['pnl'])} "
+                   f"| итог шагов {m['wf_pnl_reference']:+.1f} USD (`wf_{m['criterion']}.csv`) "
+                   f"| [{Path(m['csv']).name}](csv/{m['csv']}) |")
+    return out
+
+
+def _family_rows() -> list[str]:
+    meta = pd.DataFrame(json.loads((CSV / "ma_families_meta.json").read_text()))
+    out = ["| Этап | Рынок | Семейств | Сделок | Прибыльны в IS | Прибыльны в OOS | Совпали с журналом финалиста |",
+           "|---|---|---|---|---|---|---|"]
+    for (stage, t), g in meta.groupby(["stage", "market"], sort=False):
+        out.append(f"| {'этап 1' if stage == 'stage1' else 'этап 3'} | {t} | {len(g)} | {sp(int(g['trades'].sum()))} "
+                   f"| {(g['is_pnl'] > 0).sum()} | {(g['oos_pnl'] > 0).sum()} | {(g['same_as'] != '').sum()} |")
+    return out
+
+
+def write_families_index():
+    meta = json.loads((CSV / "ma_families_meta.json").read_text())
+    lines = [
+        "# Скользящие средние: лучший в каждом из 144 семейств", "",
+        "Семейство — сочетание типов быстрой и медленной средней × модель выхода × метод наклона (36 × 2 × 2 = "
+        "144). В каждом выбрана конфигурация с лучшим сглаженным IS-Шарпом (правило R3, не меньше 100 сделок в "
+        "выборке) — это кандидаты разделов 7 и 12 `docs/RESULTS_MA_CROSSOVER_5M.md`. Все сделки по порядку, "
+        "1 контракт, без издержек. Сделки посчитаны событийным ядром исследования и сверены с полной сеткой: "
+        "число сделок IS и OOS — точно, PnL — до 0.5 USD (в сетке он округлён).", "",
+        "«Совпадает с» — конфигурация уже есть среди финалистов (глобальных или лучших в группе); её сделки в обоих "
+        "файлах одинаковы.", "",
+        "| Этап | Рынок | Семейство | Конфигурация | Сделок | Итог IS, USD | Итог OOS, USD | Совпадает с | CSV |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for m in meta:
+        lines.append(f"| {'1' if m['stage'] == 'stage1' else '3'} | {m['market']} | {m['family']} | {m['name']} "
+                     f"| {m['trades']} | {m['is_pnl']:+.1f} | {m['oos_pnl']:+.1f} | {m['same_as']} "
+                     f"| [{Path(m['csv']).name}]({Path(m['csv']).name}) |")
+    (CSV / "families" / "README.md").write_text("\n".join(lines) + "\n")
+
+
+def write_readme(rows, group_rows, full_rows):
     n_main = sum(last - FIRST + 1 for _, _, last in rows)
     n_groups = sum(last - FIRST + 1 for _, _, last in group_rows)
+    n_full = sum(last - FIRST + 1 for _, _, last in full_rows)
+    families = json.loads((CSV / "ma_families_meta.json").read_text())
     lines = [
-        "# Журнал сделок отобранных стратегий",
+        "# Журнал сделок оптимизированных стратегий",
         "",
-        "Все сделки по порядку и результат каждой, по листу на стратегию с итогом нарастающим и сериями "
-        "убытков (формулы Excel) и листом «Сводка»:",
+        "Все сделки по порядку и результат каждой — по каждой системе, которую оптимизация отобрала в отчётах. "
+        "Полнота проверена независимым пересчётом: [`AUDIT.md`](AUDIT.md).",
         "",
         f"* **[`trade_log.xlsx`](trade_log.xlsx)** — основные отборы (стратегий: {len(rows)}, строк: {sp(n_main)}): "
         "победители семи семейств и глобальные отборы скользящих средних.",
         f"* **[`trade_log_groups.xlsx`](trade_log_groups.xlsx)** — скользящие средние, лучшие внутри каждой группы "
         f"«модель выхода × метод наклона» (стратегий: {len(group_rows)}, строк: {sp(n_groups)}).",
+        f"* **[`trade_log_full.xlsx`](trade_log_full.xlsx)** — семь семейств, **сквозной прогон** по всей истории: "
+        f"все сделки подряд, без разрыва между выборкой и проверкой (стратегий: {len(full_rows)}, строк: {sp(n_full)}).",
+        f"* **[`csv/families/`](csv/families/README.md)** — скользящие средние, лучший в каждом из 144 семейств на "
+        f"этапах 1 и 3 (файлов: {len(families)}, сделок: {sp(sum(m['trades'] for m in families))}); только CSV — "
+        "для Excel это слишком много строк.",
+        "* **[`csv/walkforward/`](csv/walkforward/)** — walk-forward с переоптимизацией: сделки каждого шага "
+        "с параметрами, выбранными на этом шаге.",
         "",
         "* **[`points/`](points/README.md)** — исходы в **пунктах** по выгоднейшим параметрам каждой "
-        "стратегии, по таблице на актив, со статистикой.",
+        "стратегии, по таблице на актив, со статистикой; [`points/full/`](points/full/README.md) — то же для "
+        "сквозного прогона семи семейств.",
         "",
         "Те же сделки — в CSV: [`csv/`](csv/) для основных отборов, [`csv/groups/`](csv/groups/) "
-        "(сжатые `.csv.gz`) для лучших в группах.",
+        "(сжатые `.csv.gz`) для лучших в группах, [`csv/full/`](csv/full/) для сквозного прогона.",
         "",
         "* **Семь семейств** — победители по in-sample из `docs/RESULTS_SEVEN_FAMILIES.md`; счёт "
-        "1 000 000 USD, позиция по целевой волатильности 15%, издержки вычтены. IS и OOS — отдельные "
-        "прогоны, как в отчёте. Позиция с изменяемым размером: уменьшение позиции записывается движком "
-        "как отдельное закрытие. Последняя строка периода, если позиция осталась открытой, — её "
-        "переоценка по последнему закрытию.",
+        "1 000 000 USD, позиция по целевой волатильности 15%, издержки вычтены. В основном журнале IS и OOS — "
+        "отдельные прогоны, как в отчёте: OOS начинается без позиции и с пустыми индикаторами, между ними "
+        "эмбарго 10 дней, поэтому там нет сделок за несколько месяцев, а позиция на конец IS закрыта "
+        "переоценкой. Сквозной прогон этих разрывов не имеет. Позиция с изменяемым размером: уменьшение "
+        "позиции записывается движком как отдельное закрытие. Последняя строка периода, если позиция "
+        "осталась открытой, — её переоценка по последнему закрытию.",
         "* **Скользящие средние** — правила R1 (макс. PnL), R2 (макс. Шарп), R3 (плато) на этапах 1 и 3: "
-        "по всей сетке (глобальные) и внутри каждой группы «выход × метод наклона». 1 контракт, без "
-        "издержек (так в задании). Котировки — Open бара исполнения. «через ролл» — позиция пережила "
-        "смену контракта: результат включает перекладку и не равен разности котировок. Если лучший в "
-        "группе совпал с глобальным отбором, он записан один раз — среди глобальных.",
+        "по всей сетке (глобальные), внутри каждой группы «выход × метод наклона» и в каждом из 144 "
+        "семейств. Каждая конфигурация торгует всю историю одним прогоном; сделка относится к IS или OOS по "
+        "бару выхода. 1 контракт, без издержек (так в задании). Котировки — Open бара исполнения. «через "
+        "ролл» — позиция пережила смену контракта: результат включает перекладку и не равен разности "
+        "котировок. Если два правила выбрали одну конфигурацию, её сделки записаны один раз; где именно — "
+        "в [`AUDIT.md`](AUDIT.md), раздел «Совпадения».",
         "",
-        "Каждый файл сверен с отчётом при выгрузке (`export_trades.py` падает при расхождении): "
-        "OOS-итог и число сделок семи семейств — с отчётом, итог скользящих средних — с VectorBT-статистикой "
-        "финалиста, а IS/OOS — с полной сеткой.",
+        "Каждый файл сверен при выгрузке (`export_trades.py` падает при расхождении): OOS-итог семи семейств — "
+        "с отчётом, итог скользящих средних — с VectorBT-статистикой финалиста, IS/OOS и число сделок — с "
+        "полной сеткой, walk-forward — с итогами шагов отчёта.",
         "",
         "## Основные отборы",
         "",
@@ -260,11 +371,34 @@ def write_readme(rows, group_rows):
         "",
         *HEADER, *_readme_rows(group_rows),
         "",
-        "Пересборка: `python export_trades.py seven` (окружение пакета `exchange`), "
-        "`python export_trades.py ma` (нужен рабочий каталог исследования `MA5M_WORK`), "
-        "`python export_trades.py excel`.",
+        "## Семь семейств: сквозной прогон по всей истории",
+        "",
+        "| Стратегия | Сделок | Прибыльных | Итог IS, USD | Эмбарго, USD | Итог OOS, USD | Итог, USD "
+        "| Макс. убыточных сделок подряд | CSV |",
+        "|---|---|---|---|---|---|---|---|---|",
+        *_full_rows(full_rows),
+        "",
+        "## Walk-forward с переоптимизацией",
+        "",
+        "Семь семейств: в каждом окне параметры выбираются по лучшему Шарпу на обучающем отрезке, затем отдельный "
+        "прогон на тестовом — как в `research/seven_families/run_stats.py`. Скользящие средние: на каждом шаге "
+        "лучшая конфигурация всей сетки по 24 месяцам, её сделки за следующие 3 месяца; сделка относится к шагу по "
+        "месяцу выхода, поэтому вошедшая до начала шага помечена.",
+        "",
+        *_wf_rows(),
+        "",
+        "## Скользящие средние: лучший в каждом из 144 семейств",
+        "",
+        *_family_rows(),
+        "",
+        "Полный список с итогами и ссылками — [`csv/families/README.md`](csv/families/README.md).",
+        "",
+        "Пересборка: `python export_trades.py seven`, `seven-full`, `seven-wf` (окружение пакета `exchange`); "
+        "`python export_trades.py ma` (нужен рабочий каталог исследования `MA5M_WORK`), `ma-families`, `ma-wf` "
+        "(окружение исследования); `python export_trades.py excel`; проверка — `python audit_trades.py`.",
     ]
     (HERE / "README.md").write_text("\n".join(lines) + "\n")
+    write_families_index()
 
 
 def build(kind: str, out: Path, title: str, notes: list[str]):
@@ -282,11 +416,22 @@ def build(kind: str, out: Path, title: str, notes: list[str]):
     return rows
 
 
-def main():
-    rows = build("main", OUT, "Журнал сделок отобранных стратегий", MAIN_NOTES)
-    group_rows = build("groups", OUT_GROUPS, "Журнал сделок: скользящие средние, лучшие в группах", GROUP_NOTES)
-    write_readme(rows, group_rows)
+def main(what: str = "all"):
+    """all — все книги и README; full — только trade_log_full.xlsx; readme — только README."""
+    if what == "all":
+        rows = build("main", OUT, "Журнал сделок отобранных стратегий", MAIN_NOTES)
+        group_rows = build("groups", OUT_GROUPS, "Журнал сделок: скользящие средние, лучшие в группах", GROUP_NOTES)
+    else:
+        rows, group_rows = rows_for("main"), rows_for("groups")
+    if what in ("all", "full"):
+        full_rows = build("full", OUT_FULL, "Журнал сделок: семь семейств, сквозной прогон по всей истории",
+                          FULL_NOTES)
+    else:
+        full_rows = rows_for("full")
+    write_readme(rows, group_rows, full_rows)
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(sys.argv[1] if len(sys.argv) > 1 else "all")

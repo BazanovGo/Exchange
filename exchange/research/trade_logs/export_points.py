@@ -16,7 +16,8 @@
     python export_points.py seven    # окружение пакета exchange; EXCHANGE_MOEX_DATA
     python export_points.py ma       # из журнала сделок csv/MA_3_*_R1.csv
     python export_points.py tables   # points/README.md и points/points.xlsx
-    python export_points.py sequence # points/sequence/: только числа, шаги цены, по файлу на актив
+    python export_points.py seven-full  # семь семейств, сквозной прогон по всей истории -> points/full/
+    python export_points.py sequence # points/sequence/ (и sequence/full/): только числа, шаги цены
 """
 from __future__ import annotations
 
@@ -58,7 +59,9 @@ def finish(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
 
 
 # ------------------------------------------------------------------ семь семейств
-def export_seven():
+def export_seven(mode: str = "report"):
+    """mode="report" — прогоны отчёта (отдельный IS и отдельный OOS) -> points/;
+    mode="full" — сквозной прогон по всей истории, период сделки по дате выхода -> points/full/."""
     sys.path.insert(0, str(ROOT / "research" / "seven_families"))
     sys.path.insert(0, str(HERE))
     import families as F
@@ -70,7 +73,8 @@ def export_seven():
     panel_all = {r: p["bars"] for r, p in universe.items()}
     ppys = {r: universe[r]["ppy"] for r in panel_all}
     common = panel_all["NG"].index.intersection(panel_all["BR"].index)
-    OUT.mkdir(exist_ok=True)
+    out_dir = OUT if mode == "report" else OUT / "full"
+    out_dir.mkdir(parents=True, exist_ok=True)
     meta = []
     for cell in seven_cells().itertuples():
         family, market, params = cell.family, cell.market, cell.params
@@ -79,7 +83,13 @@ def export_seven():
         is_idx, oos_idx = RA.split(index)
         rows = {}
         oos_usd = 0.0
-        for period, idx in (("IS", is_idx), ("OOS", oos_idx)):
+        if mode == "report":
+            runs = [(lambda _ts, p=p: p, idx, p) for p, idx in (("IS", is_idx), ("OOS", oos_idx))]
+        else:
+            def label(ts, is_end=is_idx[-1], oos_start=oos_idx[0]):
+                return "IS" if ts <= is_end else ("эмбарго" if ts < oos_start else "OOS")
+            runs = [(label, index, "FULL")]
+        for label_of, idx, period in runs:
             if is_panel:
                 panel = {r: b.loc[common].loc[idx] for r, b in panel_all.items()}
                 signals = F.PANEL[family](panel, **params)
@@ -108,7 +118,7 @@ def export_seven():
                     if abs(exit_q / quoted["open"][r.exit_time] - 1) > 0.01:
                         raise SystemExit(f"{cell.id}/{leg} {r.exit_time}: цена выхода {exit_q} против "
                                          f"котировки {quoted['open'][r.exit_time]}")
-                    out.append({"период": period, "вход": r.entry_time, "выход": r.exit_time,
+                    out.append({"период": label_of(r.exit_time), "вход": r.entry_time, "выход": r.exit_time,
                                 "направление": "long" if r.direction > 0 else "short",
                                 "объём, ед. актива": r.quantity * f_out,
                                 "цена входа": r.entry_price / f_in, "цена выхода": exit_q,
@@ -121,7 +131,7 @@ def export_seven():
                 pos = float(result.position.iloc[-1])
                 if pos != 0 or abs(residual) > 0.005:
                     f_last = float(bars["close"].iloc[-1] / quoted["close"].reindex(bars.index).iloc[-1])
-                    out.append({"период": period, "вход": pd.NaT, "выход": bars.index[-1],
+                    out.append({"период": label_of(bars.index[-1]), "вход": pd.NaT, "выход": bars.index[-1],
                                 "направление": "long" if pos > 0 else "short",
                                 "объём, ед. актива": abs(pos) * f_last,
                                 "цена входа": np.nan, "цена выхода": float(quoted["close"].iloc[-1]),
@@ -132,10 +142,11 @@ def export_seven():
                 if period == "OOS":
                     oos_usd += change
         got = oos_usd / H.CAPITAL
-        if abs(got - cell.oos_return_report) > 0.0006:
+        if mode == "report" and abs(got - cell.oos_return_report) > 0.0006:
             raise SystemExit(f"{cell.id}: OOS {got:.4%} против отчёта {cell.oos_return_report:.1%}")
         for leg, out in rows.items():
-            df = pd.DataFrame(out).sort_values(["период", "выход"], kind="stable")
+            order = ["период", "выход"] if mode == "report" else ["выход"]
+            df = pd.DataFrame(out).sort_values(order, kind="stable")
             for col in ("вход", "выход"):
                 df[col] = pd.to_datetime(df[col]).dt.tz_localize(None).dt.date
             df = finish(df, leg)
@@ -150,13 +161,15 @@ def export_seven():
             if len(gap) and (gap.min() < -1e-9 or gap.max() > 0.002):
                 raise SystemExit(f"{cell.id}/{leg}: комиссия на единицу вне ожидаемого: {gap.min()}..{gap.max()}")
             sid = f"{cell.id}_{leg}" if is_panel else cell.id
-            write(df, COLUMNS, OUT / f"{sid}.csv")
+            write(df, COLUMNS, out_dir / f"{sid}.csv")
             meta.append({"id": sid, "study": "seven", "strategy": cell.ячейка.split(" · ")[0],
-                         "asset": leg, "params": cell.лучшая, "selection": "лучший Шарп в выборке",
+                         "asset": leg, "params": cell.лучшая,
+                         "selection": "лучший Шарп в выборке" + ("" if mode == "report" else
+                                                                 "; сквозной прогон по всей истории"),
                          "costs": "издержки ~7 б.п. за оборот вычтены"})
             print(f"{sid:26} сделок {len(df):4d} | пунктов {df['результат, пунктов'].sum():+9.3f} | "
                   f"USD {df['результат, USD'].sum():+12,.0f} | комиссия на единицу ≤ {gap.max() if len(gap) else 0:.4%} цены")
-    (OUT / "seven_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
+    (out_dir / "seven_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
 
 
 # ------------------------------------------------------------------ скользящие средние
@@ -197,19 +210,22 @@ def export_ma():
 
 
 # ------------------------------------------------------------------ только числа
-def export_sequence():
+def export_sequence(mode: str = "report"):
     """По файлу на стратегию и актив: исходы по порядку, целым числом шагов цены, без заголовка.
 
     Пункт здесь — минимальный шаг цены (BR 0.01 USD, NG 0.001 USD): плюс — прибыль, минус —
     убыток, 0 — выход по цене входа. Строки переоценки открытой позиции на конец периода
     сделками не являются и не включаются.
     """
-    seq = OUT / "sequence"
-    seq.mkdir(exist_ok=True)
-    meta = json.loads((OUT / "seven_meta.json").read_text()) + json.loads((OUT / "ma_meta.json").read_text())
+    src = OUT if mode == "report" else OUT / "full"
+    seq = OUT / "sequence" if mode == "report" else OUT / "sequence" / "full"
+    seq.mkdir(parents=True, exist_ok=True)
+    meta = json.loads((src / "seven_meta.json").read_text())
+    if mode == "report":
+        meta += json.loads((OUT / "ma_meta.json").read_text())
     lines = []
     for m in meta:
-        df = pd.read_csv(OUT / f"{m['id']}.csv")
+        df = pd.read_csv(src / f"{m['id']}.csv")
         steps = df.loc[df["вход"].notna(), "результат, шагов цены"].to_numpy(float)
         whole = (np.sign(steps) * np.floor(np.abs(steps) + 0.5)).astype(int)
         if m["study"] == "ma" and not np.array_equal(whole, np.round(steps).astype(int)):
@@ -225,11 +241,18 @@ def export_sequence():
         "По файлу на стратегию и актив: результат каждой сделки по порядку, одно число в строке, без "
         "заголовка. **Пункт — минимальный шаг цены**: у BR 0.01 USD за баррель, у NG 0.001 USD за MMBtu. "
         "Плюс — прибыльный исход, минус — убыточный, 0 — выход по цене входа.", "",
-        "Параметры — выгоднейшие по оптимизации: у семи семейств выбранные оптимизатором (лучший Шарп в "
-        "выборке), у скользящих средних — R1, максимальная прибыль в выборке (этап 3). У семи семейств "
-        "издержки вычтены и результат дан на единицу позиции, округлён до целого шага; у скользящих средних — "
-        "1 контракт без издержек, шаги целые точно. Подробные таблицы с датами, ценами и USD — в "
-        "[`../`](../README.md).", "",
+        ("Параметры — выгоднейшие по оптимизации: у семи семейств выбранные оптимизатором (лучший Шарп в "
+         "выборке), у скользящих средних — R1, максимальная прибыль в выборке (этап 3). У семи семейств "
+         "издержки вычтены и результат дан на единицу позиции, округлён до целого шага; у скользящих средних — "
+         "1 контракт без издержек, шаги целые точно. Подробные таблицы с датами, ценами и USD — в "
+         "[`../`](../README.md).") if mode == "report" else
+        ("Параметры — выбранные оптимизатором (лучший Шарп в выборке). Издержки вычтены, результат дан на "
+         "единицу позиции и округлён до целого шага. Подробные таблицы с датами, ценами и USD — в "
+         "[`../../full/`](../../full/README.md)."), "",
+        *([] if mode == "report" else [
+            "**Сквозной прогон**: семь семейств торгуют всю историю одним прогоном, без разрыва между "
+            "выборкой и проверкой, поэтому здесь все исходы подряд с первого до последнего дня данных. "
+            "Исходы прогонов отчёта (отдельный IS и отдельный OOS) — в [`../`](../README.md).", ""]),
         "| Стратегия | Актив | Параметры | Исходов | Плюс | Минус | Ноль | Файл |",
         "|---|---|---|---|---|---|---|---|",
     ]
@@ -245,10 +268,14 @@ if __name__ == "__main__":
         export_seven()
     elif step == "ma":
         export_ma()
+    elif step == "seven-full":
+        export_seven("full")
     elif step == "sequence":
         export_sequence()
+        export_sequence("full")
     elif step == "tables":
         import build_points
         build_points.main()
+        build_points.main(OUT / "full")
     else:
         raise SystemExit(__doc__)

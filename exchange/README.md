@@ -197,13 +197,21 @@ uv run exchange controls               # the framework's own calibration
   out-of-sample result, equity, stability over time and the verdict. Built by
   `research/investor_charts/build.py` from the result files.
 * [`research/trade_logs/`](research/trade_logs/README.md) — every trade of
-  the selected strategies of both studies, in order, with its profit or loss:
-  `trade_log.xlsx` (a sheet per strategy, running total and losing streaks as
-  formulas), `trade_log_groups.xlsx` (the best moving-average strategies of
-  each exit × slope-method group, 346k trades), `points/` (the outcome of
-  every trade at each strategy's best parameters, in price points, one table
-  per asset, with statistics) and the same trades as CSV. Each file is reconciled with the
-  report it came from when it is exported.
+  every system the optimisation selected in both studies, in order, with its
+  profit or loss: `trade_log.xlsx` (a sheet per strategy, running total and
+  losing streaks as formulas), `trade_log_groups.xlsx` (the best
+  moving-average strategies of each exit × slope-method group, 346k trades),
+  `trade_log_full.xlsx` (the seven-family winners traded over the whole
+  history in one run, with no gap between in-sample and out-of-sample),
+  `csv/families/` (the best configuration of each of the 144 moving-average
+  families, 5.2M trades), `csv/walkforward/` (every step of both walk-forward
+  studies), `points/` (the outcome of every trade at each strategy's best
+  parameters, in price points, one table per asset, with statistics) and the
+  same trades as CSV. [`AUDIT.md`](research/trade_logs/AUDIT.md) re-derives
+  every log independently — the moving-average research kernel against the
+  VectorBT exports, a fresh engine run for the seven families — and checks
+  completeness, order, duplicates and every derived file: 671 systems,
+  5.6M trades, no discrepancy.
 * [`notebooks/00_presentation.ipynb`](notebooks/00_presentation.ipynb) — the
   whole project as one presentation, in Russian: the audit, the framework,
   the data, both studies and what they found. Built from the result files in

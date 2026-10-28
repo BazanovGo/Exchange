@@ -1,0 +1,709 @@
+[
+ {
+  "kind": "excel_main",
+  "id": "7F_1_TSMOM_BR",
+  "file": "trade_log.xlsx",
+  "rows": 346,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_1_TSMOM_NG",
+  "file": "trade_log.xlsx",
+  "rows": 119,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_2_DualMA_BR",
+  "file": "trade_log.xlsx",
+  "rows": 174,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_2_DualMA_NG",
+  "file": "trade_log.xlsx",
+  "rows": 62,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_3_Breakout_BR",
+  "file": "trade_log.xlsx",
+  "rows": 128,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_3_Breakout_NG",
+  "file": "trade_log.xlsx",
+  "rows": 77,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_4_CrossSect_NGBR",
+  "file": "trade_log.xlsx",
+  "rows": 232,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_5_Carry_BR",
+  "file": "trade_log.xlsx",
+  "rows": 130,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_5_Carry_NG",
+  "file": "trade_log.xlsx",
+  "rows": 79,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_6_PortfolioMA_NGBR",
+  "file": "trade_log.xlsx",
+  "rows": 133,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_7_MomRev_BR",
+  "file": "trade_log.xlsx",
+  "rows": 189,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "7F_7_MomRev_NG",
+  "file": "trade_log.xlsx",
+  "rows": 121,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_NG_R1",
+  "file": "trade_log.xlsx",
+  "rows": 4761,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_NG_R2",
+  "file": "trade_log.xlsx",
+  "rows": 3256,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_NG_R3",
+  "file": "trade_log.xlsx",
+  "rows": 2343,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_BR_R1",
+  "file": "trade_log.xlsx",
+  "rows": 5892,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_BR_R2",
+  "file": "trade_log.xlsx",
+  "rows": 4364,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_1_BR_R3",
+  "file": "trade_log.xlsx",
+  "rows": 4350,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_NG_R1",
+  "file": "trade_log.xlsx",
+  "rows": 1067,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_NG_R2",
+  "file": "trade_log.xlsx",
+  "rows": 3039,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_NG_R3",
+  "file": "trade_log.xlsx",
+  "rows": 520,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_BR_R1",
+  "file": "trade_log.xlsx",
+  "rows": 6353,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_BR_R2",
+  "file": "trade_log.xlsx",
+  "rows": 2188,
+  "issues": []
+ },
+ {
+  "kind": "excel_main",
+  "id": "MA_3_BR_R3",
+  "file": "trade_log.xlsx",
+  "rows": 2220,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 5233,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 7852,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sA_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 7838,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 7246,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sB_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 10173,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xA_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 6787,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xB_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 3602,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xB_sA_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 2976,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_NG_xB_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 1512,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 15565,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 15532,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sA_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 15446,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 13959,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sB_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 22284,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xA_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 21176,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xB_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4384,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xB_sB_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4945,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_1_BR_xB_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4869,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4940,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 7956,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sA_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 8469,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4881,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sB_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 6835,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xA_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 8433,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xB_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 1929,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xB_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 1672,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_NG_xB_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 3032,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xA_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 23398,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xA_sA_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 23350,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xA_sA_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 24108,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xA_sB_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 21953,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xA_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 22364,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xB_sA_R1",
+  "file": "trade_log_groups.xlsx",
+  "rows": 2855,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xB_sB_R2",
+  "file": "trade_log_groups.xlsx",
+  "rows": 3873,
+  "issues": []
+ },
+ {
+  "kind": "excel_groups",
+  "id": "MA_3_BR_xB_sB_R3",
+  "file": "trade_log_groups.xlsx",
+  "rows": 4418,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_1_TSMOM_BR",
+  "file": "trade_log_full.xlsx",
+  "rows": 349,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_1_TSMOM_NG",
+  "file": "trade_log_full.xlsx",
+  "rows": 132,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_2_DualMA_BR",
+  "file": "trade_log_full.xlsx",
+  "rows": 176,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_2_DualMA_NG",
+  "file": "trade_log_full.xlsx",
+  "rows": 67,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_3_Breakout_BR",
+  "file": "trade_log_full.xlsx",
+  "rows": 131,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_3_Breakout_NG",
+  "file": "trade_log_full.xlsx",
+  "rows": 80,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_4_CrossSect_NGBR",
+  "file": "trade_log_full.xlsx",
+  "rows": 251,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_5_Carry_BR",
+  "file": "trade_log_full.xlsx",
+  "rows": 135,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_5_Carry_NG",
+  "file": "trade_log_full.xlsx",
+  "rows": 79,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_6_PortfolioMA_NGBR",
+  "file": "trade_log_full.xlsx",
+  "rows": 141,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_7_MomRev_BR",
+  "file": "trade_log_full.xlsx",
+  "rows": 170,
+  "issues": []
+ },
+ {
+  "kind": "excel_full",
+  "id": "7F_7_MomRev_NG",
+  "file": "trade_log_full.xlsx",
+  "rows": 106,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_1_TSMOM_BR",
+  "file": "points/points.xlsx",
+  "rows": 346,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_1_TSMOM_NG",
+  "file": "points/points.xlsx",
+  "rows": 119,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_2_DualMA_BR",
+  "file": "points/points.xlsx",
+  "rows": 174,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_2_DualMA_NG",
+  "file": "points/points.xlsx",
+  "rows": 62,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_3_Breakout_BR",
+  "file": "points/points.xlsx",
+  "rows": 128,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_3_Breakout_NG",
+  "file": "points/points.xlsx",
+  "rows": 77,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_4_CrossSect_NGBR_NG",
+  "file": "points/points.xlsx",
+  "rows": 122,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_4_CrossSect_NGBR_BR",
+  "file": "points/points.xlsx",
+  "rows": 110,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_5_Carry_BR",
+  "file": "points/points.xlsx",
+  "rows": 130,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_5_Carry_NG",
+  "file": "points/points.xlsx",
+  "rows": 79,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_6_PortfolioMA_NGBR_NG",
+  "file": "points/points.xlsx",
+  "rows": 68,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_6_PortfolioMA_NGBR_BR",
+  "file": "points/points.xlsx",
+  "rows": 65,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_7_MomRev_BR",
+  "file": "points/points.xlsx",
+  "rows": 189,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_7_MomRev_NG",
+  "file": "points/points.xlsx",
+  "rows": 121,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "MA_3_NG_R1",
+  "file": "points/points.xlsx",
+  "rows": 1067,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "MA_3_BR_R1",
+  "file": "points/points.xlsx",
+  "rows": 6353,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_1_TSMOM_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 349,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_1_TSMOM_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 132,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_2_DualMA_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 176,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_2_DualMA_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 67,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_3_Breakout_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 131,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_3_Breakout_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 80,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_4_CrossSect_NGBR_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 131,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_4_CrossSect_NGBR_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 120,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_5_Carry_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 135,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_5_Carry_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 79,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_6_PortfolioMA_NGBR_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 73,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_6_PortfolioMA_NGBR_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 68,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_7_MomRev_BR",
+  "file": "points/full/points_full.xlsx",
+  "rows": 170,
+  "issues": []
+ },
+ {
+  "kind": "excel_points",
+  "id": "7F_7_MomRev_NG",
+  "file": "points/full/points_full.xlsx",
+  "rows": 106,
+  "issues": []
+ }
+]

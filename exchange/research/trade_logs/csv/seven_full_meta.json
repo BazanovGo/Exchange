@@ -1,0 +1,266 @@
+[
+ {
+  "id": "7F_1_TSMOM_BR",
+  "csv": "full/7F_1_TSMOM_BR.csv",
+  "study": "seven",
+  "name": "1 Time-Series Momentum · BR",
+  "market": "BR",
+  "params": "lookback=40",
+  "is_end": "2021-02-01",
+  "oos_start": "2021-02-16",
+  "trades": 349,
+  "pnl": {
+   "IS": 1223471.5078499701,
+   "OOS": 390031.07206076337
+  },
+  "rows": {
+   "IS": 209,
+   "OOS": 140
+  },
+  "equity_change": 1613502.5799107337,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_1_TSMOM_NG",
+  "csv": "full/7F_1_TSMOM_NG.csv",
+  "study": "seven",
+  "name": "1 Time-Series Momentum · NG",
+  "market": "NG",
+  "params": "lookback=90",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 132,
+  "pnl": {
+   "IS": 333381.5607068637,
+   "OOS": -233357.72816575872,
+   "эмбарго": 20510.426372760794
+  },
+  "rows": {
+   "IS": 69,
+   "OOS": 62,
+   "эмбарго": 1
+  },
+  "equity_change": 120534.25891386578,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_2_DualMA_BR",
+  "csv": "full/7F_2_DualMA_BR.csv",
+  "study": "seven",
+  "name": "2 Dual Moving Average · BR",
+  "market": "BR",
+  "params": "fast=20,slow=60",
+  "is_end": "2021-02-01",
+  "oos_start": "2021-02-16",
+  "trades": 176,
+  "pnl": {
+   "IS": 1349836.6232444642,
+   "OOS": 786049.8146616288
+  },
+  "rows": {
+   "IS": 103,
+   "OOS": 73
+  },
+  "equity_change": 2135886.437906093,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_2_DualMA_NG",
+  "csv": "full/7F_2_DualMA_NG.csv",
+  "study": "seven",
+  "name": "2 Dual Moving Average · NG",
+  "market": "NG",
+  "params": "fast=20,slow=150",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 67,
+  "pnl": {
+   "IS": 272984.5328450002,
+   "OOS": -206357.07154111587,
+   "эмбарго": 18697.179028458755
+  },
+  "rows": {
+   "IS": 37,
+   "OOS": 29,
+   "эмбарго": 1
+  },
+  "equity_change": 85324.64033234306,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_3_Breakout_BR",
+  "csv": "full/7F_3_Breakout_BR.csv",
+  "study": "seven",
+  "name": "3 Channel Breakout · BR",
+  "market": "BR",
+  "params": "entry=40,exit_=20",
+  "is_end": "2021-02-01",
+  "oos_start": "2021-02-16",
+  "trades": 131,
+  "pnl": {
+   "IS": 1516085.0957931494,
+   "OOS": 740143.9160270928
+  },
+  "rows": {
+   "IS": 81,
+   "OOS": 50
+  },
+  "equity_change": 2256229.0118202427,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_3_Breakout_NG",
+  "csv": "full/7F_3_Breakout_NG.csv",
+  "study": "seven",
+  "name": "3 Channel Breakout · NG",
+  "market": "NG",
+  "params": "entry=20,exit_=10",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 80,
+  "pnl": {
+   "IS": 299619.96703506075,
+   "OOS": 8216.146335695845,
+   "эмбарго": 42286.51143327681
+  },
+  "rows": {
+   "IS": 47,
+   "OOS": 31,
+   "эмбарго": 2
+  },
+  "equity_change": 350122.62480403343,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_4_CrossSect_NGBR",
+  "csv": "full/7F_4_CrossSect_NGBR.csv",
+  "study": "seven",
+  "name": "4 Cross-sectional momentum · NG+BR",
+  "market": "NG+BR",
+  "params": "lookback=120",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 251,
+  "pnl": {
+   "IS": 72354.99607810138,
+   "OOS": -302371.0413976982,
+   "эмбарго": 12243.275425959946
+  },
+  "rows": {
+   "IS": 153,
+   "OOS": 97,
+   "эмбарго": 1
+  },
+  "equity_change": -217772.76989363693,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_5_Carry_BR",
+  "csv": "full/7F_5_Carry_BR.csv",
+  "study": "seven",
+  "name": "5 Carry / term structure · BR",
+  "market": "BR",
+  "params": "smooth=1,threshold=0.15",
+  "is_end": "2021-02-01",
+  "oos_start": "2021-02-16",
+  "trades": 135,
+  "pnl": {
+   "IS": 1158861.2421613815,
+   "OOS": 413586.51639565965
+  },
+  "rows": {
+   "IS": 75,
+   "OOS": 60
+  },
+  "equity_change": 1572447.758557045,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_5_Carry_NG",
+  "csv": "full/7F_5_Carry_NG.csv",
+  "study": "seven",
+  "name": "5 Carry / term structure · NG",
+  "market": "NG",
+  "params": "smooth=1,threshold=0.15",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 79,
+  "pnl": {
+   "IS": -210750.57028579584,
+   "OOS": 186603.31440484538,
+   "эмбарго": 10458.88729662233
+  },
+  "rows": {
+   "IS": 52,
+   "OOS": 26,
+   "эмбарго": 1
+  },
+  "equity_change": -13688.368584328098,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_6_PortfolioMA_NGBR",
+  "csv": "full/7F_6_PortfolioMA_NGBR.csv",
+  "study": "seven",
+  "name": "6 MA + portfolio · NG+BR",
+  "market": "NG+BR",
+  "params": "fast=20,slow=100",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 141,
+  "pnl": {
+   "IS": 462010.58115836367,
+   "OOS": -158613.23836521243,
+   "эмбарго": 9288.704912962621
+  },
+  "rows": {
+   "IS": 80,
+   "OOS": 60,
+   "эмбарго": 1
+  },
+  "equity_change": 312686.0477061139,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_7_MomRev_BR",
+  "csv": "full/7F_7_MomRev_BR.csv",
+  "study": "seven",
+  "name": "7 Momentum + reversal · BR",
+  "market": "BR",
+  "params": "momentum=60,reversal=750",
+  "is_end": "2021-02-01",
+  "oos_start": "2021-02-16",
+  "trades": 170,
+  "pnl": {
+   "IS": 473708.86406764906,
+   "OOS": 268356.8383280959
+  },
+  "rows": {
+   "IS": 115,
+   "OOS": 55
+  },
+  "equity_change": 742065.7023957493,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ },
+ {
+  "id": "7F_7_MomRev_NG",
+  "csv": "full/7F_7_MomRev_NG.csv",
+  "study": "seven",
+  "name": "7 Momentum + reversal · NG",
+  "market": "NG",
+  "params": "momentum=60,reversal=500",
+  "is_end": "2024-04-25",
+  "oos_start": "2024-05-13",
+  "trades": 106,
+  "pnl": {
+   "IS": 7851.067883528868,
+   "OOS": -59177.648860812515
+  },
+  "rows": {
+   "IS": 68,
+   "OOS": 38
+  },
+  "equity_change": -51326.58097728365,
+  "units": "USD на счёт 1 000 000, размер позиции по целевой волатильности 15%"
+ }
+]

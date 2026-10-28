@@ -29,10 +29,12 @@ WIDTH = {"№": 7, "период": 8, "вход": 17, "выход": 17, "нап�
          "итог, пунктов": 13, "при издержках 1 шаг, пунктов": 15, "примечание": 58}
 
 
-def tables() -> list[dict]:
-    meta = json.loads((PTS / "seven_meta.json").read_text()) + json.loads((PTS / "ma_meta.json").read_text())
+def tables(pts: Path = PTS) -> list[dict]:
+    meta = json.loads((pts / "seven_meta.json").read_text())
+    if (pts / "ma_meta.json").exists():
+        meta += json.loads((pts / "ma_meta.json").read_text())
     for m in meta:
-        m["df"] = pd.read_csv(PTS / f"{m['id']}.csv", keep_default_na=False, na_values=[""])
+        m["df"] = pd.read_csv(pts / f"{m['id']}.csv", keep_default_na=False, na_values=[""])
     return meta
 
 
@@ -104,8 +106,8 @@ def write_sheet(wb, m) -> tuple[str, int, dict]:
     return ws.title, FIRST + len(df) - 1, letter
 
 
-def write_summary(ws, rows):
-    ws["A1"] = "Исходы сделок в пунктах: выгоднейшие параметры каждой стратегии"
+def write_summary(ws, rows, title="Исходы сделок в пунктах: выгоднейшие параметры каждой стратегии"):
+    ws["A1"] = title
     ws["A1"].font = font(size=14, bold=True)
     notes = ["Лист на каждую пару «стратегия × актив»: исходы по порядку, плюс — прибыль, минус — убыток.",
              "Пункт — единица котировки: BR — 1 USD за баррель, NG — 1 USD за MMBtu; шаг цены — 0.01 (BR) и "
@@ -197,8 +199,34 @@ def write_readme(items):
     (PTS / "README.md").write_text("\n".join(lines) + "\n")
 
 
-def main():
-    items = tables()
+def write_readme_full(items, pts: Path):
+    lines = [
+        "# Исходы сделок в пунктах: семь семейств, сквозной прогон", "",
+        "Те же системы и параметры, что в [`../`](../README.md), но **одним прогоном по всей истории**: "
+        "все сделки подряд, без разрыва между выборкой и проверкой. В прогонах отчёта OOS начинается без "
+        "позиции и с пустыми индикаторами, а между периодами — эмбарго 10 дней; поэтому там нет сделок за "
+        "несколько месяцев, а позиция на конец IS закрыта переоценкой. Здесь этих разрывов нет. Период "
+        "сделки — по дате выхода: **IS**, **эмбарго** (10 дней между периодами) или **OOS**. Итоги OOS "
+        "здесь не равны итогам отчёта: отчёт честно оценивает систему, запущенную с нуля в начале OOS.", "",
+        "Тот же файл одним Excel со статистикой на формулах: [`points_full.xlsx`](points_full.xlsx). Только "
+        "числа, по файлу на актив: [`../sequence/full/`](../sequence/full/README.md).", "",
+        "| Стратегия | Актив | Параметры | Исходов | Прибыльных | Средний +, пунктов | Средний −, пунктов "
+        "| Убыточных подряд, макс. | Итог IS, USD | Итог OOS, USD | Итог, USD | Таблица |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    num = lambda v: f"{v:+,.0f}".replace(",", " ")  # noqa: E731
+    for m in items:
+        s = stats(m["df"])
+        lines.append(f"| {m['strategy']} | {m['asset']} | {m['params']} | {s['n']} | {s['wins']} ({s['rate']:.0%}) "
+                     f"| {s['avg_win']:+.4f} | {s['avg_loss']:+.4f} | {s['streak']} | {num(s['usd_is'])} "
+                     f"| {num(s['usd_oos'])} | {num(s['usd'])} | [{m['id']}.csv]({m['id']}.csv) |")
+    lines += ["", "Пересборка: `python export_points.py seven-full` (окружение пакета `exchange`), "
+              "`python export_points.py tables`, `python export_points.py sequence`."]
+    (pts / "README.md").write_text("\n".join(lines) + "\n")
+
+
+def main(pts: Path = PTS):
+    items = tables(pts)
     wb = Workbook()
     summary = wb.active
     summary.title = "Сводка"
@@ -206,10 +234,17 @@ def main():
     for m in items:
         sheet, last, letter = write_sheet(wb, m)
         rows.append((m, sheet, last, letter))
-    write_summary(summary, rows)
-    out = PTS / "points.xlsx"
+    if pts == PTS:
+        write_summary(summary, rows)
+        out = PTS / "points.xlsx"
+    else:
+        write_summary(summary, rows, "Исходы сделок в пунктах: семь семейств, сквозной прогон по всей истории")
+        out = pts / "points_full.xlsx"
     wb.save(out)
-    write_readme(items)
+    if pts == PTS:
+        write_readme(items)
+    else:
+        write_readme_full(items, pts)
     print(f"{len(items)} таблиц -> {out} ({out.stat().st_size / 1e6:.1f} МБ) и README.md")
 
 

@@ -429,7 +429,7 @@ t ≈ 1.7–2.1 — пограничный результат. Это одна �
 | Ноутбук: цены, волатильность, MACD | [`01_prices_ng_br.ipynb`](01_prices_ng_br.ipynb) |
 | Ноутбук: сделки семи семейств | [`02_trades_seven_families.ipynb`](02_trades_seven_families.ipynb) |
 | Ноутбук: скользящие средние, все графики | [`03_ma_crossover_5m.ipynb`](03_ma_crossover_5m.ipynb) |
-| Журнал сделок: каждая сделка отобранных стратегий и её результат (Excel и CSV) | [`research/trade_logs/`](../research/trade_logs/README.md) |
+| Журнал сделок: каждая сделка каждой оптимизированной системы и её результат (Excel и CSV), проверка полноты — `AUDIT.md` | [`research/trade_logs/`](../research/trade_logs/README.md) |
 | Таблицы и полная сетка (2 рынка × 2 этапа × {sp(n['grid'])}) | [`research/ma_crossover_5m/results/`](../research/ma_crossover_5m/results/) |
 | Код исследования и команды воспроизведения | [`research/ma_crossover_5m/README.md`](../research/ma_crossover_5m/README.md) |
 

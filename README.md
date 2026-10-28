@@ -35,7 +35,7 @@ MOEX AlgoPack:** фьючерсы на природный газ (NG) и неф�
 
 * Весь проект одной презентацией: [`exchange/notebooks/00_presentation.ipynb`](exchange/notebooks/00_presentation.ipynb).
 * Дашборды перебора параметров по каждой стратегии: [`exchange/docs/figures/investor/`](exchange/docs/figures/investor/README.md).
-* Все сделки отобранных стратегий и их исходы в пунктах: [`exchange/research/trade_logs/`](exchange/research/trade_logs/README.md).
+* Все сделки каждой системы, отобранной оптимизацией, по порядку, и их исходы в пунктах: [`exchange/research/trade_logs/`](exchange/research/trade_logs/README.md); проверка полноты — [`AUDIT.md`](exchange/research/trade_logs/AUDIT.md) (671 система, 5,6 млн сделок, расхождений нет).
 * Свечные графики, волатильность и MACD по NG и BR: [`exchange/notebooks/01_prices_ng_br.ipynb`](exchange/notebooks/01_prices_ng_br.ipynb).
 
 ## Как фреймворк проверяет сам себя
